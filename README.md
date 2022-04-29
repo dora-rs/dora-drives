@@ -35,6 +35,11 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)/examples/pylot
 
 - Current configuration are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
 
+#### InfluxDB visualisation
+
+- Create a free plan at:  https://cloud2.influxdata.com/signup
+- Create a bucket and a API token.
+- Change the current static constant variables.
 ### Known Issues
 
 #### Carla 9.10 version error.
@@ -44,3 +49,4 @@ throwing an instance of 'std::out_of_range'
   what():  _Map_base::at
 ```
 It's normal, you will have to restart the docker instance. This is due to the current Carla version used by Pylot.
+
