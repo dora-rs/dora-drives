@@ -27,8 +27,8 @@ And then within the container:
 
 ```bash
 cd /home/erdos/workspace/dora-rs
-export PYTHONPATH=$PYTHONPATH:$(pwd)/examples/pylot
-./target/release/dora-rs start-python sink_eval_plot plot image waypoints obstacles pose &
+export PYTHONPATH=$PYTHONPATH:$(pwd)/nodes
+./dora-rs start-python sink_eval_plot plot image waypoints obstacles pose &
 ```
 
 ### Configuration
