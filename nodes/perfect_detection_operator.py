@@ -1,8 +1,9 @@
 import time
 
 from carla import Client
+from pylot.simulation.utils import extract_data_in_pylot_format
 
-from dora_watermark import MAX_SECONDS_LATENCY, dump, load
+from dora_watermark import dump, load
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
@@ -26,16 +27,11 @@ def run(inputs):
         return {}
 
     pose, timestamps = load(inputs, "pose")
-    previous_timestamp = timestamps[-1][1]
     timestamps.append(("perfect_detection_operator_recieving", time.time()))
-    if time.time() - previous_timestamp > MAX_SECONDS_LATENCY:
-        return {}
     vehicle_transform = pose.transform
 
     depth_frame, _ = load(inputs, "depth_frame")
     segmented_frame, _ = load(inputs, "segmented_frame")
-
-    from pylot.simulation.utils import extract_data_in_pylot_format
 
     actor_list = world.get_actors()
     (vehicles, people, _traffic_lights, _, _) = extract_data_in_pylot_format(

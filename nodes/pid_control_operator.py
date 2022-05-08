@@ -4,8 +4,9 @@ import time
 
 import pylot.control.utils
 import pylot.planning.utils
-from dora_watermark import MAX_SECONDS_LATENCY, dump, load
 from pylot.control.pid import PIDLongitudinalController
+
+from dora_watermark import dump, load
 
 mutex = threading.Lock()
 MIN_PID_STEER_WAYPOINT_DISTANCE = 5
@@ -38,10 +39,7 @@ def run(inputs):
         return {}
 
     pose, timestamps = load(inputs, "pose")
-    previous_timestamp = timestamps[-1][1]
     timestamps.append(("pid_control_operator_recieving", time.time()))
-    if time.time() - previous_timestamp > MAX_SECONDS_LATENCY:
-        return {}
     ego_transform = pose.transform
     # Vehicle speed in m/s.
     current_speed = pose.forward_speed
