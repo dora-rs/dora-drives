@@ -7,5 +7,5 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)/nodes
 ./dora-rs start-python planning_operator run pose obstacles &
 ./dora-rs start-python pid_control_operator run pose waypoints &
 ./dora-rs start-python control_operator run control vehicle_id &
-./dora-rs start-python summary_operator run control_status pose obstacles &
+# ./dora-rs start-python summary_operator run control_status pose obstacles &
 # ./dora-rs start-python sink_eval_plot plot image waypoints obstacles pose &
