@@ -2,10 +2,10 @@ import os
 
 import numpy as np
 import tensorflow as tf
-
-from dora_watermark import dump, load
 from pylot.perception.detection.obstacle import Obstacle
 from pylot.perception.detection.utils import BoundingBox2D
+
+from dora_watermark import dump, load
 
 
 def load_coco_labels(labels_path):
@@ -99,7 +99,5 @@ def run(inputs):
                         )
                     )
 
-    if len(obstacles) == 0:
-        return {}
 
     return {"obstacles": dump(obstacles, timestamps)}

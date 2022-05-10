@@ -2,17 +2,17 @@ import logging
 import random
 import time
 
-from carla import Client, Location, Rotation, Transform, command
-
 import pylot.simulation.utils
 import pylot.utils
-from dora_watermark import dump, load
+from carla import Client, Location, Rotation, Transform, command
 from pylot.drivers.sensor_setup import (CameraSetup, LidarSetup,
                                         SegmentedCameraSetup)
 from pylot.perception.camera_frame import CameraFrame
 from pylot.perception.depth_frame import DepthFrame
 from pylot.perception.point_cloud import PointCloud
 from pylot.perception.segmentation.segmented_frame import SegmentedFrame
+
+from dora_watermark import dump, load
 
 logger = logging.Logger("")
 
@@ -215,7 +215,7 @@ world = client.get_world()
     -1,
     True,
     10,
-    1,
+    10,
     logger,
 )
 

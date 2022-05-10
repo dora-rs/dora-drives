@@ -15,6 +15,12 @@ world = client.get_world()
 town_name = world.get_map().name
 DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD = 500
 
+time.sleep(15)
+
+actor_list = world.get_actors()
+(vehicles, people, _traffic_lights, _, _) = extract_data_in_pylot_format(
+        actor_list
+)
 
 def run(inputs):
     keys = inputs.keys()
@@ -33,10 +39,6 @@ def run(inputs):
     depth_frame, _ = load(inputs, "depth_frame")
     segmented_frame, _ = load(inputs, "segmented_frame")
 
-    actor_list = world.get_actors()
-    (vehicles, people, _traffic_lights, _, _) = extract_data_in_pylot_format(
-        actor_list
-    )
 
     det_obstacles = []
     for obstacle in vehicles + people:
@@ -53,8 +55,6 @@ def run(inputs):
             if bbox:
                 det_obstacles.append(obstacle)
 
-    if len(det_obstacles) == 0:
-        return {}
 
     timestamps.append(("perfect_detection_operator", time.time()))
 

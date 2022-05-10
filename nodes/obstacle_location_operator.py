@@ -96,8 +96,6 @@ def run(inputs):
         obstacles_with_location, pose.transform
     )
 
-    if len(obstacles_with_prediction) == 0:
-        return {}
 
     timestamps.append(("obstacle_location_operator", time.time()))
     return {"obstacles": dump(obstacles_with_prediction, timestamps)}
