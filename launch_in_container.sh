@@ -1,6 +1,7 @@
 #!/bin/bash
 cd /home/erdos/workspace/dora-rs
 export PYTHONPATH=$PYTHONPATH:$(pwd)/nodes
+# export RUST_LOG=warn
 ./dora-rs start-python carla_source_operator send &
 ./dora-rs start-python perfect_detection_operator run pose depth_frame segmented_frame &
 ./dora-rs start-python obstacle_location_operator run pose depth_frame obstacles_without_location &

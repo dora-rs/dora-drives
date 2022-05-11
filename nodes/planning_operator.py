@@ -122,9 +122,8 @@ class PlanningOperator:
         self,
     ):
         # Use the FOT planner for overtaking.
-        from pylot.planning.hybrid_astar.hybrid_astar_planner import (
-            HybridAStarPlanner,
-        )
+        from pylot.planning.hybrid_astar.hybrid_astar_planner import \
+            HybridAStarPlanner
 
         self._flags = FLAGS
         self._logger = logger
@@ -163,7 +162,7 @@ class PlanningOperator:
 
         return output_wps
 
-
+time.sleep(5) # Wait for the world to load.
 planning = PlanningOperator()
 
 

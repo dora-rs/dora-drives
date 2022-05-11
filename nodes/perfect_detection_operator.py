@@ -3,6 +3,7 @@ import time
 from carla import Client
 from pylot.simulation.utils import extract_data_in_pylot_format
 
+from dora_tracing import extract_context, tracer
 from dora_watermark import dump, load
 
 CARLA_SIMULATOR_HOST = "localhost"
@@ -15,12 +16,6 @@ world = client.get_world()
 town_name = world.get_map().name
 DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD = 500
 
-time.sleep(15)
-
-actor_list = world.get_actors()
-(vehicles, people, _traffic_lights, _, _) = extract_data_in_pylot_format(
-        actor_list
-)
 
 def run(inputs):
     keys = inputs.keys()
@@ -32,14 +27,20 @@ def run(inputs):
     ):
         return {}
 
-    pose, timestamps = load(inputs, "pose")
-    timestamps.append(("perfect_detection_operator_recieving", time.time()))
-    vehicle_transform = pose.transform
+    context = extract_context(inputs)
+    with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
+        pose, timestamps = load(inputs, "pose")
+        timestamps.append(("perfect_detection_operator_recieving", time.time()))
+        vehicle_transform = pose.transform
 
-    depth_frame, _ = load(inputs, "depth_frame")
-    segmented_frame, _ = load(inputs, "segmented_frame")
+        depth_frame, _ = load(inputs, "depth_frame")
+        segmented_frame, _ = load(inputs, "segmented_frame")
 
 
+    actor_list = world.get_actors()
+    (vehicles, people, _traffic_lights, _, _) = extract_data_in_pylot_format(
+            actor_list
+    )
     det_obstacles = []
     for obstacle in vehicles + people:
         # Calculate the distance of the obstacle from the vehicle, and
@@ -58,7 +59,11 @@ def run(inputs):
 
     timestamps.append(("perfect_detection_operator", time.time()))
 
+    context = extract_context(inputs)
+    with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
+        byte_array=dump(det_obstacles, timestamps)
+
     return {
-        "obstacles_without_location": dump(det_obstacles, timestamps),
+        "obstacles_without_location": byte_array,
         #   "traffic_lights": dump(visible_tls),
     }

@@ -89,7 +89,9 @@ RUN sudo apt-get install vim -y
 
 WORKDIR /home/erdos/workspace/dora-rs
 
-RUN pip install influxdb-client
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
 
 COPY dora-rs dora-rs
 

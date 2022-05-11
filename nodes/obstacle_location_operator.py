@@ -10,6 +10,8 @@ from dora_watermark import dump, load
 
 logger = logging.Logger("Obstacle Location")
 
+from dora_tracing import extract_context, tracer
+
 
 def get_predictions(obstacles, ego_transform):
     """Extracts obstacle predictions out of the message.
@@ -81,21 +83,32 @@ def run(inputs):
     ):
         return {}
 
-    obstacles, timestamps = load(inputs, "obstacles_without_location")
-    depth_frame, _ = load(inputs, "depth_frame")
-    pose, _ = load(inputs, "pose")
-    timestamps.append(("obstacle_location_operator_recieving", time.time()))
+    context = extract_context(inputs)
+    with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
+        obstacles, timestamps = load(inputs, "obstacles_without_location")
+        depth_frame, _ = load(inputs, "depth_frame")
+        pose, _ = load(inputs, "pose")
+        timestamps.append(("obstacle_location_operator_recieving", time.time()))
 
-    obstacles_with_location = get_obstacle_locations(
-        obstacles,
-        depth_frame,
-        pose.transform,
-    )
+    context = extract_context(inputs)
+    with tracer.start_span(f"python-{__name__}-obstacle-location", context=context):
+        obstacles_with_location = get_obstacle_locations(
+            obstacles,
+            depth_frame,
+            pose.transform,
+        )
 
-    obstacles_with_prediction = get_predictions(
-        obstacles_with_location, pose.transform
-    )
+    context = extract_context(inputs)
+    with tracer.start_span(f"python-{__name__}-location-prediction", context=context):
+        obstacles_with_prediction = get_predictions(
+            obstacles_with_location, pose.transform
+        )
 
 
     timestamps.append(("obstacle_location_operator", time.time()))
-    return {"obstacles": dump(obstacles_with_prediction, timestamps)}
+
+    context = extract_context(inputs)
+    with tracer.start_span(f"python-{__name__}-location-prediction", context=context):
+        bytearray = dump(obstacles_with_prediction, timestamps)
+
+    return {"obstacles": bytearray}

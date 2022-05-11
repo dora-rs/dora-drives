@@ -1,11 +1,10 @@
 import threading
 import time
 
-from dora_watermark import dump, load
-
-mutex = threading.Lock()
-
 from carla import Client, VehicleControl, command
+
+from dora_tracing import extract_context, tracer
+from dora_watermark import dump, load
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
@@ -15,7 +14,6 @@ vehicle_id = None
 
 
 def run(inputs):
-
     global vehicle_id
 
     if vehicle_id is None and "vehicle_id" not in inputs.keys():
@@ -40,8 +38,10 @@ def run(inputs):
         reverse=False,
     )
 
-    client.apply_batch_sync(
-        [command.ApplyVehicleControl(vehicle_id, vec_control)]
-    )
-    timestamps.append(("control_operator", time.time()))
-    return {"control_status": dump(1, timestamps)}
+    context = extract_context(inputs)
+    with tracer.start_span(f"within-python-{__name__}", context=context):
+        client.apply_batch_sync(
+            [command.ApplyVehicleControl(vehicle_id, vec_control)]
+        )
+        timestamps.append(("control_operator", time.time()))
+        return {"control_status": dump(1, timestamps)}
