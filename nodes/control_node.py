@@ -12,6 +12,7 @@ client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)
 vehicle_id = None
 
+mutex = threading.Lock()
 
 def run(inputs):
     global vehicle_id
@@ -39,7 +40,8 @@ def run(inputs):
     )
 
     context = extract_context(inputs)
-    with tracer.start_span(f"within-python-{__name__}", context=context):
+
+    with tracer.start_span(f"within-python-{__name__}", context=context) as span:
         client.apply_batch_sync(
             [command.ApplyVehicleControl(vehicle_id, vec_control)]
         )
