@@ -9,6 +9,7 @@ from pylot.control.pid import PIDLongitudinalController
 from dora_watermark import dump, load
 
 mutex = threading.Lock()
+previous_waypoints = None
 MIN_PID_STEER_WAYPOINT_DISTANCE = 5
 MIN_PID_SPEED_WAYPOINT_DISTANCE = 5
 STEER_GAIN = 0.7
@@ -33,6 +34,8 @@ FLAGS.throttle_max = 0.5
 
 
 def run(inputs):
+    global mutex
+    global previous_waypoints
 
     keys = inputs.keys()
     if "pose" not in keys:
@@ -45,15 +48,15 @@ def run(inputs):
     current_speed = pose.forward_speed
     if "waypoints" in keys:
         waypoints, timestamps = load(inputs, "waypoints")
-    elif "previous_waypoints" in keys:
-        waypoints, _ = load(inputs, "previous_waypoints")
+    elif previous_waypoints is not None:
+        waypoints = previous_waypoints
     else:
         return {}
 
-    global mutex
     mutex.acquire()
     waypoints.remove_completed(ego_transform.location)
-
+    previous_waypoints = waypoints
+    
     try:
         angle_steer = waypoints.get_angle(
             ego_transform, MIN_PID_STEER_WAYPOINT_DISTANCE
@@ -80,5 +83,4 @@ def run(inputs):
         "control": dump(
             {"steer": steer, "throttle": throttle, "brake": brake}, timestamps
         ),
-        "previous_waypoints": dump(waypoints, timestamps),
     }

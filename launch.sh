@@ -1,5 +1,6 @@
 cd ../dora-rs 
-cargo build --release 
+export RUSTFLAGS="--cfg tokio_unstable"
+cargo build --release # --features opentelemetry_jaeger 
 cd ../dora-pylot
 cp ../dora-rs/target/release/dora-rs dora-rs
 nvidia-docker build --tag dora .

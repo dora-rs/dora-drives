@@ -6,12 +6,12 @@ from collections import deque
 import cv2
 import numpy as np
 import pygame
-
 import pylot.perception.detection.utils
-from dora_watermark import dump, load
 from pylot.map.hd_map import HDMap
 from pylot.planning.world import World
 from pylot.simulation.utils import get_map
+
+from dora_watermark import dump, load
 
 mutex = threading.Lock()
 pygame.init()
@@ -77,14 +77,21 @@ world = World(FLAGS, logger)
 
 hd_map = HDMap(get_map())
 
+previous_waypoints = None
+previous_obstacles = None
 
 def plot(inputs):
+    global previous_waypoints
+    global previous_obstacles
+
     keys = inputs.keys()
     if "image" not in keys:
         return {}
 
     if "pose" not in keys:
         return {}
+    global mutex
+    mutex.acquire()
 
     image, timestamps = load(inputs, "image")
 
@@ -92,15 +99,15 @@ def plot(inputs):
 
     if "obstacles" in keys:
         obstacles, timestamps = load(inputs, "obstacles")
-    elif "previous_obstacles" in keys:
-        obstacles, timestamps = load(inputs, "previous_obstacles")
+    elif previous_obstacles is not None:
+        obstacles = previous_obstacles
     else:
         obstacles = []
 
     if "waypoints" in keys:
         waypoints, timestamps = load(inputs, "waypoints")
-    elif "previous_waypoints" in keys:
-        waypoints, timestamps = load(inputs, "previous_waypoints")
+    elif previous_waypoints is not None:
+        waypoints = previous_waypoints
     else:
         waypoints = None
 
@@ -111,8 +118,6 @@ def plot(inputs):
     for obstacle_prediction in obstacles:
         obstacle_prediction.draw_trajectory_on_frame(image)
 
-    global mutex
-    mutex.acquire()
     image = image.as_numpy_array()
     if len(image) == 800 * 600 * 4:
         resized_image = np.reshape(image, (display_height, display_width, 4))
@@ -138,9 +143,9 @@ def plot(inputs):
     counter = now
     pygame.surfarray.blit_array(gameDisplay, data)
     pygame.display.flip()
+    previous_obstacles = obstacles
+    previous_waypoints = waypoints
     mutex.release()
 
     return {
-        "previous_obstacles": dump(obstacles, timestamps),
-        "previous_waypoints": dump(waypoints, timestamps),
     }
