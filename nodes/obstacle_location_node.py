@@ -85,10 +85,9 @@ def run(inputs):
 
     context = extract_context(inputs)
     with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
-        obstacles, timestamps = load(inputs, "obstacles_without_location")
-        depth_frame, _ = load(inputs, "depth_frame")
-        pose, _ = load(inputs, "pose")
-        timestamps.append(("obstacle_location_operator_recieving", time.time()))
+        obstacles = load(inputs, "obstacles_without_location")
+        depth_frame = load(inputs, "depth_frame")
+        pose = load(inputs, "pose")
 
     context = extract_context(inputs)
     with tracer.start_span(f"python-{__name__}-obstacle-location", context=context):
@@ -105,10 +104,9 @@ def run(inputs):
         )
 
 
-    timestamps.append(("obstacle_location_operator", time.time()))
 
     context = extract_context(inputs)
     with tracer.start_span(f"python-{__name__}-location-prediction", context=context):
-        bytearray = dump(obstacles_with_prediction, timestamps)
+        bytearray = dump(obstacles_with_prediction)
 
     return {"obstacles": bytearray}

@@ -72,7 +72,8 @@ tf_session.run(
 def run(inputs):
     if "image" not in inputs.keys():
         return {}
-    image, timestamps = load(inputs, "image")
+    
+    image = load(inputs, "image")
     image = image.as_numpy_array()
     # image = np.frombuffer(image, dtype=np.dtype("uint8"))
     inputs = np.reshape(image, (HEIGHT, WIDTH, 3))
@@ -100,4 +101,4 @@ def run(inputs):
                     )
 
 
-    return {"obstacles": dump(obstacles, timestamps)}
+    return {"obstacles": dump(obstacles)}

@@ -173,11 +173,10 @@ def run(inputs):
     if "pose" not in keys:  # or "open_drive" not in keys:
         return {}
 
-    pose, timestamps = load(inputs, "pose")
-    timestamps.append(("planning_operator_recieving", time.time()))
+    pose = load(inputs, "pose")
 
     if "obstacles" in keys:
-        obstacles, timestamps = load(inputs, "obstacles")
+        obstacles = load(inputs, "obstacles")
     elif previous_obstacles is not None:
         obstacles = previous_obstacles
     else:
@@ -191,8 +190,7 @@ def run(inputs):
     waypoints = planning.run(pose, obstacles)  # , open_drive)
     mutex.release()
 
-    timestamps.append(("planning_operator", time.time()))
 
     return {
-        "waypoints": dump(waypoints, timestamps),
+        "waypoints": dump(waypoints),
     }

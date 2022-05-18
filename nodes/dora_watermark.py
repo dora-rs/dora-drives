@@ -2,12 +2,10 @@ import pickle
 
 
 def load(inputs, key):
-    data_wrapper = pickle.loads(inputs[key])
-    (data, timestamps) = data_wrapper
-    return data, timestamps
+    data = pickle.loads(inputs[key])
+    return data
 
 
-def dump(data, timestamps):
-    data_wrapper = (data, timestamps)
-    pickled_data = pickle.dumps(data_wrapper)
+def dump(data):
+    pickled_data = pickle.dumps(data)
     return pickled_data

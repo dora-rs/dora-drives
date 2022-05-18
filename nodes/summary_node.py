@@ -4,10 +4,10 @@ import threading
 import time
 from datetime import datetime
 
+import pylot.utils
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
-import pylot.utils
 from dora_watermark import load
 
 # You can generate an API token from the "API Tokens Tab" in the UI
@@ -42,31 +42,10 @@ def run(inputs):
     global points
     global counter
     mutex.acquire()
-    _, timestamps = load(inputs, "control_status")
 
     current_time = datetime.utcnow()
-    previous_timestamp = timestamps[-1][1]
-    for timestamp in timestamps:
-        if timestamp[0] == "carla_source_operator":
-            points.append(
-                Point("Dora-Pylot-Test")
-                .tag("host", host)
-                .tag("id", summary_id)
-                .field("global_latency", previous_timestamp - timestamp[1])
-                .time(current_time, WritePrecision.NS)
-            )
-        else:
-            points.append(
-                Point("Dora-Pylot-Test")
-                .tag("host", host)
-                .tag("id", summary_id)
-                .field(timestamp[0], timestamp[1] - previous_timestamp)
-                .time(current_time, WritePrecision.NS)
-            )
-        previous_timestamp = timestamp[1]
-
     if "pose" in inputs.keys():
-        pose, _ = load(inputs, "pose")
+        pose = load(inputs, "pose")
         location = pose.transform.location
         points.append(
             Point("Dora-Pylot-Test")
@@ -91,7 +70,7 @@ def run(inputs):
         )
 
     if "obstacles" in inputs.keys():
-        obstacles, _ = load(inputs, "obstacles")
+        obstacles = load(inputs, "obstacles")
         points.append(
             Point("Dora-Pylot-Test")
             .tag("host", host)

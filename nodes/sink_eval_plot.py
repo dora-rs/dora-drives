@@ -93,19 +93,19 @@ def plot(inputs):
     global mutex
     mutex.acquire()
 
-    image, timestamps = load(inputs, "image")
+    image = load(inputs, "image")
 
-    pose, timestamps = load(inputs, "pose")
+    pose = load(inputs, "pose")
 
     if "obstacles" in keys:
-        obstacles, timestamps = load(inputs, "obstacles")
+        obstacles = load(inputs, "obstacles")
     elif previous_obstacles is not None:
         obstacles = previous_obstacles
     else:
         obstacles = []
 
     if "waypoints" in keys:
-        waypoints, timestamps = load(inputs, "waypoints")
+        waypoints = load(inputs, "waypoints")
     elif previous_waypoints is not None:
         waypoints = previous_waypoints
     else:

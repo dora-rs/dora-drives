@@ -247,12 +247,11 @@ def send(_):
     forward_speed = velocity_vector.magnitude()
     pose = pylot.utils.Pose(vec_transform, forward_speed, velocity_vector)
 
-    timestamps = [("carla_source_operator", time.time())]
     return {
-        "image": dump(last_frame, timestamps),
-        "depth_frame": dump(depth_frame, timestamps),
-        "segmented_frame": dump(segmented_frame, timestamps),
-        "pose": dump(pose, timestamps),
-        "vehicle_id": dump(vehicle_id, timestamps)
+        "image": dump(last_frame),
+        "depth_frame": dump(depth_frame),
+        "segmented_frame": dump(segmented_frame),
+        "pose": dump(pose),
+        "vehicle_id": dump(vehicle_id)
         #  "open_drive": world.get_map().to_opendrive().encode("utf-8"),
     }

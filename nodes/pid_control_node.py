@@ -41,13 +41,12 @@ def run(inputs):
     if "pose" not in keys:
         return {}
 
-    pose, timestamps = load(inputs, "pose")
-    timestamps.append(("pid_control_operator_recieving", time.time()))
+    pose = load(inputs, "pose")
     ego_transform = pose.transform
     # Vehicle speed in m/s.
     current_speed = pose.forward_speed
     if "waypoints" in keys:
-        waypoints, timestamps = load(inputs, "waypoints")
+        waypoints = load(inputs, "waypoints")
     elif previous_waypoints is not None:
         waypoints = previous_waypoints
     else:
@@ -77,10 +76,9 @@ def run(inputs):
         steer = 0.0
     mutex.release()
 
-    timestamps.append(("PID_control_operator", time.time()))
 
     return {
         "control": dump(
-            {"steer": steer, "throttle": throttle, "brake": brake}, timestamps
+            {"steer": steer, "throttle": throttle, "brake": brake}
         ),
     }

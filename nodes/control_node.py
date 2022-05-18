@@ -22,14 +22,13 @@ def run(inputs):
     elif vehicle_id is None and "vehicle_id" in inputs.keys():
         global mutex
         mutex.acquire()
-        vehicle_id, _ = load(inputs, "vehicle_id")
+        vehicle_id = load(inputs, "vehicle_id")
         mutex.release()
 
     if "control" not in inputs.keys():
         return {}
 
-    control, timestamps = load(inputs, "control")
-    timestamps.append(("control_operator_recieving", time.time()))
+    control = load(inputs, "control")
 
     vec_control = VehicleControl(
         throttle=control["throttle"],
@@ -45,5 +44,4 @@ def run(inputs):
         client.apply_batch_sync(
             [command.ApplyVehicleControl(vehicle_id, vec_control)]
         )
-        timestamps.append(("control_operator", time.time()))
-        return {"control_status": dump(1, timestamps)}
+        return {"control_status": dump(1)}

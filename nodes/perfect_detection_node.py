@@ -29,12 +29,11 @@ def run(inputs):
 
     context = extract_context(inputs)
     with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
-        pose, timestamps = load(inputs, "pose")
-        timestamps.append(("perfect_detection_operator_recieving", time.time()))
+        pose = load(inputs, "pose")
         vehicle_transform = pose.transform
 
-        depth_frame, _ = load(inputs, "depth_frame")
-        segmented_frame, _ = load(inputs, "segmented_frame")
+        depth_frame = load(inputs, "depth_frame")
+        segmented_frame = load(inputs, "segmented_frame")
 
 
     actor_list = world.get_actors()
@@ -57,11 +56,10 @@ def run(inputs):
                 det_obstacles.append(obstacle)
 
 
-    timestamps.append(("perfect_detection_operator", time.time()))
 
     context = extract_context(inputs)
     with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
-        byte_array=dump(det_obstacles, timestamps)
+        byte_array=dump(det_obstacles)
 
     return {
         "obstacles_without_location": byte_array,
