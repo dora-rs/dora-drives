@@ -23,16 +23,15 @@ host = "host1"
 
 points = []
 counter = 0
-
-
-def write_to_influxdb(points):
-    with InfluxDBClient(
+client = InfluxDBClient(
         url="https://eu-central-1-1.aws.cloud2.influxdata.com",
         token=token,
         org=org,
-    ) as client:
-        write_api = client.write_api(write_options=SYNCHRONOUS)
-        write_api.write(bucket, org, points)
+    )
+write_api = client.write_api(write_options=SYNCHRONOUS)
+
+def write_to_influxdb(points):
+    write_api.write(bucket, org, points)
 
 
 def run(inputs):
@@ -48,21 +47,21 @@ def run(inputs):
         pose = load(inputs, "pose")
         location = pose.transform.location
         points.append(
-            Point("Dora-Pylot-Test")
+            Point("dora.pylot.test")
             .tag("host", host)
             .tag("id", summary_id)
             .field("goal_distance", goal_location.distance(location))
             .time(current_time, WritePrecision.NS)
         )
         points.append(
-            Point("Dora-Pylot-Test")
+            Point("dora.pylot.test")
             .tag("host", host)
             .tag("id", summary_id)
             .field("x_coordinate", location.x / 100)
             .time(current_time, WritePrecision.NS)
         )
         points.append(
-            Point("Dora-Pylot-Test")
+            Point("dora.pylot.test")
             .tag("host", host)
             .tag("id", summary_id)
             .field("y_coordinate", location.y / 100)
@@ -72,7 +71,7 @@ def run(inputs):
     if "obstacles" in inputs.keys():
         obstacles = load(inputs, "obstacles")
         points.append(
-            Point("Dora-Pylot-Test")
+            Point("dora.pylot.test")
             .tag("host", host)
             .tag("id", summary_id)
             .field("obstacles", len(obstacles))
@@ -81,7 +80,7 @@ def run(inputs):
 
     counter += 1
 
-    if counter % 500:
+    if counter % 5000:
         write_to_influxdb(points)
 
     mutex.release()

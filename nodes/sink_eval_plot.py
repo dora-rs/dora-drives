@@ -77,12 +77,12 @@ world = World(FLAGS, logger)
 
 hd_map = HDMap(get_map())
 
-previous_waypoints = None
-previous_obstacles = None
+old_waypoints = None
+old_obstacles = None
 
 def plot(inputs):
-    global previous_waypoints
-    global previous_obstacles
+    global old_waypoints
+    global old_obstacles
 
     keys = inputs.keys()
     if "image" not in keys:
@@ -99,15 +99,15 @@ def plot(inputs):
 
     if "obstacles" in keys:
         obstacles = load(inputs, "obstacles")
-    elif previous_obstacles is not None:
-        obstacles = previous_obstacles
+    elif old_obstacles is not None:
+        obstacles = old_obstacles
     else:
         obstacles = []
 
     if "waypoints" in keys:
         waypoints = load(inputs, "waypoints")
-    elif previous_waypoints is not None:
-        waypoints = previous_waypoints
+    elif old_waypoints is not None:
+        waypoints = old_waypoints
     else:
         waypoints = None
 
@@ -143,8 +143,8 @@ def plot(inputs):
     counter = now
     pygame.surfarray.blit_array(gameDisplay, data)
     pygame.display.flip()
-    previous_obstacles = obstacles
-    previous_waypoints = waypoints
+    old_obstacles = obstacles
+    old_waypoints = waypoints
     mutex.release()
 
     return {

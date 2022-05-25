@@ -164,10 +164,10 @@ class PlanningOperator:
 
 time.sleep(5) # Wait for the world to load.
 planning = PlanningOperator()
-previous_obstacles = None
+old_obstacles = None
 
 def run(inputs):
-    global previous_obstacles
+    global old_obstacles
 
     keys = inputs.keys()
     if "pose" not in keys:  # or "open_drive" not in keys:
@@ -177,8 +177,8 @@ def run(inputs):
 
     if "obstacles" in keys:
         obstacles = load(inputs, "obstacles")
-    elif previous_obstacles is not None:
-        obstacles = previous_obstacles
+    elif old_obstacles is not None:
+        obstacles = old_obstacles
     else:
         obstacles = deque()
 
@@ -186,7 +186,7 @@ def run(inputs):
     global mutex
     global planning
     mutex.acquire()
-    previous_obstacles = obstacles
+    old_obstacles = obstacles
     waypoints = planning.run(pose, obstacles)  # , open_drive)
     mutex.release()
 

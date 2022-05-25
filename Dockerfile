@@ -89,6 +89,10 @@ RUN sudo apt-get install vim -y
 
 WORKDIR /home/erdos/workspace/dora-rs
 
+RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_amd64.tar.gz
+
+RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
+
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt
