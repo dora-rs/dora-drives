@@ -73,24 +73,28 @@ def get_obstacle_locations(
     return obstacles
 
 
-def run(inputs):
+def dora_run(inputs):
     keys = inputs.keys()
 
     if (
         "depth_frame" not in keys
         or "obstacles_without_location" not in keys
-        or "pose" not in keys
+        or "position" not in keys
     ):
         return {}
 
     context = extract_context(inputs)
-    with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
+    with tracer.start_span(
+        f"python-{__name__}-pickle-parsing", context=context
+    ):
         obstacles = load(inputs, "obstacles_without_location")
         depth_frame = load(inputs, "depth_frame")
-        pose = load(inputs, "pose")
+        pose = load(inputs, "position")
 
     context = extract_context(inputs)
-    with tracer.start_span(f"python-{__name__}-obstacle-location", context=context):
+    with tracer.start_span(
+        f"python-{__name__}-obstacle-location", context=context
+    ):
         obstacles_with_location = get_obstacle_locations(
             obstacles,
             depth_frame,
@@ -98,15 +102,17 @@ def run(inputs):
         )
 
     context = extract_context(inputs)
-    with tracer.start_span(f"python-{__name__}-location-prediction", context=context):
+    with tracer.start_span(
+        f"python-{__name__}-location-prediction", context=context
+    ):
         obstacles_with_prediction = get_predictions(
             obstacles_with_location, pose.transform
         )
 
-
-
     context = extract_context(inputs)
-    with tracer.start_span(f"python-{__name__}-location-prediction", context=context):
+    with tracer.start_span(
+        f"python-{__name__}-location-prediction", context=context
+    ):
         bytearray = dump(obstacles_with_prediction)
 
     return {"obstacles": bytearray}

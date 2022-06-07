@@ -1,0 +1,79 @@
+communication:
+  zenoh_prefix: /foo
+
+nodes:
+  - id: carla_source_node
+    custom:
+      outputs:
+        - position
+        - depth_frame
+        - segmented_frame
+        - vehicle_id
+        - image
+      run: ./bin/example_python_api
+
+  - id: perfect_detection_node
+    custom:
+      outputs:
+        - obstacles_without_location
+      inputs:
+        position: carla_source_node/position
+        depth_frame: carla_source_node/depth_frame
+        segmented_frame: carla_source_node/segmented_frame
+      run: ./bin/example_python_api
+
+  - id: obstacle_location_node
+    custom: 
+      outputs:
+        - obstacles
+      inputs:
+        position: carla_source_node/position
+        depth_frame: carla_source_node/depth_frame
+        obstacles_without_location: perfect_detection_node/obstacles_without_location
+      run: ./bin/example_python_api
+
+  - id: planning_node
+    custom:
+      outputs:
+        - waypoints
+      inputs:
+        position: carla_source_node/position
+        obstacles: obstacle_location_node/obstacles
+      run: ./bin/example_python_api
+
+  - id: pid_control_node
+    custom:
+      outputs:
+        - control
+      inputs:
+        position: carla_source_node/position
+        waypoints: planning_node/waypoints
+      run: ./bin/example_python_api
+
+  - id: control_node
+    custom:
+      outputs:
+        - control_status
+      inputs:
+        control: pid_control_node/control
+        vehicle_id: carla_source_node/vehicle_id
+      run: ./bin/example_python_api
+
+  # - id: influxdb_node
+    # custom:
+      # description: Optional
+      # inputs:
+        # control_status: control_node/control_status
+        # position: carla_source_node/position
+        # obstacles: obstacle_location_node/obstacles
+      # run: ./example_python_api
+    
+  - id: sink_eval_plot
+    custom:
+      description: Optional
+      inputs: 
+        waypoints: planning_node/waypoints
+        position: carla_source_node/position
+        image: carla_source_node/image
+        obstacles: obstacle_location_node/obstacles
+      run: ./bin/example_python_api

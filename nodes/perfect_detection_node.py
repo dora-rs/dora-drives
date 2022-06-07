@@ -17,28 +17,29 @@ town_name = world.get_map().name
 DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD = 500
 
 
-def run(inputs):
+def dora_run(inputs):
     keys = inputs.keys()
 
     if (
-        "pose" not in keys
+        "position" not in keys
         or "segmented_frame" not in keys
         or "depth_frame" not in keys
     ):
         return {}
 
     context = extract_context(inputs)
-    with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
-        pose = load(inputs, "pose")
+    with tracer.start_span(
+        f"python-{__name__}-pickle-parsing", context=context
+    ):
+        pose = load(inputs, "position")
         vehicle_transform = pose.transform
 
         depth_frame = load(inputs, "depth_frame")
         segmented_frame = load(inputs, "segmented_frame")
 
-
     actor_list = world.get_actors()
     (vehicles, people, _traffic_lights, _, _) = extract_data_in_pylot_format(
-            actor_list
+        actor_list
     )
     det_obstacles = []
     for obstacle in vehicles + people:
@@ -55,11 +56,11 @@ def run(inputs):
             if bbox:
                 det_obstacles.append(obstacle)
 
-
-
     context = extract_context(inputs)
-    with tracer.start_span(f"python-{__name__}-pickle-parsing", context=context):
-        byte_array=dump(det_obstacles)
+    with tracer.start_span(
+        f"python-{__name__}-pickle-parsing", context=context
+    ):
+        byte_array = dump(det_obstacles)
 
     return {
         "obstacles_without_location": byte_array,

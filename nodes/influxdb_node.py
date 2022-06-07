@@ -24,17 +24,18 @@ host = "host1"
 points = []
 counter = 0
 client = InfluxDBClient(
-        url="https://eu-central-1-1.aws.cloud2.influxdata.com",
-        token=token,
-        org=org,
-    )
+    url="https://eu-central-1-1.aws.cloud2.influxdata.com",
+    token=token,
+    org=org,
+)
 write_api = client.write_api(write_options=SYNCHRONOUS)
+
 
 def write_to_influxdb(points):
     write_api.write(bucket, org, points)
 
 
-def run(inputs):
+def dora_run(inputs):
     if "control_status" not in inputs.keys():
         return {}
     global mutex
@@ -43,8 +44,8 @@ def run(inputs):
     mutex.acquire()
 
     current_time = datetime.utcnow()
-    if "pose" in inputs.keys():
-        pose = load(inputs, "pose")
+    if "position" in inputs.keys():
+        pose = load(inputs, "position")
         location = pose.transform.location
         points.append(
             Point("dora.pylot.test")

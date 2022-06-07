@@ -122,8 +122,9 @@ class PlanningOperator:
         self,
     ):
         # Use the FOT planner for overtaking.
-        from pylot.planning.hybrid_astar.hybrid_astar_planner import \
-            HybridAStarPlanner
+        from pylot.planning.hybrid_astar.hybrid_astar_planner import (
+            HybridAStarPlanner,
+        )
 
         self._flags = FLAGS
         self._logger = logger
@@ -162,18 +163,20 @@ class PlanningOperator:
 
         return output_wps
 
-time.sleep(5) # Wait for the world to load.
+
+time.sleep(5)  # Wait for the world to load.
 planning = PlanningOperator()
 old_obstacles = None
 
-def run(inputs):
+
+def dora_run(inputs):
     global old_obstacles
 
     keys = inputs.keys()
-    if "pose" not in keys:  # or "open_drive" not in keys:
+    if "position" not in keys:  # or "open_drive" not in keys:
         return {}
 
-    pose = load(inputs, "pose")
+    pose = load(inputs, "position")
 
     if "obstacles" in keys:
         obstacles = load(inputs, "obstacles")
@@ -189,7 +192,6 @@ def run(inputs):
     old_obstacles = obstacles
     waypoints = planning.run(pose, obstacles)  # , open_drive)
     mutex.release()
-
 
     return {
         "waypoints": dump(waypoints),

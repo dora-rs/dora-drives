@@ -25,11 +25,11 @@ inputs = np.zeros((1, 1043, 587, 3), dtype="uint8")
 result = infer(tf.convert_to_tensor(value=inputs))
 
 
-def run(image, destination=None):
+def dora_run(inputs):
     """
     read and produce a temperature every second
     """
-
+    # TODO: Change image with inputs
     array = np.frombuffer(image, dtype=np.dtype("uint8"))
     array = array.reshape((587, 1043, 3))
     image_np_expanded = np.expand_dims(array, axis=0)

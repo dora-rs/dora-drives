@@ -69,10 +69,10 @@ tf_session.run(
 )[0]
 
 
-def run(inputs):
+def dora_run(inputs):
     if "image" not in inputs.keys():
         return {}
-    
+
     image = load(inputs, "image")
     image = image.as_numpy_array()
     # image = np.frombuffer(image, dtype=np.dtype("uint8"))
@@ -99,6 +99,5 @@ def run(inputs):
                             coco_labels[_class],
                         )
                     )
-
 
     return {"obstacles": dump(obstacles)}

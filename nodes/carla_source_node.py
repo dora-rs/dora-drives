@@ -5,8 +5,11 @@ import time
 import pylot.simulation.utils
 import pylot.utils
 from carla import Client, Location, Rotation, Transform, command
-from pylot.drivers.sensor_setup import (CameraSetup, LidarSetup,
-                                        SegmentedCameraSetup)
+from pylot.drivers.sensor_setup import (
+    CameraSetup,
+    LidarSetup,
+    SegmentedCameraSetup,
+)
 from pylot.perception.camera_frame import CameraFrame
 from pylot.perception.depth_frame import DepthFrame
 from pylot.perception.point_cloud import PointCloud
@@ -230,7 +233,7 @@ segmented_camera = add_segmented_camera(
 )
 
 
-def send(_):
+def dora_run(_):
     global last_frame
     global segmented_frame
     global depth_frame
@@ -251,7 +254,7 @@ def send(_):
         "image": dump(last_frame),
         "depth_frame": dump(depth_frame),
         "segmented_frame": dump(segmented_frame),
-        "pose": dump(pose),
+        "position": dump(pose),
         "vehicle_id": dump(vehicle_id)
         #  "open_drive": world.get_map().to_opendrive().encode("utf-8"),
     }

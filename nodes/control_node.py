@@ -14,7 +14,8 @@ vehicle_id = None
 
 mutex = threading.Lock()
 
-def run(inputs):
+
+def dora_run(inputs):
     global vehicle_id
 
     if vehicle_id is None and "vehicle_id" not in inputs.keys():
@@ -40,7 +41,9 @@ def run(inputs):
 
     context = extract_context(inputs)
 
-    with tracer.start_span(f"within-python-{__name__}", context=context) as span:
+    with tracer.start_span(
+        f"within-python-{__name__}", context=context
+    ) as span:
         client.apply_batch_sync(
             [command.ApplyVehicleControl(vehicle_id, vec_control)]
         )

@@ -80,7 +80,8 @@ hd_map = HDMap(get_map())
 old_waypoints = None
 old_obstacles = None
 
-def plot(inputs):
+
+def dora_run(inputs):
     global old_waypoints
     global old_obstacles
 
@@ -88,14 +89,14 @@ def plot(inputs):
     if "image" not in keys:
         return {}
 
-    if "pose" not in keys:
+    if "position" not in keys:
         return {}
     global mutex
     mutex.acquire()
 
     image = load(inputs, "image")
 
-    pose = load(inputs, "pose")
+    pose = load(inputs, "position")
 
     if "obstacles" in keys:
         obstacles = load(inputs, "obstacles")
@@ -147,5 +148,4 @@ def plot(inputs):
     old_waypoints = waypoints
     mutex.release()
 
-    return {
-    }
+    return {}

@@ -97,12 +97,14 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY dora-rs dora-rs
+COPY pylot_graph.yaml pylot_graph.yaml
+
+COPY bin bin
 
 COPY nodes nodes
 
-COPY launch_in_container.sh /home/erdos/
+COPY launch_in_container.sh .
 
 RUN sudo chown erdos:erdos /home/erdos/workspace/dora-rs
 
-RUN sudo chmod +x /home/erdos/launch_in_container.sh
+RUN sudo chmod +x /home/erdos/workspace/dora-rs/launch_in_container.sh

@@ -33,15 +33,15 @@ FLAGS.brake_max = 1.0
 FLAGS.throttle_max = 0.5
 
 
-def run(inputs):
+def dora_run(inputs):
     global mutex
     global old_waypoints
 
     keys = inputs.keys()
-    if "pose" not in keys:
+    if "position" not in keys:
         return {}
 
-    pose = load(inputs, "pose")
+    pose = load(inputs, "position")
     ego_transform = pose.transform
     # Vehicle speed in m/s.
     current_speed = pose.forward_speed
@@ -55,7 +55,7 @@ def run(inputs):
     mutex.acquire()
     waypoints.remove_completed(ego_transform.location)
     old_waypoints = waypoints
-    
+
     try:
         angle_steer = waypoints.get_angle(
             ego_transform, MIN_PID_STEER_WAYPOINT_DISTANCE
@@ -76,9 +76,6 @@ def run(inputs):
         steer = 0.0
     mutex.release()
 
-
     return {
-        "control": dump(
-            {"steer": steer, "throttle": throttle, "brake": brake}
-        ),
+        "control": dump({"steer": steer, "throttle": throttle, "brake": brake}),
     }
