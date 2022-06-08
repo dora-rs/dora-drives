@@ -234,6 +234,7 @@ segmented_camera = add_segmented_camera(
 
 
 def dora_run(_):
+
     global last_frame
     global segmented_frame
     global depth_frame

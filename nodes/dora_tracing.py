@@ -7,24 +7,24 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import \
-    TraceContextTextMapPropagator
+from opentelemetry.trace.propagation.tracecontext import (
+    TraceContextTextMapPropagator,
+)
 
 CarrierT = typing.TypeVar("CarrierT")
 propagator = TraceContextTextMapPropagator()
 
 trace.set_tracer_provider(
-TracerProvider(
-        resource=Resource.create({SERVICE_NAME: "python-client"})
-    )
+    TracerProvider(resource=Resource.create({SERVICE_NAME: "python-client"}))
 )
 tracer = trace.get_tracer(__name__)
 jaeger_exporter = JaegerExporter(
-    agent_host_name='172.17.0.1',
+    agent_host_name="172.17.0.1",
     agent_port=6831,
 )
 span_processor = BatchSpanProcessor(jaeger_exporter)
 trace.get_tracer_provider().add_span_processor(span_processor)
+
 
 class Getter(abc.ABC):
     """This class implements a Getter that enables extracting propagated
@@ -57,23 +57,26 @@ class Getter(abc.ABC):
         """
         return list(carrier.keys())
 
+
 getter = Getter()
+
 
 def parse_context(string_context: str) -> CarrierT:
 
     result = {}
 
-    for elements in string_context.split(';'):
-        splits = elements.split(':')
+    for elements in string_context.split(";"):
+        splits = elements.split(":")
         if len(splits) == 2:
-            result[splits[0]] = splits[1] 
+            result[splits[0]] = splits[1]
         elif len(splits) == 1:
             result[splits[0]] = ""
 
     return result
 
+
 def extract_context(inputs):
-    string_context = inputs["otel_context"]
+    string_context = inputs["otel_context"].decode("utf-8")
 
     carrier = parse_context(string_context)
 
