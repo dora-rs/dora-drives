@@ -95,12 +95,9 @@ async fn main() -> eyre::Result<()> {
 
         // Send the data one by one.
         for (k, v) in batch_messages {
-            node.send_output(
-                &DataId::from(k),
-                &serialize_message(&v, &string_context, max_depth + 1),
-            )
-            .await
-            .unwrap();
+            node.send_output(&DataId::from(k), &serialize_message(&v, &string_context))
+                .await
+                .unwrap();
         }
     }
 }
