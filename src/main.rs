@@ -73,7 +73,7 @@ async fn main() -> eyre::Result<()> {
                 let data = message.get_data().unwrap();
                 let metadata = message.get_metadata().unwrap();
                 let tmp_cx = deserialize_context(&metadata.get_otel_context().unwrap().to_string());
-                let depth = cx.get::<Depth>().unwrap().0;
+                let depth = cx.get::<Depth>().unwrap_or(&Depth(0)).0;
                 if max_depth <= depth {
                     max_depth = depth;
                     cx = tmp_cx;
