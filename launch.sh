@@ -1,12 +1,10 @@
 cd ../dora-rs
 export RUSTFLAGS="--cfg tokio_unstable"
 cargo build  --manifest-path coordinator/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
-cargo build --manifest-path coordinator/Cargo.toml --examples --release # --features metrics # opentelemetry_jaeger 
-cargo build --manifest-path runtime/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
 cd ../dora-pylot
+cargo build --release
 cp ../dora-rs/target/release/dora-coordinator bin/dora-coordinator
-cp ../dora-rs/target/release/examples/example_python_api bin/example_python_api
-cp ../dora-rs/target/release/dora-runtime bin/dora-runtime
+cp target/release/dora-pylot-node bin/dora-pylot-node
 
 # Carla start
 nvidia-docker build --tag dora .
