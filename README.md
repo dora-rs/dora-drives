@@ -1,44 +1,56 @@
 # DORA Pylot
+
+## Description
+
+`dora-pylot` is the starter kit for `dora`. `dora-pylot` is an autonomous vehicle that runs within the [Carla simulator](https://carla.org/).
+
+This project is largely inspired by [Pylot](https://github.com/erdos-project/pylot).
+
+## Requirements:
+|||
+|-|-|
+|OS| Linux
+|Python| Version 3.8
+|Rust| Latest
+|Docker|Latest
+
 ## Getting started
-### Enabling autonomous driving through Dora.
-
-Project largely inspired by [Pylot](https://github.com/erdos-project/pylot).
-
-Thanks the Pylot team for their contribution to open autonomous driving.
 
 - Create a conda environment and activate it for building `dora-rs`:
+
 ```bash
 conda create -n dora3.8 python=3.8
 conda activate dora3.8
 ```
-- Make sure to have [dora-rs](https://github.com/futurewei-tech/dora-rs) within the same parent folder than `dora-pylot`.
-- Run with:
+
+- Clone `dora` and `dora-pylot` using the following commands:
+
 ```bash
-./launch.sh
+git clone git@github.com:futurewei-tech/dora-rs.git
+git clone git@github.com:futurewei-tech/dora-pylot.git
+cd dora-pylot
 ```
-> I haven't specified cross-compilation target, and depending on your OS you might need to change the compilation target.
+
+- Run with:
+
+```bash
+docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
+./scripts/launch.sh
+```
 
 And then within the container:
 ```bash
-./launch_in_container.sh
-```
-
-- If you want to add a visualisation:
-
-```bash
-cd /home/erdos/workspace/dora-rs
-export PYTHONPATH=$PYTHONPATH:$(pwd)/nodes
-./dora-rs start-python sink_eval_plot plot image waypoints obstacles pose &
+./workspace/dora-rs/scripts/launch_in_container.sh
 ```
 
 ### Configuration
 
-- Current configuration are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
+- Current configurations are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
 
 #### InfluxDB visualisation
 
 - Create a free plan at:  https://cloud2.influxdata.com/signup
-- Create a bucket and a API token.
+- Create a bucket and an API token.
 - Change the current static constant variables.
 
 ### Jaeger Export
