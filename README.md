@@ -1,8 +1,8 @@
-# DORA drive
+# DORA drives
 
 ## Description
 
-`dora-drive` is the starter kit for `dora`. `dora-drive` is an autonomous vehicle that runs within the [Carla simulator](https://carla.org/).
+`dora-drives` is the starter kit for `dora`. `dora-drives` is an autonomous vehicle that runs within the [Carla simulator](https://carla.org/).
 
 ## Requirements:
 |Dependencies|Version|
@@ -21,12 +21,12 @@ conda create -n dora3.8 python=3.8
 conda activate dora3.8
 ```
 
-- Clone `dora` and `dora-drive` using the following commands:
+- Clone `dora` and `dora-drives` using the following commands:
 
 ```bash
 git clone git@github.com:futurewei-tech/dora-rs.git
-git clone git@github.com:futurewei-tech/dora-drive.git
-cd dora-drive
+git clone git@github.com:futurewei-tech/dora-drives.git
+cd dora-drives
 ```
 
 - Run with:

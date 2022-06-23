@@ -632,7 +632,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dora-drive-node"
+name = "dora-drives-node"
 version = "0.1.0"
 dependencies = [
  "capnp",
