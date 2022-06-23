@@ -1,13 +1,11 @@
-# DORA Pylot
+# DORA Drives
 
 ## Description
 
-`dora-pylot` is the starter kit for `dora`. `dora-pylot` is an autonomous vehicle that runs within the [Carla simulator](https://carla.org/).
-
-This project is largely inspired by [Pylot](https://github.com/erdos-project/pylot).
+`dora-drives` is the starter kit for `dora`. `dora-drives` is an autonomous vehicle that runs within the [Carla simulator](https://carla.org/).
 
 ## Requirements:
-|||
+|Dependencies|Version|
 |-|-|
 |OS| Linux
 |Python| Version 3.8
@@ -23,12 +21,12 @@ conda create -n dora3.8 python=3.8
 conda activate dora3.8
 ```
 
-- Clone `dora` and `dora-pylot` using the following commands:
+- Clone `dora` and `dora-drives` using the following commands:
 
 ```bash
 git clone git@github.com:futurewei-tech/dora-rs.git
-git clone git@github.com:futurewei-tech/dora-pylot.git
-cd dora-pylot
+git clone git@github.com:futurewei-tech/dora-drives.git
+cd dora-drives
 ```
 
 - Run with:

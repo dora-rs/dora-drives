@@ -2,6 +2,7 @@
 name = "dora-pylot-node"
 version = "0.1.0"
 edition = "2021"
+license = "Apache 2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,7 +11,7 @@ dora-message = { path = "../dora-rs/message" }
 dora-metrics = { path = "../dora-rs/metrics" }
 dora-tracing = { path = "../dora-rs/tracing" }
 dora-python-binding = { path = "../dora-rs/api/python/binding" }
-dora-node-api = { path = "../dora-rs/api/node" }
+dora-node-api = { path = "../dora-rs/api/rust/node" }
 opentelemetry = { git = "https://github.com/open-telemetry/opentelemetry-rust", features = [
   "rt-tokio",
   "metrics",
