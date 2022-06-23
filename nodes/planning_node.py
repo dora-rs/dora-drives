@@ -1,7 +1,3 @@
-"""
-Author: Edward Fang
-Email: edward.fang@berkeley.edu
-"""
 import logging
 import threading
 import time
@@ -101,21 +97,6 @@ class PlanningOperator:
     If the operator is running in challenge mode, then it receives all
     the waypoints from the scenario runner agent (on the global trajectory
     stream). Otherwise, it computes waypoints using the HD Map.
-    Args:
-        pose_stream (:py:class:`erdos.ReadStream`): Stream on which pose
-            info is received.
-        prediction_stream (:py:class:`erdos.ReadStream`): Stream on which
-            trajectory predictions of dynamic obstacles is received.
-        static_obstacles_stream (:py:class:`erdos.ReadStream`): Stream on
-            which static obstacles (e.g., traffic lights) are received.
-        open_drive_stream (:py:class:`erdos.ReadStream`): Stream on which open
-            drive string representations are received. The operator can
-            construct HDMaps out of the open drive strings.
-        route_stream (:py:class:`erdos.ReadStream`): Stream on the planner
-            receives high-level waypoints to follow.
-        waypoints_stream (:py:class:`erdos.WriteStream`): Stream on which the
-            operator sends waypoints the ego vehicle must follow.
-        flags (absl.flags): Object to be used to access absl flags.
     """
 
     def __init__(
