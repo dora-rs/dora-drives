@@ -2,6 +2,11 @@ FROM nvidia/cudagl:11.4.2-devel-ubuntu20.04
 MAINTAINER Xavier Tao (tao.xavier@outlook.com)
 
 # Set up a dora user first.
+
+## See: https://github.com/NVIDIA/nvidia-docker/issues/1632
+RUN apt-key del 7fa2af80
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub
 RUN apt-get -y update && apt-get -y install sudo
 ENV uid 1000
 ENV gid 1000
@@ -56,7 +61,6 @@ ENV PYLOT_HOME /home/dora/workspace/pylot/
 RUN cd /home/dora/workspace/pylot/ && python3 -m pip install -e ./
 # Get the Pylot models and code dependencies.
 RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
-RUN sudo rm /etc/apt/sources.list.d/cuda.list
 RUN sudo apt-get install -y -q
 RUN cd /home/dora/workspace/pylot/ && DEBIAN_FRONTEND=noninteractive ./install.sh
 

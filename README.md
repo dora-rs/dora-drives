@@ -11,20 +11,22 @@
 |Python| Version 3.8
 |Rust| Latest
 |Docker|Latest
+|Conda|Latest
+
 
 ## Getting started
 
-- Create a conda environment and activate it for building `dora-rs`:
+- Create a conda environment and activate it for building `dora`:
 
 ```bash
 conda create -n dora3.8 python=3.8
 conda activate dora3.8
 ```
 
-- Clone `dora` and `dora-drives` using the following commands:
+- Clone `dora` and `dora-drives ` using the following commands:
 
 ```bash
-git clone git@github.com:futurewei-tech/dora-rs.git
+git clone git@github.com:futurewei-tech/dora.git
 git clone git@github.com:futurewei-tech/dora-drives.git
 cd dora-drives
 ```
@@ -38,7 +40,7 @@ docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in
 
 And then within the container:
 ```bash
-./workspace/dora-rs/scripts/launch_in_container.sh
+./workspace/dora/scripts/launch_in_container.sh
 ```
 
 ### Configuration
