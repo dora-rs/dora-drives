@@ -48,8 +48,8 @@ async fn main() -> eyre::Result<()> {
         let time_at_start = Instant::now();
         let py_function = py_function.clone();
         let mut max_depth = 0;
-        let span = tracer.start(format!("{}.pushing", node.id()));
-        let mut cx = Context::current_with_span(span).with_value(Depth(0));
+        //  let span = tracer.start(format!("{}.pushing", node.id()));
+        //  let mut cx = Context::current_with_span(span).with_value(Depth(0));
 
         // Retrieve several inputs within a time frame
         if is_source {
@@ -73,29 +73,26 @@ async fn main() -> eyre::Result<()> {
                 let data = message.get_data().unwrap();
                 let metadata = message.get_metadata().unwrap();
                 let tmp_cx = deserialize_context(&metadata.get_otel_context().unwrap().to_string());
-                let depth = cx.get::<Depth>().unwrap_or(&Depth(0)).0;
-                if max_depth <= depth {
-                    max_depth = depth;
-                    cx = tmp_cx;
-                }
+                //let depth = cx.get::<Depth>().unwrap_or(&Depth(0)).0;
+                //if max_depth <= depth {
+                //max_depth = depth;
+                //cx = tmp_cx;
+                //}
                 workload.insert(input.id.to_string(), data.to_vec());
             }
         }
 
-        let span = tracer.start_with_context(format!("{}.pushing", node.id()), &cx);
-        cx = Context::current_with_span(span).with_value(Depth(max_depth + 1));
-        let string_context = serialize_context(&cx);
-        workload.insert(
-            "otel_context".to_string(),
-            string_context.clone().into_bytes(),
-        );
+        //   let span = tracer.start_with_context(format!("{}.pushing", node.id()), &cx);
+        // cx = Context::current_with_span(span).with_value(Depth(max_depth + 1));
+        //   let string_context = serialize_context(&cx);
+        workload.insert("otel_context".to_string(), "".to_string().into_bytes());
 
         // Call the function
         let batch_messages = py_function.call(&workload).unwrap();
 
         // Send the data one by one.
         for (k, v) in batch_messages {
-            node.send_output(&DataId::from(k), &serialize_message(&v, &string_context))
+            node.send_output(&DataId::from(k), &serialize_message(&v, &""))
                 .await
                 .unwrap();
         }

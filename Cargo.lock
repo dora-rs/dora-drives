@@ -643,8 +643,8 @@ dependencies = [
  "dora-tracing",
  "eyre",
  "futures",
- "opentelemetry",
- "opentelemetry-system-metrics",
+ "opentelemetry 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "opentelemetry-system-metrics 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio",
 ]
 
@@ -661,9 +661,9 @@ name = "dora-metrics"
 version = "0.1.0"
 dependencies = [
  "futures",
- "opentelemetry",
+ "opentelemetry 0.17.0 (git+https://github.com/open-telemetry/opentelemetry-rust)",
  "opentelemetry-otlp",
- "opentelemetry-system-metrics",
+ "opentelemetry-system-metrics 0.1.1 (git+https://github.com/haixuanTao/opentelemetry-rust-system-metrics)",
  "tokio",
 ]
 
@@ -698,7 +698,7 @@ dependencies = [
 name = "dora-tracing"
 version = "0.1.0"
 dependencies = [
- "opentelemetry",
+ "opentelemetry 0.17.0 (git+https://github.com/open-telemetry/opentelemetry-rust)",
  "opentelemetry-jaeger",
  "tokio",
 ]
@@ -1467,6 +1467,29 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 [[package]]
 name = "opentelemetry"
 version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6105e89802af13fdf48c49d7646d3b533a70e536d818aae7e78ba0433d01acb8"
+dependencies = [
+ "async-trait",
+ "crossbeam-channel",
+ "dashmap",
+ "fnv",
+ "futures-channel",
+ "futures-executor",
+ "futures-util",
+ "js-sys",
+ "lazy_static",
+ "percent-encoding",
+ "pin-project",
+ "rand",
+ "thiserror",
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
+name = "opentelemetry"
+version = "0.17.0"
 source = "git+https://github.com/open-telemetry/opentelemetry-rust#e33859f475b62aa57ee31fed52dc7cb6d2d8800a"
 dependencies = [
  "opentelemetry-api",
@@ -1497,7 +1520,7 @@ dependencies = [
  "futures",
  "futures-executor",
  "lazy_static",
- "opentelemetry",
+ "opentelemetry 0.17.0 (git+https://github.com/open-telemetry/opentelemetry-rust)",
  "opentelemetry-semantic-conventions",
  "thiserror",
  "thrift",
@@ -1513,7 +1536,7 @@ dependencies = [
  "futures",
  "futures-util",
  "http",
- "opentelemetry",
+ "opentelemetry 0.17.0 (git+https://github.com/open-telemetry/opentelemetry-rust)",
  "opentelemetry-proto",
  "prost",
  "thiserror",
@@ -1528,7 +1551,7 @@ source = "git+https://github.com/open-telemetry/opentelemetry-rust#e33859f475b62
 dependencies = [
  "futures",
  "futures-util",
- "opentelemetry",
+ "opentelemetry 0.17.0 (git+https://github.com/open-telemetry/opentelemetry-rust)",
  "prost",
  "tonic",
  "tonic-build",
@@ -1562,7 +1585,18 @@ name = "opentelemetry-semantic-conventions"
 version = "0.9.0"
 source = "git+https://github.com/open-telemetry/opentelemetry-rust#e33859f475b62aa57ee31fed52dc7cb6d2d8800a"
 dependencies = [
- "opentelemetry",
+ "opentelemetry 0.17.0 (git+https://github.com/open-telemetry/opentelemetry-rust)",
+]
+
+[[package]]
+name = "opentelemetry-system-metrics"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a848fb2d43cc8e5adabdedc6b37a88b45653d3a23b000a3d047e6953d5af42ea"
+dependencies = [
+ "indexmap",
+ "opentelemetry 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sysinfo 0.24.5",
 ]
 
 [[package]]
@@ -1571,8 +1605,8 @@ version = "0.1.1"
 source = "git+https://github.com/haixuanTao/opentelemetry-rust-system-metrics#74c90e45560e4c20ea2dc69a553c6e310ca7c4ab"
 dependencies = [
  "indexmap",
- "opentelemetry",
- "sysinfo",
+ "opentelemetry 0.17.0 (git+https://github.com/open-telemetry/opentelemetry-rust)",
+ "sysinfo 0.23.15",
 ]
 
 [[package]]
@@ -2550,6 +2584,21 @@ dependencies = [
 name = "sysinfo"
 version = "0.23.15"
 source = "git+https://github.com/haixuanTao/sysinfo#8844f520f4f12ce3df52220bae4dd666593206b2"
+dependencies = [
+ "cfg-if",
+ "core-foundation-sys",
+ "libc",
+ "ntapi",
+ "once_cell",
+ "rayon",
+ "winapi",
+]
+
+[[package]]
+name = "sysinfo"
+version = "0.24.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d80929a3b477bce3a64360ca82bfb361eacce1dcb7b1fb31e8e5e181e37c212"
 dependencies = [
  "cfg-if",
  "core-foundation-sys",
