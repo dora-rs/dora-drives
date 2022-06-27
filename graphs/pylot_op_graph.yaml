@@ -42,23 +42,23 @@ nodes:
         obstacles: obstacle_location_node/obstacles
       run: ./bin/dora-drives-node
 
-  - id: pid_control_node
-    custom:
-      outputs:
-        - control
-      inputs:
-        position: carla_source_node/position
-        waypoints: planning_node/waypoints
-      run: ./bin/dora-drives-node
 
-  - id: control_node
-    custom:
-      outputs:
-        - control_status
-      inputs:
-        control: pid_control_node/control
-        vehicle_id: carla_source_node/vehicle_id
-      run: ./bin/dora-drives-node
+  - id: runtime-node
+    operators:
+      - id: control-op
+        python: ./operators/control_operator.py
+        inputs:
+          control: pid_control_node/control
+          vehicle_id: carla_source_node/vehicle_id
+          outputs:
+            - counter
+      - id: pid-control-op
+        outputs:
+          - control
+        inputs:
+          position: carla_source_node/position
+          waypoints: planning_node/waypoints
+        python: ./operators/pid_control_op.py
 
   # - id: influxdb_node
     # custom:

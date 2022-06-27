@@ -104,7 +104,7 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY pylot_graph.yaml pylot_graph.yaml
+COPY graphs graphs
 
 COPY bin bin
 

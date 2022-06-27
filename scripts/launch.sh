@@ -1,9 +1,10 @@
-cd ../dora-rs
+cd ../dora
 export RUSTFLAGS="--cfg tokio_unstable"
 cargo build  --manifest-path coordinator/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
-cd ../dora-pylot
+cargo build  --manifest-path runtime/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
+cd ../dora-drives
 cargo build --release
-cp ../dora-rs/target/release/dora-coordinator bin/dora-coordinator
+cp ../dora/target/release/dora-coordinator bin/dora-coordinator
 cp target/release/dora-pylot-node bin/dora-pylot-node
 
 # Carla start
