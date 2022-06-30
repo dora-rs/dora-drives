@@ -5,7 +5,8 @@ cargo build  --manifest-path runtime/Cargo.toml --release # --features metrics #
 cd ../dora-drives
 cargo build --release
 cp ../dora/target/release/dora-coordinator bin/dora-coordinator
-cp target/release/dora-pylot-node bin/dora-pylot-node
+cp ../dora/target/release/dora-runtime bin/dora-runtime
+cp target/release/dora-drives-node bin/dora-drives-node
 
 # Carla start
 nvidia-docker build --tag dora .

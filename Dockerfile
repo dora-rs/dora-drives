@@ -104,13 +104,7 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY graphs graphs
-
-COPY bin bin
-
-COPY nodes nodes
-
-COPY scripts scripts
+COPY . . 
 
 RUN sudo chown dora:dora /home/dora/workspace/dora-rs
 

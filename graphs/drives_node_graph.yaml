@@ -11,7 +11,7 @@ nodes:
         - segmented_frame
         - vehicle_id
         - image
-      run: ./bin/dora-drives-node
+      run: dora-drives-node
 
   - id: perfect_detection_node
     custom:
@@ -21,7 +21,7 @@ nodes:
         position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
         segmented_frame: carla_source_node/segmented_frame
-      run: ./bin/dora-drives-node
+      run: dora-drives-node
 
   - id: obstacle_location_node
     custom: 
@@ -31,7 +31,7 @@ nodes:
         position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
         obstacles_without_location: perfect_detection_node/obstacles_without_location
-      run: ./bin/dora-drives-node
+      run: dora-drives-node
 
   - id: planning_node
     custom:
@@ -40,7 +40,7 @@ nodes:
       inputs:
         position: carla_source_node/position
         obstacles: obstacle_location_node/obstacles
-      run: ./bin/dora-drives-node
+      run: dora-drives-node
 
   - id: pid_control_node
     custom:
@@ -49,7 +49,7 @@ nodes:
       inputs:
         position: carla_source_node/position
         waypoints: planning_node/waypoints
-      run: ./bin/dora-drives-node
+      run: dora-drives-node
 
   - id: control_node
     custom:
@@ -58,17 +58,17 @@ nodes:
       inputs:
         control: pid_control_node/control
         vehicle_id: carla_source_node/vehicle_id
-      run: ./bin/dora-drives-node
+      run: dora-drives-node
 
-  - id: runtime-node
+  - id: runtime_node
     operators:
       - id: control-op
         python: ./operators/control_operator.py
         inputs:
           control: pid_control_node/control
           vehicle_id: carla_source_node/vehicle_id
-          outputs:
-            - counter
+        outputs:
+          - counter
 
   # - id: influxdb_node
     # custom:
@@ -77,7 +77,7 @@ nodes:
         # control_status: control_node/control_status
         # position: carla_source_node/position
         # obstacles: obstacle_location_node/obstacles
-      # run: ./dora-drives-node
+      # run: dora-drives-node
     
   - id: sink_eval_plot
     custom:
@@ -87,4 +87,4 @@ nodes:
         position: carla_source_node/position
         image: carla_source_node/image
         obstacles: obstacle_location_node/obstacles
-      run: ./bin/dora-drives-node
+      run: dora-drives-node

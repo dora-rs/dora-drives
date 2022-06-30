@@ -6,5 +6,7 @@ export INFLUX_TOKEN=RmC0MizRVFt04yBDXE12nqBIwUVvBEVb1qAYBbX3OFwZYSnpiGPPc03SUGfM
 cd /home/dora/workspace/dora-rs
 export PYTHONPATH=$PYTHONPATH:$(pwd)/nodes
 export DORA_RUNTIME_PATH=/home/dora/workspace/dora-rs/bin/dora-runtime
-./bin/dora-coordinator run ./graphs/pylot_graph.yaml
+export PATH=$PATH:/home/dora/workspace/dora-rs/bin/
+export DORA_PATH=/home/dora/workspace/dora-rs
+dora-coordinator run $DORA_PATH/graphs/drives_op_graph.yaml $DORA_RUNTIME_PATH
 # ./dora-rs start-python sink_eval_plot plot image waypoints obstacles pose &
