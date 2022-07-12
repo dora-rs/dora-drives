@@ -60,15 +60,6 @@ nodes:
         vehicle_id: carla_source_node/vehicle_id
       run: dora-drives-node
 
-  - id: runtime_node
-    operators:
-      - id: control-op
-        python: ./operators/control_operator.py
-        inputs:
-          control: pid_control_node/control
-          vehicle_id: carla_source_node/vehicle_id
-        outputs:
-          - counter
 
   # - id: influxdb_node
     # custom:
