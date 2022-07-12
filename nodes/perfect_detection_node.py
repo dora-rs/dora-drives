@@ -2,7 +2,6 @@ import numpy as np
 from carla import Client
 from pylot.simulation.utils import extract_data_in_pylot_format
 
-from dora_tracing import extract_context, tracer
 from dora_watermark import dump, load
 
 CARLA_SIMULATOR_HOST = "localhost"

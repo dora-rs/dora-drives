@@ -2,11 +2,10 @@ import logging
 import threading
 
 import numpy as np
-import pylot.control.utils
-import pylot.planning.utils
 from pylot.control.pid import PIDLongitudinalController
+from sklearn.metrics import pairwise_distances
 
-from dora_watermark import dump, load
+from dora_watermark import load
 
 mutex = threading.Lock()
 old_waypoints = None
@@ -33,6 +32,55 @@ FLAGS.brake_max = 1.0
 FLAGS.throttle_max = 0.5
 
 
+def radians_to_steer(rad: float, steer_gain: float):
+    """Converts radians to steer input.
+
+    Returns:
+        :obj:`float`: Between [-1.0, 1.0].
+    """
+    steer = steer_gain * rad
+    if steer > 0:
+        steer = min(steer, 1)
+    else:
+        steer = max(steer, -1)
+    return steer
+
+
+def compute_throttle_and_brake(
+    pid, current_speed: float, target_speed: float, flags, logger
+):
+    """Computes the throttle/brake required to reach the target speed.
+
+    It uses the longitudinal controller to derive the required information.
+
+    Args:
+        pid: The pid controller.
+        current_speed (:obj:`float`): The current speed of the ego vehicle
+            (in m/s).
+        target_speed (:obj:`float`): The target speed to reach (in m/s).
+        flags (absl.flags): The flags object.
+
+    Returns:
+        Throttle and brake values.
+    """
+    if current_speed < 0:
+        logger.warning("Current speed is negative: {}".format(current_speed))
+        non_negative_speed = 0
+    else:
+        non_negative_speed = current_speed
+    acceleration = pid.run_step(target_speed, non_negative_speed)
+    if acceleration >= 0.0:
+        throttle = min(acceleration, flags.throttle_max)
+        brake = 0
+    else:
+        throttle = 0.0
+        brake = min(abs(acceleration), flags.brake_max)
+    # Keep the brake pressed when stopped or when sliding back on a hill.
+    if (current_speed < 1 and target_speed == 0) or current_speed < -0.3:
+        brake = 1.0
+    return throttle, brake
+
+
 def dora_run(inputs):
     global old_waypoints
 
@@ -42,41 +90,51 @@ def dora_run(inputs):
 
     position = np.frombuffer(inputs["position"])
     [x, y, z, pitch, yaw, roll, current_speed] = position
-    ego_transform = pylot.utils.Transform(
-        pylot.utils.Location(x, y, z),
-        pylot.utils.Rotation(pitch, yaw, roll),
-    )
 
     # Vehicle speed in m/s.
     if "waypoints" in keys:
-        waypoints = load(inputs, "waypoints")
+        waypoints = np.frombuffer(inputs["waypoints"])
+        waypoints = waypoints.reshape((-1, 3))
+        target_speeds = waypoints[2]
+        waypoints = waypoints[:2].T
     elif old_waypoints is not None:
-        waypoints = old_waypoints
+        (waypoints, target_speeds) = old_waypoints
     else:
         return {}
 
     mutex.acquire()
-    waypoints.remove_completed(ego_transform.location)
-    old_waypoints = waypoints
+    distances = pairwise_distances(waypoints, [[x, y]]).flatten()
 
-    try:
-        angle_steer = waypoints.get_angle(
-            ego_transform, MIN_PID_STEER_WAYPOINT_DISTANCE
-        )
+    old_waypoints = (waypoints, target_speeds)
 
-        target_speed = waypoints.get_target_speed(
-            ego_transform, MIN_PID_SPEED_WAYPOINT_DISTANCE
-        )
+    ## Retrieve the closest point to the steer distance
+    expected_target_locations = waypoints[
+        distances > MIN_PID_STEER_WAYPOINT_DISTANCE
+    ]
+    if len(expected_target_locations) == 0:
+        target_angle = 0
+    else:
+        target_location = expected_target_locations[0]
 
-        throttle, brake = pylot.control.utils.compute_throttle_and_brake(
-            pid, current_speed, target_speed, FLAGS, logger
-        )
+        ## Compute the angle of steering
+        forward_vector = target_location - [x, y]
+        target_angle = np.arctan2(forward_vector[1], forward_vector[0])
 
-        steer = pylot.control.utils.radians_to_steer(angle_steer, STEER_GAIN)
-    except ValueError:
-        print("Braking! No more waypoints to follow.")
-        throttle, brake = 0.0, 0.5
-        steer = 0.0
+    # Retrieve the target speed.
+    expected_target_speed = target_speeds[
+        distances > MIN_PID_SPEED_WAYPOINT_DISTANCE
+    ]
+    if len(expected_target_speed) == 0:
+        target_speed = 0
+    else:
+        target_speed = expected_target_speed[0]
+
+    throttle, brake = compute_throttle_and_brake(
+        pid, current_speed, target_speed, FLAGS, logger
+    )
+
+    steer = radians_to_steer(target_angle, STEER_GAIN)
+
     mutex.release()
 
     return {

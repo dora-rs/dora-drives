@@ -80,17 +80,6 @@ FLAGS.klon = 1.0  # Longitudinal cost
 goal_location = pylot.utils.Location(234, 59, 39)
 
 logger = logging.getLogger("")
-logger.setLevel(logging.INFO)
-# define file handler and set formatter
-file_handler = logging.FileHandler("logfile.log")
-formatter = logging.Formatter(
-    "%(asctime)s : %(levelname)s : %(name)s : %(message)s"
-)
-file_handler.setFormatter(formatter)
-
-# add file handler to logger
-logger.addHandler(file_handler)
-file_handler = logging.FileHandler("logfile.log")
 
 
 class PlanningOperator:
@@ -104,8 +93,9 @@ class PlanningOperator:
         self,
     ):
         # Use the FOT planner for overtaking.
-        from pylot.planning.hybrid_astar.hybrid_astar_planner import \
-            HybridAStarPlanner
+        from pylot.planning.hybrid_astar.hybrid_astar_planner import (
+            HybridAStarPlanner,
+        )
 
         self._flags = FLAGS
         self._logger = logger
@@ -180,8 +170,10 @@ def dora_run(inputs):
     global planning
     old_obstacles = obstacles
     waypoints = planning.run(pose, obstacles)  # , open_drive)
+    waypoints_array = waypoints.as_numpy_array_2D()
+    np.append(waypoints_array, np.array(waypoints.target_speeds))
     mutex.release()
 
     return {
-        "waypoints": dump(waypoints),
+        "waypoints": waypoints_array.tobytes(),
     }
