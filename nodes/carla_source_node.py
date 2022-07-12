@@ -256,6 +256,6 @@ def dora_run(_):
         "depth_frame": dump(depth_frame),
         "segmented_frame": dump(segmented_frame),
         "position": dump(pose),
-        "vehicle_id": dump(vehicle_id)
+        "vehicle_id": vehicle_id.to_bytes(2, "big")
         #  "open_drive": world.get_map().to_opendrive().encode("utf-8"),
     }

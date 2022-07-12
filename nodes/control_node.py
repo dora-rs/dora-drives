@@ -1,10 +1,9 @@
 import threading
-import time
 
+import numpy as np
 from carla import Client, VehicleControl, command
 
 from dora_tracing import extract_context, tracer
-from dora_watermark import dump, load
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
@@ -23,18 +22,19 @@ def dora_run(inputs):
     elif vehicle_id is None and "vehicle_id" in inputs.keys():
         global mutex
         mutex.acquire()
-        vehicle_id = load(inputs, "vehicle_id")
+        vehicle_id = int.from_bytes(inputs["vehicle_id"], "big")
         mutex.release()
 
     if "control" not in inputs.keys():
         return {}
 
-    control = load(inputs, "control")
+    # Control should be a C-order array with Throttle, steer, and brake as value.
+    control = np.frombuffer(inputs["control"])
 
     vec_control = VehicleControl(
-        throttle=control["throttle"],
-        steer=control["steer"],
-        brake=control["brake"],
+        throttle=control[0],
+        steer=control[1],
+        brake=control[2],
         hand_brake=False,
         reverse=False,
     )
@@ -47,4 +47,4 @@ def dora_run(inputs):
         client.apply_batch_sync(
             [command.ApplyVehicleControl(vehicle_id, vec_control)]
         )
-        return {"control_status": dump(1)}
+        return {"control_status": (1).to_bytes(2, "big")}

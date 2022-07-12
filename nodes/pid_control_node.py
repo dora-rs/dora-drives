@@ -1,7 +1,7 @@
 import logging
 import threading
-import time
 
+import numpy as np
 import pylot.control.utils
 import pylot.planning.utils
 from pylot.control.pid import PIDLongitudinalController
@@ -34,7 +34,6 @@ FLAGS.throttle_max = 0.5
 
 
 def dora_run(inputs):
-    global mutex
     global old_waypoints
 
     keys = inputs.keys()
@@ -77,5 +76,5 @@ def dora_run(inputs):
     mutex.release()
 
     return {
-        "control": dump({"steer": steer, "throttle": throttle, "brake": brake}),
+        "control": np.array([throttle, steer, brake]).tobytes(),
     }
