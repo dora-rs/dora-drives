@@ -1,5 +1,5 @@
 import logging
-import time
+import math
 
 import numpy as np
 import pylot.utils
@@ -10,10 +10,8 @@ from dora_watermark import dump, load
 
 logger = logging.Logger("Obstacle Location")
 
-from dora_tracing import extract_context, tracer
 
-
-def get_predictions(obstacles, ego_transform):
+def get_predictions(obstacles, position_matrix):
     """Extracts obstacle predictions out of the message.
     This method is useful to build obstacle predictions when
     the operator directly receives detections instead of predictions.
@@ -23,11 +21,12 @@ def get_predictions(obstacles, ego_transform):
     # Transform the obstacle into a prediction.
     for obstacle in obstacles:
         obstacle_trajectory = ObstacleTrajectory(obstacle, [])
+        inverse_matrix = np.linalg.inv(position_matrix)
         prediction = ObstaclePrediction(
             obstacle_trajectory,
             obstacle.transform,
             1.0,
-            [ego_transform.inverse_transform() * obstacle.transform],
+            [np.dot(inverse_matrix, obstacle.transform.matrix)],
         )
         predictions.append(prediction)
 
@@ -63,6 +62,7 @@ def get_obstacle_locations(
         min_distance = np.infty
         closest_location = None
         for location in locations:
+
             dist = location.distance(ego_transform.location)
             if dist < min_distance:
                 min_distance = dist
@@ -71,6 +71,39 @@ def get_obstacle_locations(
             closest_location, pylot.utils.Rotation()
         )
     return obstacles
+
+
+def create_matrix(position: np.array):
+    """Creates a transformation matrix to convert points in the 3D world
+    coordinate space with respect to the object.
+    Use the transform_points function to transpose a given set of points
+    with respect to the object.
+    Args:
+        location (:py:class:`.Location`): The location of the object
+            represented by the transform.
+        rotation (:py:class:`.Rotation`): The rotation of the object
+            represented by the transform.
+    Returns:
+        A 4x4 numpy matrix which represents the transformation matrix.
+    """
+    matrix = np.identity(4)
+    cy = np.cos(np.radians(position[4]))
+    sy = np.sin(np.radians(position[4]))
+    cr = np.cos(np.radians(position[5]))
+    sr = np.sin(np.radians(position[5]))
+    cp = np.cos(np.radians(position[3]))
+    sp = np.sin(np.radians(position[3]))
+    matrix[:3, 3] = position[:3]
+    matrix[0, 0] = cp * cy
+    matrix[0, 1] = cy * sp * sr - sy * cr
+    matrix[0, 2] = -1 * (cy * sp * cr + sy * sr)
+    matrix[1, 0] = sy * cp
+    matrix[1, 1] = sy * sp * sr + cy * cr
+    matrix[1, 2] = cy * sr - sy * sp * cr
+    matrix[2, 0] = sp
+    matrix[2, 1] = -1 * (cp * sr)
+    matrix[2, 2] = cp * cr
+    return matrix
 
 
 def dora_run(inputs):
@@ -83,36 +116,31 @@ def dora_run(inputs):
     ):
         return {}
 
-    context = extract_context(inputs)
-    with tracer.start_span(
-        f"python-{__name__}-pickle-parsing", context=context
-    ):
-        obstacles = load(inputs, "obstacles_without_location")
-        depth_frame = load(inputs, "depth_frame")
-        pose = load(inputs, "position")
+    obstacles = load(inputs, "obstacles_without_location")
+    depth_frame = load(inputs, "depth_frame")
+    position = np.frombuffer(inputs["position"])
 
-    context = extract_context(inputs)
-    with tracer.start_span(
-        f"python-{__name__}-obstacle-location", context=context
-    ):
-        obstacles_with_location = get_obstacle_locations(
-            obstacles,
-            depth_frame,
-            pose.transform,
-        )
+    [x, y, z, pitch, yaw, roll, current_speed] = position
+    pose = pylot.utils.Pose(
+        pylot.utils.Transform(
+            pylot.utils.Location(x, y, z),
+            pylot.utils.Rotation(pitch, yaw, roll),
+        ),
+        current_speed,
+    )
 
-    context = extract_context(inputs)
-    with tracer.start_span(
-        f"python-{__name__}-location-prediction", context=context
-    ):
-        obstacles_with_prediction = get_predictions(
-            obstacles_with_location, pose.transform
-        )
+    position_matrix = create_matrix(position)
 
-    context = extract_context(inputs)
-    with tracer.start_span(
-        f"python-{__name__}-location-prediction", context=context
-    ):
-        bytearray = dump(obstacles_with_prediction)
+    obstacles_with_location = get_obstacle_locations(
+        obstacles,
+        depth_frame,
+        pose.transform,
+    )
 
-    return {"obstacles": bytearray}
+    obstacles_with_prediction = get_predictions(
+        obstacles_with_location, position_matrix
+    )
+
+    obstacles = dump(obstacles_with_prediction)
+
+    return {"obstacles": obstacles}

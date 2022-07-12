@@ -2,6 +2,7 @@ import logging
 import random
 import time
 
+import numpy as np
 import pylot.simulation.utils
 import pylot.utils
 from carla import Client, Location, Rotation, Transform, command
@@ -242,20 +243,29 @@ def dora_run(_):
     if last_frame is None or segmented_frame is None or depth_frame is None:
         return {}
 
-    vec_transform = pylot.utils.Transform.from_simulator_transform(
-        ego_vehicle.get_transform()
-    )
-    velocity_vector = pylot.utils.Vector3D.from_simulator_vector(
-        ego_vehicle.get_velocity()
-    )
-    forward_speed = velocity_vector.magnitude()
-    pose = pylot.utils.Pose(vec_transform, forward_speed, velocity_vector)
+    vec_transform = ego_vehicle.get_transform()
+    velocity_vector = ego_vehicle.get_velocity()
+    x = vec_transform.location.x
+    y = vec_transform.location.y
+    z = vec_transform.location.z
+    pitch = vec_transform.rotation.pitch
+    yaw = vec_transform.rotation.yaw
+    roll = vec_transform.rotation.roll
+
+    vx = velocity_vector.x
+    vy = velocity_vector.y
+    vz = velocity_vector.z
+
+    forward_speed = np.linalg.norm([vx, vy, vz])
+
+    # position = [x, y, z, pitch, yaw, roll, forward_speed]
+    position = np.array([x, y, z, pitch, yaw, roll, forward_speed])
 
     return {
         "image": dump(last_frame),
         "depth_frame": dump(depth_frame),
         "segmented_frame": dump(segmented_frame),
-        "position": dump(pose),
+        "position": position.tobytes(),
         "vehicle_id": vehicle_id.to_bytes(2, "big")
         #  "open_drive": world.get_map().to_opendrive().encode("utf-8"),
     }

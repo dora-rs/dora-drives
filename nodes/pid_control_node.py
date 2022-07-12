@@ -40,10 +40,14 @@ def dora_run(inputs):
     if "position" not in keys:
         return {}
 
-    pose = load(inputs, "position")
-    ego_transform = pose.transform
+    position = np.frombuffer(inputs["position"])
+    [x, y, z, pitch, yaw, roll, current_speed] = position
+    ego_transform = pylot.utils.Transform(
+        pylot.utils.Location(x, y, z),
+        pylot.utils.Rotation(pitch, yaw, roll),
+    )
+
     # Vehicle speed in m/s.
-    current_speed = pose.forward_speed
     if "waypoints" in keys:
         waypoints = load(inputs, "waypoints")
     elif old_waypoints is not None:

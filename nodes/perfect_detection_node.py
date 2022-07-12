@@ -1,5 +1,4 @@
-import time
-
+import numpy as np
 from carla import Client
 from pylot.simulation.utils import extract_data_in_pylot_format
 
@@ -27,15 +26,10 @@ def dora_run(inputs):
     ):
         return {}
 
-    context = extract_context(inputs)
-    with tracer.start_span(
-        f"python-{__name__}-pickle-parsing", context=context
-    ):
-        pose = load(inputs, "position")
-        vehicle_transform = pose.transform
+    position = np.frombuffer(inputs["position"])
 
-        depth_frame = load(inputs, "depth_frame")
-        segmented_frame = load(inputs, "segmented_frame")
+    depth_frame = load(inputs, "depth_frame")
+    segmented_frame = load(inputs, "segmented_frame")
 
     actor_list = world.get_actors()
     (vehicles, people, _traffic_lights, _, _) = extract_data_in_pylot_format(
@@ -46,8 +40,12 @@ def dora_run(inputs):
         # Calculate the distance of the obstacle from the vehicle, and
         # convert to camera view if it is less than
         # dynamic_obstacle_distance_threshold metres away.
+        obs_x = obstacle.transform.location.x
+        obs_y = obstacle.transform.location.y
+        obs_z = obstacle.transform.location.z
+
         if (
-            obstacle.transform.location.distance(vehicle_transform.location)
+            np.linalg.norm([obs_x, obs_y, obs_z] - position[:3])
             <= DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD
         ):
             bbox = obstacle.populate_bounding_box_2D(
@@ -56,11 +54,7 @@ def dora_run(inputs):
             if bbox:
                 det_obstacles.append(obstacle)
 
-    context = extract_context(inputs)
-    with tracer.start_span(
-        f"python-{__name__}-pickle-parsing", context=context
-    ):
-        byte_array = dump(det_obstacles)
+    byte_array = dump(det_obstacles)
 
     return {
         "obstacles_without_location": byte_array,

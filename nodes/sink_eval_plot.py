@@ -96,7 +96,15 @@ def dora_run(inputs):
 
     image = load(inputs, "image")
 
-    pose = load(inputs, "position")
+    position = np.frombuffer(inputs["position"])
+    [x, y, z, pitch, yaw, roll, current_speed] = position
+    pose = pylot.utils.Pose(
+        pylot.utils.Transform(
+            pylot.utils.Location(x, y, z),
+            pylot.utils.Rotation(pitch, yaw, roll),
+        ),
+        current_speed,
+    )
 
     if "obstacles" in keys:
         obstacles = load(inputs, "obstacles")

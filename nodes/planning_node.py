@@ -3,6 +3,7 @@ import threading
 import time
 from collections import deque
 
+import numpy as np
 import pylot.utils
 from pylot.map.hd_map import HDMap
 from pylot.planning.world import World
@@ -103,9 +104,8 @@ class PlanningOperator:
         self,
     ):
         # Use the FOT planner for overtaking.
-        from pylot.planning.hybrid_astar.hybrid_astar_planner import (
-            HybridAStarPlanner,
-        )
+        from pylot.planning.hybrid_astar.hybrid_astar_planner import \
+            HybridAStarPlanner
 
         self._flags = FLAGS
         self._logger = logger
@@ -157,7 +157,17 @@ def dora_run(inputs):
     if "position" not in keys:  # or "open_drive" not in keys:
         return {}
 
-    pose = load(inputs, "position")
+    global mutex
+    mutex.acquire()
+    position = np.frombuffer(inputs["position"])
+    [x, y, z, pitch, yaw, roll, current_speed] = position
+    pose = pylot.utils.Pose(
+        pylot.utils.Transform(
+            pylot.utils.Location(x, y, z),
+            pylot.utils.Rotation(pitch, yaw, roll),
+        ),
+        current_speed,
+    )
 
     if "obstacles" in keys:
         obstacles = load(inputs, "obstacles")
@@ -167,9 +177,7 @@ def dora_run(inputs):
         obstacles = deque()
 
     # open_drive = inputs,"open_drive"].decode("utf-8")
-    global mutex
     global planning
-    mutex.acquire()
     old_obstacles = obstacles
     waypoints = planning.run(pose, obstacles)  # , open_drive)
     mutex.release()

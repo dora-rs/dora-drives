@@ -1,9 +1,9 @@
 import os
 import random
 import threading
-import time
 from datetime import datetime
 
+import numpy as np
 import pylot.utils
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -45,27 +45,28 @@ def dora_run(inputs):
 
     current_time = datetime.utcnow()
     if "position" in inputs.keys():
-        pose = load(inputs, "position")
-        location = pose.transform.location
+        position = np.frombuffer(inputs["position"])
+        [x, y, z, pitch, yaw, roll, current_speed] = position
+
+        # points.append(
+        # Point("dora.pylot.test")
+        # .tag("host", host)
+        # .tag("id", summary_id)
+        # .field("goal_distance", goal_location.distance(location))
+        # .time(current_time, WritePrecision.NS)
+        # )
         points.append(
             Point("dora.pylot.test")
             .tag("host", host)
             .tag("id", summary_id)
-            .field("goal_distance", goal_location.distance(location))
+            .field("x_coordinate", x / 100)
             .time(current_time, WritePrecision.NS)
         )
         points.append(
             Point("dora.pylot.test")
             .tag("host", host)
             .tag("id", summary_id)
-            .field("x_coordinate", location.x / 100)
-            .time(current_time, WritePrecision.NS)
-        )
-        points.append(
-            Point("dora.pylot.test")
-            .tag("host", host)
-            .tag("id", summary_id)
-            .field("y_coordinate", location.y / 100)
+            .field("y_coordinate", y / 100)
             .time(current_time, WritePrecision.NS)
         )
 
