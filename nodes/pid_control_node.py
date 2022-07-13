@@ -1,11 +1,10 @@
 import logging
 import threading
+import time
+from collections import deque
 
 import numpy as np
-from pylot.control.pid import PIDLongitudinalController
 from sklearn.metrics import pairwise_distances
-
-from dora_watermark import load
 
 mutex = threading.Lock()
 old_waypoints = None
@@ -18,7 +17,6 @@ pid_d = 0.0
 pid_i = 0.05
 dt = 1.0 / 10
 pid_use_real_time = True
-pid = PIDLongitudinalController(pid_p, pid_d, pid_i, dt, pid_use_real_time)
 
 logger = logging.Logger("")
 
@@ -30,6 +28,69 @@ class Flags(object):
 FLAGS = Flags()
 FLAGS.brake_max = 1.0
 FLAGS.throttle_max = 0.5
+
+
+class PIDLongitudinalController(object):
+    """Implements longitudinal control using a PID.
+
+    Args:
+       K_P (:obj:`float`): Proportional term.
+       K_D (:obj:`float`): Differential term.
+       K_I (:obj:`float`): Integral term.
+       dt (:obj:`float`): time differential in seconds.
+    """
+
+    def __init__(
+        self,
+        K_P: float = 1.0,
+        K_D: float = 0.0,
+        K_I: float = 0.0,
+        dt: float = 0.03,
+        use_real_time: bool = False,
+    ):
+        self._k_p = K_P
+        self._k_d = K_D
+        self._k_i = K_I
+        self._dt = dt
+        self._use_real_time = use_real_time
+        self._last_time = time.time()
+        self._error_buffer = deque(maxlen=10)
+
+    def run_step(self, target_speed: float, current_speed: float):
+        """Computes the throttle/brake based on the PID equations.
+
+        Args:
+            target_speed (:obj:`float`): Target speed in m/s.
+            current_speed (:obj:`float`): Current speed in m/s.
+
+        Returns:
+            Throttle and brake values.
+        """
+        # Transform to km/h
+        error = (target_speed - current_speed) * 3.6
+        self._error_buffer.append(error)
+
+        if self._use_real_time:
+            time_now = time.time()
+            dt = time_now - self._last_time
+            self._last_time = time_now
+        else:
+            dt = self._dt
+        if len(self._error_buffer) >= 2:
+            _de = (self._error_buffer[-1] - self._error_buffer[-2]) / dt
+            _ie = sum(self._error_buffer) * dt
+        else:
+            _de = 0.0
+            _ie = 0.0
+
+        return np.clip(
+            (self._k_p * error) + (self._k_d * _de) + (self._k_i * _ie),
+            -1.0,
+            1.0,
+        )
+
+
+pid = PIDLongitudinalController(pid_p, pid_d, pid_i, dt, pid_use_real_time)
 
 
 def radians_to_steer(rad: float, steer_gain: float):
