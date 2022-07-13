@@ -26,7 +26,11 @@ def get_predictions(obstacles, position_matrix):
             obstacle_trajectory,
             obstacle.transform,
             1.0,
-            [np.dot(inverse_matrix, obstacle.transform.matrix)],
+            [
+                pylot.utils.Transform(
+                    matrix=np.dot(inverse_matrix, obstacle.transform.matrix)
+                )
+            ],
         )
         predictions.append(prediction)
 
@@ -121,20 +125,16 @@ def dora_run(inputs):
     position = np.frombuffer(inputs["position"])
 
     [x, y, z, pitch, yaw, roll, current_speed] = position
-    pose = pylot.utils.Pose(
-        pylot.utils.Transform(
-            pylot.utils.Location(x, y, z),
-            pylot.utils.Rotation(pitch, yaw, roll),
-        ),
-        current_speed,
+    pose_transform = pylot.utils.Transform(
+        pylot.utils.Location(x, y, z),
+        pylot.utils.Rotation(pitch, yaw, roll),
     )
-
     position_matrix = create_matrix(position)
 
     obstacles_with_location = get_obstacle_locations(
         obstacles,
         depth_frame,
-        pose.transform,
+        pose_transform,
     )
 
     obstacles_with_prediction = get_predictions(
