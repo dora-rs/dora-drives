@@ -21,13 +21,8 @@ pid_use_real_time = True
 logger = logging.Logger("")
 
 
-class Flags(object):
-    pass
-
-
-FLAGS = Flags()
-FLAGS.brake_max = 1.0
-FLAGS.throttle_max = 0.5
+BRAKE_MAX = 1.0
+THROTTLE_MAX = 0.5
 
 
 class PIDLongitudinalController(object):
@@ -108,7 +103,7 @@ def radians_to_steer(rad: float, steer_gain: float):
 
 
 def compute_throttle_and_brake(
-    pid, current_speed: float, target_speed: float, flags, logger
+    pid, current_speed: float, target_speed: float, logger
 ):
     """Computes the throttle/brake required to reach the target speed.
 
@@ -119,7 +114,6 @@ def compute_throttle_and_brake(
         current_speed (:obj:`float`): The current speed of the ego vehicle
             (in m/s).
         target_speed (:obj:`float`): The target speed to reach (in m/s).
-        flags (absl.flags): The flags object.
 
     Returns:
         Throttle and brake values.
@@ -131,11 +125,11 @@ def compute_throttle_and_brake(
         non_negative_speed = current_speed
     acceleration = pid.run_step(target_speed, non_negative_speed)
     if acceleration >= 0.0:
-        throttle = min(acceleration, flags.throttle_max)
+        throttle = min(acceleration, THROTTLE_MAX)
         brake = 0
     else:
         throttle = 0.0
-        brake = min(abs(acceleration), flags.brake_max)
+        brake = min(abs(acceleration), BRAKE_MAX)
     # Keep the brake pressed when stopped or when sliding back on a hill.
     if (current_speed < 1 and target_speed == 0) or current_speed < -0.3:
         brake = 1.0
@@ -150,7 +144,7 @@ def dora_run(inputs):
         return {}
 
     position = np.frombuffer(inputs["position"])
-    [x, y, z, pitch, yaw, roll, current_speed] = position
+    [x, y, _, _, _, _, current_speed] = position
 
     # Vehicle speed in m/s.
     if "waypoints" in keys:
@@ -191,7 +185,7 @@ def dora_run(inputs):
         target_speed = expected_target_speed[0]
 
     throttle, brake = compute_throttle_and_brake(
-        pid, current_speed, target_speed, FLAGS, logger
+        pid, current_speed, target_speed, logger
     )
 
     steer = radians_to_steer(target_angle, STEER_GAIN)
