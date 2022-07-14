@@ -1,11 +1,11 @@
 import logging
-import math
 
 import numpy as np
 import pylot.utils
 from pylot.perception.tracking.obstacle_trajectory import ObstacleTrajectory
 from pylot.prediction.obstacle_prediction import ObstaclePrediction
 
+from dora_utils import get_projection_matrix
 from dora_watermark import dump, load
 
 logger = logging.Logger("Obstacle Location")
@@ -40,11 +40,13 @@ def get_predictions(obstacles, position_matrix):
 def get_obstacle_locations(
     obstacles,
     depth_frame,
-    ego_transform,
+    ego_position: np.array,
+    depth_frame_position: np.array,
 ):
 
-    depth_frame.camera_setup.set_transform(
-        ego_transform * depth_frame.camera_setup.transform
+    depth_frame_matrix = np.dot(
+        get_projection_matrix(ego_position),
+        get_projection_matrix(depth_frame_position),
     )
 
     for obstacle in obstacles:
@@ -67,7 +69,7 @@ def get_obstacle_locations(
         closest_location = None
         for location in locations:
 
-            dist = location.distance(ego_transform.location)
+            dist = np.linalg.norm(location - ego_position[:3])
             if dist < min_distance:
                 min_distance = dist
                 closest_location = location
@@ -75,39 +77,6 @@ def get_obstacle_locations(
             closest_location, pylot.utils.Rotation()
         )
     return obstacles
-
-
-def create_matrix(position: np.array):
-    """Creates a transformation matrix to convert points in the 3D world
-    coordinate space with respect to the object.
-    Use the transform_points function to transpose a given set of points
-    with respect to the object.
-    Args:
-        location (:py:class:`.Location`): The location of the object
-            represented by the transform.
-        rotation (:py:class:`.Rotation`): The rotation of the object
-            represented by the transform.
-    Returns:
-        A 4x4 numpy matrix which represents the transformation matrix.
-    """
-    matrix = np.identity(4)
-    cy = np.cos(np.radians(position[4]))
-    sy = np.sin(np.radians(position[4]))
-    cr = np.cos(np.radians(position[5]))
-    sr = np.sin(np.radians(position[5]))
-    cp = np.cos(np.radians(position[3]))
-    sp = np.sin(np.radians(position[3]))
-    matrix[:3, 3] = position[:3]
-    matrix[0, 0] = cp * cy
-    matrix[0, 1] = cy * sp * sr - sy * cr
-    matrix[0, 2] = -1 * (cy * sp * cr + sy * sr)
-    matrix[1, 0] = sy * cp
-    matrix[1, 1] = sy * sp * sr + cy * cr
-    matrix[1, 2] = cy * sr - sy * sp * cr
-    matrix[2, 0] = sp
-    matrix[2, 1] = -1 * (cp * sr)
-    matrix[2, 2] = cp * cr
-    return matrix
 
 
 def dora_run(inputs):
@@ -121,20 +90,20 @@ def dora_run(inputs):
         return {}
 
     obstacles = load(inputs, "obstacles_without_location")
-    depth_frame = load(inputs, "depth_frame")
+    buffer_depth_frame = inputs["depth_frame"]
+    depth_frame = np.frombuffer(
+        buffer_depth_frame[: 800 * 600 * 4], dtype="uint8"
+    )
+    depth_frame_position = np.frombuffer(
+        buffer_depth_frame[800 * 600 * 4 :], dtype="float32"
+    )
+
     position = np.frombuffer(inputs["position"])
 
-    [x, y, z, pitch, yaw, roll, current_speed] = position
-    pose_transform = pylot.utils.Transform(
-        pylot.utils.Location(x, y, z),
-        pylot.utils.Rotation(pitch, yaw, roll),
-    )
-    position_matrix = create_matrix(position)
+    position_matrix = get_projection_matrix(position)
 
     obstacles_with_location = get_obstacle_locations(
-        obstacles,
-        depth_frame,
-        pose_transform,
+        obstacles, depth_frame, position, depth_frame_position
     )
 
     obstacles_with_prediction = get_predictions(
