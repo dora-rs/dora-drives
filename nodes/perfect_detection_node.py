@@ -267,7 +267,7 @@ def get_bounding_box_in_camera_view(
         x = [int(x) for x, _ in thresholded_points]
         y = [int(y) for _, y in thresholded_points]
         if min(x) < max(x) and min(y) < max(y):
-            return np.array([min(x), max(x), min(y), max(y)])
+            return np.array([min(x), max(x), min(y), max(y)], dtype="float32")
         else:
             return None
 
@@ -372,11 +372,11 @@ def dora_run(inputs):
     actor_list = world.get_actors()
     obstacles = actor_list.filter("walker.pedestrian.*|vehicle.*")
 
-    det_obstacles = []
+    outputs = []
     for obstacle in obstacles:
         # Calculate the distance of the obstacle from the vehicle, and
         # convert to camera view if it is less than
-        # dynamic_obstacle_distance_threshold metres away.
+        # DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD metres away.
         transform = obstacle.get_transform()
         obs_x = transform.location.x
         obs_y = transform.location.y
@@ -391,9 +391,24 @@ def dora_run(inputs):
                 obstacle, depth_frame, segmented_frame, depth_frame_position
             )
             if bbox:
-                det_obstacles.append(obstacle)
 
-    byte_array = dump(det_obstacles)
+                # Get the instance of the Obstacle
+                if isinstance(obstacle, Vehicle):
+                    segmentation_class = 10
+                else:
+                    segmentation_class = 4
+
+                obstacle_bytes = (
+                    bbox.tobytes()
+                    + depth_frame_position.tobytes()
+                    + np.array(
+                        [1.0, segmentation_class], dtype="float32"
+                    ).tobytes()
+                )
+
+                outputs.append(obstacle_bytes)
+
+    byte_array = b"".join(outputs)
 
     return {
         "obstacles_without_location": byte_array,
