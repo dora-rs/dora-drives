@@ -31,7 +31,7 @@ def get_projection_matrix(position: np.array):
     return matrix
 
 
-def to_world_coordinate(points, matrix):
+def to_world_coordinate(points: np.array, matrix: np.array) -> np.array:
     """Internal function to transform the points according to the
     given matrix. This function either converts the points from
     coordinate space relative to the transform to the world coordinate

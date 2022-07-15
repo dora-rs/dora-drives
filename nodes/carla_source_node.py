@@ -124,6 +124,7 @@ def add_depth_camera(world, transform, callback, vehicle):
     depth_blueprint = world.get_blueprint_library().find("sensor.camera.depth")
     depth_blueprint.set_attribute("image_size_x", "800")
     depth_blueprint.set_attribute("image_size_y", "600")
+    depth_blueprint.set_attribute("fov", str(90.0))
     depth_camera = world.spawn_actor(
         depth_blueprint, transform, attach_to=vehicle
     )
