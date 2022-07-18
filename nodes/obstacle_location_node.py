@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+import numpy.matlib
 from sklearn.metrics import pairwise_distances_argmin
 
 from dora_utils import (

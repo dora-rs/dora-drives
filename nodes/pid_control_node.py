@@ -4,12 +4,11 @@ import time
 from collections import deque
 
 import numpy as np
-from sklearn.metrics import pairwise_distances
+from sklearn.metrics import pairwise_distances_argmin
 
 mutex = threading.Lock()
 old_waypoints = None
-MIN_PID_STEER_WAYPOINT_DISTANCE = 5
-MIN_PID_SPEED_WAYPOINT_DISTANCE = 5
+MIN_PID_WAYPOINT_DISTANCE = 5
 STEER_GAIN = 0.7
 COAST_FACTOR = 1.75
 pid_p = 1.0
@@ -151,38 +150,39 @@ def dora_run(inputs):
         waypoints = np.frombuffer(inputs["waypoints"])
         waypoints = waypoints.reshape((-1, 3))
         target_speeds = waypoints[2]
-        waypoints = waypoints[:2].T
+        waypoints = np.ascontiguousarray(waypoints[:2].T)
     elif old_waypoints is not None:
         (waypoints, target_speeds) = old_waypoints
     else:
         return {}
 
     mutex.acquire()
-    distances = pairwise_distances(waypoints, [[x, y]]).flatten()
 
     old_waypoints = (waypoints, target_speeds)
 
     ## Retrieve the closest point to the steer distance
-    expected_target_locations = waypoints[
-        distances > MIN_PID_STEER_WAYPOINT_DISTANCE
-    ]
+    argmin_distance = pairwise_distances_argmin(waypoints, [[x, y]])
+    print(waypoints)
+    expected_target_locations = waypoints[argmin_distance]
+    expected_target_speeds = target_speeds[argmin_distance]
+
     if len(expected_target_locations) == 0:
         target_angle = 0
+        target_speed = 0
     else:
         target_location = expected_target_locations[0]
 
         ## Compute the angle of steering
         forward_vector = target_location - [x, y]
         target_angle = np.arctan2(forward_vector[1], forward_vector[0])
-
-    # Retrieve the target speed.
-    expected_target_speed = target_speeds[
-        distances > MIN_PID_SPEED_WAYPOINT_DISTANCE
-    ]
-    if len(expected_target_speed) == 0:
-        target_speed = 0
-    else:
-        target_speed = expected_target_speed[0]
+        print(
+            str(target_location)
+            + " current location: "
+            + str([x, y])
+            + "\n target vector"
+            + str(forward_vector)
+        )
+        target_speed = expected_target_speeds[0]
 
     throttle, brake = compute_throttle_and_brake(
         pid, current_speed, target_speed, logger

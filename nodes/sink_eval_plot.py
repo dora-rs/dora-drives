@@ -95,7 +95,7 @@ def dora_run(inputs):
     global mutex
     mutex.acquire()
 
-    buffer_camera_frame = inputs["depth_frame"]
+    buffer_camera_frame = inputs["image"]
     camera_frame = np.frombuffer(
         buffer_camera_frame[: 800 * 600 * 4], dtype="uint8"
     )
@@ -116,7 +116,7 @@ def dora_run(inputs):
 
     if "obstacles" in keys:
         obstacles = inputs["obstacles"]
-        obstacles = obstacles.split("\n")
+        obstacles = obstacles.split(b"\n")
     elif old_obstacles is not None:
         obstacles = old_obstacles
     else:
@@ -125,9 +125,7 @@ def dora_run(inputs):
     if "waypoints" in keys:
         waypoints = np.frombuffer(inputs["waypoints"])
         waypoints = waypoints.reshape((-1, 3))
-        waypoints = pylot.planning.waypoints.Waypoints(
-            waypoints[:2], waypoints[2]
-        )
+
     elif old_waypoints is not None:
         waypoints = old_waypoints
     else:
