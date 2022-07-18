@@ -1,7 +1,7 @@
 cd ../dora
 export RUSTFLAGS="--cfg tokio_unstable"
-cargo build  --manifest-path coordinator/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
-cargo build  --manifest-path runtime/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
+cargo build  --manifest-path binaries/coordinator/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
+cargo build  --manifest-path binaries/runtime/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
 cd ../dora-drives
 cargo build --release
 cp ../dora/target/release/dora-coordinator bin/dora-coordinator

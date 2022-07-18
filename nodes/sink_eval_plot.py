@@ -7,11 +7,12 @@ import cv2
 import numpy as np
 import pygame
 import pylot.perception.detection.utils
+import pylot.planning.waypoints
 from pylot.map.hd_map import HDMap
 from pylot.planning.world import World
 from pylot.simulation.utils import get_map
 
-from dora_watermark import dump, load
+from dora_watermark import load
 
 mutex = threading.Lock()
 pygame.init()
@@ -94,40 +95,52 @@ def dora_run(inputs):
     global mutex
     mutex.acquire()
 
-    image = load(inputs, "image")
+    buffer_camera_frame = inputs["depth_frame"]
+    camera_frame = np.frombuffer(
+        buffer_camera_frame[: 800 * 600 * 4], dtype="uint8"
+    )
+
+    camera_frame_position = np.frombuffer(
+        buffer_camera_frame[800 * 600 * 4 :], dtype="float32"
+    )
 
     position = np.frombuffer(inputs["position"])
     [x, y, z, pitch, yaw, roll, current_speed] = position
-    pose = pylot.utils.Pose(
-        pylot.utils.Transform(
-            pylot.utils.Location(x, y, z),
-            pylot.utils.Rotation(pitch, yaw, roll),
-        ),
-        current_speed,
-    )
+    # pose = pylot.utils.Pose(
+    # pylot.utils.Transform(
+    # pylot.utils.Location(x, y, z),
+    # pylot.utils.Rotation(pitch, yaw, roll),
+    # ),
+    # current_speed,
+    # )
 
     if "obstacles" in keys:
-        obstacles = load(inputs, "obstacles")
+        obstacles = inputs["obstacles"]
+        obstacles = obstacles.split("\n")
     elif old_obstacles is not None:
         obstacles = old_obstacles
     else:
         obstacles = []
 
     if "waypoints" in keys:
-        waypoints = load(inputs, "waypoints")
+        waypoints = np.frombuffer(inputs["waypoints"])
+        waypoints = waypoints.reshape((-1, 3))
+        waypoints = pylot.planning.waypoints.Waypoints(
+            waypoints[:2], waypoints[2]
+        )
     elif old_waypoints is not None:
         waypoints = old_waypoints
     else:
         waypoints = None
 
-    if waypoints is not None:
-        waypoints.remove_completed(pose.transform.location)
-        waypoints.draw_on_frame(image)
+    # if waypoints is not None:
+    # waypoints.remove_completed(pose.transform.location)
+    # waypoints.draw_on_frame(image)
 
-    for obstacle_prediction in obstacles:
-        obstacle_prediction.draw_trajectory_on_frame(image)
+    # for obstacle_prediction in obstacles:
+    # obstacle_prediction.draw_trajectory_on_frame(image)
 
-    image = image.as_numpy_array()
+    image = camera_frame
     if len(image) == 800 * 600 * 4:
         resized_image = np.reshape(image, (display_height, display_width, 4))
         resized_image = resized_image[:, :, :3]

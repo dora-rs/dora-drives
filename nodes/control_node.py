@@ -39,12 +39,7 @@ def dora_run(inputs):
         reverse=False,
     )
 
-    context = extract_context(inputs)
-
-    with tracer.start_span(
-        f"within-python-{__name__}", context=context
-    ) as span:
-        client.apply_batch_sync(
-            [command.ApplyVehicleControl(vehicle_id, vec_control)]
-        )
-        return {"control_status": (1).to_bytes(2, "big")}
+    client.apply_batch_sync(
+        [command.ApplyVehicleControl(vehicle_id, vec_control)]
+    )
+    return {"control_status": (1).to_bytes(2, "big")}

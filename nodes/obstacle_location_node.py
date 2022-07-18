@@ -14,6 +14,7 @@ logger = logging.Logger("Obstacle Location")
 DEPTH_CAMERA_MAX_DEPTH = 1000
 DEPTH_IMAGE_WIDTH = 800
 DEPTH_IMAGE_HEIGHT = 600
+DEPTH_IMAGE_CHANNEL = 4
 PIXEL_LENGTH = DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT
 DEPTH_FOV = 90
 INTRINSIC_MATRIX = get_intrinsic_matrix(
@@ -28,15 +29,18 @@ def get_point_cloud(depth_frame, depth_frame_matrix):
     coordinate axis orientations.
     """
     frame = depth_frame.astype(np.float32)
+    frame = np.reshape(
+        frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_CHANNEL)
+    )
     # Apply (R + G * 256 + B * 256 * 256) / (256 * 256 * 256 - 1).
     frame = np.dot(frame[:, :, :3], [65536.0, 256.0, 1.0])
     frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
 
     # 2d pixel coordinates
-    u_coord = np.libmat.repmat(
+    u_coord = np.matlib.repmat(
         np.r_[0:DEPTH_IMAGE_WIDTH:1], DEPTH_IMAGE_HEIGHT, 1
     ).reshape(PIXEL_LENGTH)
-    v_coord = np.libmat.repmat(
+    v_coord = np.matlib.repmat(
         np.c_[0:DEPTH_IMAGE_HEIGHT:1], 1, DEPTH_IMAGE_WIDTH
     ).reshape(PIXEL_LENGTH)
     normalized_depth = np.reshape(frame, PIXEL_LENGTH)
@@ -56,7 +60,7 @@ def get_point_cloud(depth_frame, depth_frame_matrix):
     return point_cloud
 
 
-def get_predictions(obstacles, obstacle_with_locations, position_matrix):
+def get_predictions(obstacles, obstacle_with_locations):
     """Extracts obstacle predictions out of the message.
     This method is useful to build obstacle predictions when
     the operator directly receives detections instead of predictions.
@@ -142,14 +146,10 @@ def dora_run(inputs):
 
     position = np.frombuffer(inputs["position"])
 
-    position_matrix = get_projection_matrix(position)
-
     obstacles_with_location = get_obstacle_locations(
         obstacles, depth_frame, position, depth_frame_position
     )
 
-    predictions_bytes = get_predictions(
-        obstacles, obstacles_with_location, position_matrix
-    )
+    predictions_bytes = get_predictions(obstacles, obstacles_with_location)
 
     return {"obstacles": predictions_bytes}

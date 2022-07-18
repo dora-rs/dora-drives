@@ -1,15 +1,12 @@
 import logging
 import threading
 import time
-from collections import deque
 
 import numpy as np
 import pylot.utils
 from pylot.map.hd_map import HDMap
 from pylot.planning.world import World
 from pylot.simulation.utils import get_map
-
-from dora_watermark import dump, load
 
 mutex = threading.Lock()
 
@@ -115,7 +112,7 @@ class PlanningOperator:
         self._world.update(
             time.time(),
             pose_msg,
-            obstacles,
+            [],
             [],
             hd_map=self._map,
             lanes=None,
@@ -160,11 +157,12 @@ def dora_run(inputs):
     )
 
     if "obstacles" in keys:
-        obstacles = load(inputs, "obstacles")
+        obstacles = inputs["obstacles"]
+        obstacles = obstacles.split(b"\n")
     elif old_obstacles is not None:
         obstacles = old_obstacles
     else:
-        obstacles = deque()
+        obstacles = []
 
     # open_drive = inputs,"open_drive"].decode("utf-8")
     global planning
