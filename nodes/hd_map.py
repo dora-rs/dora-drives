@@ -5,11 +5,12 @@ with the CARLA HD map.
 """
 
 
+import numpy as np
+
 # Import Planner from CARLA codebase
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 from agents.navigation.global_route_planner_dao import GlobalRoutePlannerDAO
-from carla import LaneType
-from pylot.utils import Location
+from carla import LaneType, Location
 
 
 class HDMap(object):
@@ -32,24 +33,7 @@ class HDMap(object):
         )
         self._grp.setup()
 
-    # def get_closest_lane_waypoint(self, location: Location) -> Transform:
-    # """Returns the road closest waypoint to location.
-
-    # Args:
-    # location (:py:class:`~pylot.utils.Location`): Location in world
-    # coordinates.
-
-    # Returns:
-    # :py:class:`~pylot.utils.Transform`: Transform or None if no
-    # waypoint is found.
-    # """
-    # waypoint = self._get_waypoint(location, project_to_road=True)
-    # if waypoint:
-    # return Transform.from_simulator_transform(waypoint.transform)
-    # else:
-    # return None
-
-    def is_intersection(self, location: Location) -> bool:
+    def is_intersection(self, location: np.array) -> bool:
         """Checks if a location is in an intersection.
 
         Args:
@@ -74,26 +58,8 @@ class HDMap(object):
             return waypoint.is_intersection
         return False
 
-    # def is_on_lane(self, location: Location) -> bool:
-    # """Checks if a location is on a lane.
-
-    # Args:
-    # location (:py:class:`~pylot.utils.Location`): Location in world
-    # coordinates.
-
-    # Returns:
-    # bool: True if the location is on a lane.
-    # """
-    # waypoint = self._get_waypoint(location, lane_type=LaneType.Driving)
-    # if not waypoint:
-    # # The map didn't return a waypoint because the location not within
-    # # mapped location.
-    # return False
-    # else:
-    # return True
-
     def are_on_same_lane(
-        self, location1: Location, location2: Location
+        self, location1: np.array, location2: np.array
     ) -> bool:
         """Checks if two locations are on the same lane.
 
@@ -130,32 +96,8 @@ class HDMap(object):
                 return True
         return False
 
-    # def is_on_opposite_lane(self, transform: Transform):
-    # """Checks if a transform is on an opposite lane.
-
-    # Args:
-    # transform (:py:class:`~pylot.utils.Transform`): Transform in world
-    # coordinates.
-
-    # Returns:
-    # bool: True if the transform is on the opposite lane.
-    # """
-    # waypoint = self._get_waypoint(
-    # transform.location, lane_type=LaneType.Driving
-    # )
-    # if not waypoint:
-    # return True
-    # if self.__is_intersection(waypoint):
-    # return False
-
-    ## XXX(ionel): Check logic.
-    # if abs(waypoint.transform.rotation.yaw - transform.rotation.yaw) > 140:
-    # return True
-    # else:
-    # return False
-
     def distance_to_intersection(
-        self, location: Location, max_distance_to_check: float = 30
+        self, location: np.array, max_distance_to_check: float = 30
     ):
         """Computes the distance (in meters) from location to an intersection.
 
@@ -188,183 +130,8 @@ class HDMap(object):
             waypoint = waypoints[0]
         return None
 
-    # def is_on_bidirectional_lane(self, location: Location) -> bool:
-    # """Checks if a location is a bidirectional lane.
-
-    # Args:
-    # location (:py:class:`~pylot.utils.Location`): Location in world
-    # coordinates.
-
-    # Returns:
-    # bool: True if the location is on a bidirectional lane.
-    # """
-    # waypoint = self._get_waypoint(
-    # location, lane_type=LaneType.Bidirectional
-    # )
-    # return not waypoint
-
-    # def must_obey_traffic_light(
-    # self, ego_location: Location, tl_location: Location
-    # ) -> bool:
-    # """Checks if an ego vehicle must obey a traffic light.
-
-    # Args:
-    # ego_location (:py:class:`~pylot.utils.Location`): Location of the
-    # ego vehicle in world coordinates.
-    # tl_location (:py:class:`~pylot.utils.Location`): Location of the
-    # traffic light in world coordinates.
-
-    # Returns:
-    # bool: True if the ego vehicle must obey the traffic light.
-    # """
-    # waypoint = self._get_waypoint(ego_location)
-    # if waypoint and self.__is_intersection(waypoint):
-    # # Do not obey traffic light if ego is already in the intersection.
-    # return False
-
-    # # TODO(ionel): Implement.
-
-    # return True
-
-    # def _must_obey_european_traffic_light(
-    # self, ego_transform: Transform, tl_locations, tl_max_dist_thresh: float
-    # ) -> bool:
-    # ego_waypoint = self._get_waypoint(ego_transform.location)
-    # # We're not on a road, or we're already in the intersection. Carry on.
-    # if ego_waypoint is None or self.__is_intersection(ego_waypoint):
-    # return (False, None)
-    # # Iterate through traffic lights.
-    # for tl_loc in tl_locations:
-    # tl_waypoint = self._get_waypoint(tl_loc)
-    # if (
-    # tl_waypoint.road_id != ego_waypoint.road_id
-    # or tl_waypoint.lane_id != ego_waypoint.lane_id
-    # ):
-    # continue
-    # if ego_transform.is_within_distance_ahead(
-    # tl_loc, tl_max_dist_thresh
-    # ):
-    # return (True, tl_loc)
-    # return (False, None)
-
-    # def _must_obey_american_traffic_light(
-    # self, ego_transform: Transform, tl_locations, tl_max_dist_thresh: float
-    # ) -> bool:
-    # ego_waypoint = self._get_waypoint(ego_transform.location)
-    # # We're not on a road, or we're already in the intersection. Carry on.
-    # if ego_waypoint is None or self.__is_intersection(ego_waypoint):
-    # return (False, None)
-
-    # min_angle = 25.0
-    # selected_tl_loc = None
-    # for tl_loc in tl_locations:
-    # if ego_transform.is_within_distance_ahead(
-    # tl_loc, tl_max_dist_thresh
-    # ):
-    # angle, distance = ego_transform.get_angle_and_magnitude(tl_loc)
-    # if distance < 60.0 and angle < min(25.0, min_angle):
-    # min_angle = angle
-    # selected_tl_loc = tl_loc
-    # if selected_tl_loc is not None:
-    # return (True, selected_tl_loc)
-    # else:
-    # return (False, None)
-
-    # def get_lane(
-    # self,
-    # location: Location,
-    # waypoint_precision: float = 0.05,
-    # lane_id: int = 0,
-    # ) -> Lane:
-    # lane_waypoints = []
-    # # Consider waypoints in opposite direction of camera so we can get
-    # # lane data for adjacent lanes in opposing directions.
-    # previous_wp = [self._get_waypoint(location)]
-
-    # while len(previous_wp) == 1:
-    # lane_waypoints.append(previous_wp[0])
-    # previous_wp = previous_wp[0].previous(waypoint_precision)
-
-    # next_wp = [self._get_waypoint(location)]
-
-    # while len(next_wp) == 1:
-    # lane_waypoints.append(next_wp[0])
-    # next_wp = next_wp[0].next(waypoint_precision)
-
-    # # Get the left and right markings of the lane and send it as a message.
-    # left_markings = [
-    # self._lateral_shift(w.transform, -w.lane_width * 0.5)
-    # for w in lane_waypoints
-    # ]
-    # right_markings = [
-    # self._lateral_shift(w.transform, w.lane_width * 0.5)
-    # for w in lane_waypoints
-    # ]
-    # return Lane(lane_id, left_markings, right_markings)
-
-    # def get_left_lane(self, location: Location):
-    # waypoint = self._get_waypoint(location)
-    # if waypoint:
-    # left_lane_waypoint = waypoint.get_left_lane()
-    # if left_lane_waypoint:
-    # return Transform.from_simulator_transform(
-    # left_lane_waypoint.transform
-    # )
-    # return None
-
-    # def get_right_lane(self, location: Location):
-    # waypoint = self._get_waypoint(location)
-    # if waypoint:
-    # right_lane_waypoint = waypoint.get_right_lane()
-    # if right_lane_waypoint:
-    # return Transform.from_simulator_transform(
-    # right_lane_waypoint.transform
-    # )
-    # return None
-
-    # def get_all_lanes(self, location: Location):
-    # lanes = [self.get_lane(location)]
-
-    # waypoint = self._get_waypoint(location)
-    # if waypoint:
-    # wp_left = waypoint.get_left_lane()
-    # w_rotation = waypoint.transform.rotation
-    # while wp_left and wp_left.lane_type == LaneType.Driving:
-    # left_location = Location.from_simulator_location(
-    # wp_left.transform.location
-    # )
-    # lanes.append(
-    # self.get_lane(left_location, lane_id=wp_left.lane_id)
-    # )
-
-    # # If left lane is facing the opposite direction, its left
-    # # lane would point back to the current lane, so we select
-    # # its right lane to get the left lane relative to current.
-    # if w_rotation == wp_left.transform.rotation:
-    # wp_left = wp_left.get_left_lane()
-    # else:
-    # wp_left = wp_left.get_right_lane()
-
-    # wp_right = waypoint.get_right_lane()
-    # while wp_right and wp_right.lane_type == LaneType.Driving:
-    # right_location = Location.from_simulator_location(
-    # wp_right.transform.location
-    # )
-    # lanes.append(
-    # self.get_lane(right_location, lane_id=wp_right.lane_id)
-    # )
-
-    # # Same logic as above. If right lane of current is in
-    # # opposite direction, move rightwards by selecting it's
-    # # left lane.
-    # if w_rotation == wp_right.transform.rotation:
-    # wp_right = wp_right.get_right_lane()
-    # else:
-    # wp_right = wp_left.get_left_lane()
-    # return lanes
-
     def compute_waypoints(
-        self, source_loc: Location, destination_loc: Location
+        self, source_loc: np.array, destination_loc: np.array
     ):
         """Computes waypoints between two locations.
 
@@ -400,20 +167,16 @@ class HDMap(object):
             ]
         ]
 
-    # def _lateral_shift(self, transform, shift) -> Location:
-    # transform.rotation.yaw += 90
-    # shifted = transform.location + shift * transform.get_forward_vector()
-    # return Location.from_simulator_location(shifted)
-
     def _get_waypoint(
         self,
-        location: Location,
+        location: np.array,  # [x, y, z]
         project_to_road: bool = False,
         lane_type=LaneType.Any,
     ):
         try:
+            [x, y, z] = location
             waypoint = self._map.get_waypoint(
-                location.as_simulator_location(),
+                Location(x, y, z),
                 project_to_road=project_to_road,
                 lane_type=lane_type,
             )
