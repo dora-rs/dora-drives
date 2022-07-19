@@ -3,8 +3,6 @@ import threading
 import numpy as np
 from carla import Client, VehicleControl, command
 
-from dora_tracing import extract_context, tracer
-
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))

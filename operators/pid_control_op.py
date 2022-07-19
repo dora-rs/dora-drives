@@ -69,7 +69,6 @@ class Operator:
         if self.waypoints == None:
             return None
         mutex.acquire()
-        self.waypoints.remove_completed(ego_transform.location)
 
         try:
             angle_steer = self.waypoints.get_angle(

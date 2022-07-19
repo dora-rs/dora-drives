@@ -1,4 +1,24 @@
+from typing import List
+
 import numpy as np
+from sklearn.metrics import pairwise_distances_argmin
+
+
+def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:
+    return np.norm(left_vertix[:3] - right_vertix[:3])
+
+
+def distance_points(left_point: np.array, right_point: np.array) -> np.array:
+    return np.norm(left_point - right_point)
+
+
+def closest_vertex(
+    vertices: List[np.array], point: np.array
+) -> (int, np.array):
+    argmin_vertice = pairwise_distances_argmin(vertices, [point])
+    min_vertice = vertices[argmin_vertice]
+
+    return (argmin_vertice, min_vertice)
 
 
 def get_projection_matrix(position: np.array):

@@ -2,9 +2,9 @@ import logging
 
 import numpy as np
 import numpy.matlib
-from sklearn.metrics import pairwise_distances_argmin
 
 from dora_utils import (
+    closest_vertex,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,
@@ -26,8 +26,6 @@ INTRINSIC_MATRIX = get_intrinsic_matrix(
 def get_point_cloud(depth_frame, depth_frame_matrix):
     """Converts the depth frame to a 1D array containing the 3D
     position of each pixel in world coordinates.
-    See :py:class:`~pylot.drivers.sensor_setup.CameraSetup` for
-    coordinate axis orientations.
     """
     frame = depth_frame.astype(np.float32)
     frame = np.reshape(
@@ -115,7 +113,7 @@ def get_obstacle_locations(
 
         # Choose the closest from the locations of the sampled points.
 
-        min_location = pairwise_distances_argmin(locations, [ego_position[:3]])
+        min_location = closest_vertex(locations, [ego_position[:3]])
 
         obstacle_with_locations.append(locations[min_location])
 

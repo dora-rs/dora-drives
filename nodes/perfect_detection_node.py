@@ -8,7 +8,6 @@ from dora_utils import (
     get_projection_matrix,
     to_world_coordinate,
 )
-from dora_watermark import dump
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
@@ -111,9 +110,6 @@ def to_camera_view(
     Note that this function does not cap the coordinates to be within the
     size of the camera image.
     Args:
-        obstacle_transform (:py:class:`~pylot.utils.Transform`): The
-            transform of the obstacle that the bounding box is associated
-            with.
         extrinsic_matrix: The extrinsic matrix of the camera.
     Returns:
         A list of 8 Location instances specifying the 8 corners of the
@@ -192,8 +188,6 @@ def get_bounding_box_in_camera_view(
     """Creates the bounding box in the view of the camera image using the
     coordinates generated with respect to the camera transform.
     Args:
-        bb_coordinates: 8 :py:class:`~pylot.utils.Location` coordinates of
-            the bounding box relative to the camera transform.
         image_width (:obj:`int`): The width of the image being published by the
             camera.
         image_height (:obj:`int`): The height of the image being published by
@@ -279,11 +273,6 @@ def populate_bounding_box_2D(
     Heuristically uses the depth frame and segmentation frame to figure out
     if the obstacle is in view of the camera or not.
     Args:
-        depth_frame (:py:class:`~pylot.perception.depth_frame.DepthFrame`):
-            Depth frame used to compare the depth to the distance of the
-            obstacle from the sensor.
-        segmented_frame (:py:class:`~pylot.perception.segmentation.segmented_frame.SegmentedFrame`):  # noqa: E501
-            Segmented frame used to refine the conversions.
     Returns:
        np.array: An instance representing a
         rectangle over the obstacle if the obstacle is deemed to be

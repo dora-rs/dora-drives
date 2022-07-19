@@ -4,7 +4,8 @@ import time
 from collections import deque
 
 import numpy as np
-from sklearn.metrics import pairwise_distances_argmin
+
+from dora_utils import closest_vertex
 
 mutex = threading.Lock()
 old_waypoints = None
@@ -161,9 +162,9 @@ def dora_run(inputs):
     old_waypoints = (waypoints, target_speeds)
 
     ## Retrieve the closest point to the steer distance
-    argmin_distance = pairwise_distances_argmin(waypoints, [[x, y]])
-    print(waypoints)
-    expected_target_locations = waypoints[argmin_distance]
+    (argmin_distance, expected_target_locations) = closest_vertex(
+        waypoints, [x, y]
+    )
     expected_target_speeds = target_speeds[argmin_distance]
 
     if len(expected_target_locations) == 0:

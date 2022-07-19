@@ -5,8 +5,6 @@ import time
 import numpy as np
 from carla import Client, Location, Rotation, Transform, command
 
-from dora_watermark import dump
-
 logger = logging.Logger("")
 
 
