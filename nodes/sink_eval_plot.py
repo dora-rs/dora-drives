@@ -1,7 +1,6 @@
 import logging
 import threading
 import time
-from collections import deque
 
 import cv2
 import numpy as np
@@ -12,12 +11,10 @@ from pylot.map.hd_map import HDMap
 from pylot.planning.world import World
 from pylot.simulation.utils import get_map
 
-from dora_watermark import load
-
 mutex = threading.Lock()
 pygame.init()
 
-goal_location = pylot.utils.Location(234, 59, 39)
+goal_location = [234, 59, 39]
 
 
 class Flags(object):
@@ -51,8 +48,6 @@ FLAGS.radius = 10
 FLAGS.car_length = 10
 FLAGS.car_width = 10
 FLAGS.static_obstacle_distance_threshold = 1000
-
-goal_location = pylot.utils.Location(234, 59, 39)
 
 
 logger = logging.Logger("")

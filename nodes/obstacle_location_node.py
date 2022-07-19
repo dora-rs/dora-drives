@@ -113,7 +113,7 @@ def get_obstacle_locations(
 
         # Choose the closest from the locations of the sampled points.
 
-        min_location = closest_vertex(locations, [ego_position[:3]])
+        min_location = closest_vertex(locations, np.array([ego_position[:2]]))
 
         obstacle_with_locations.append(locations[min_location])
 

@@ -75,31 +75,39 @@ class HybridAStarPlanner:
         return output_wps
 
     def _compute_initial_conditions(self, obstacles):
-        ego_transform = self._world.ego_transform
+        [x, y, _, _, yaw, _] = self._world.position
         start = np.array(
             [
-                ego_transform.location.x,
-                ego_transform.location.y,
-                np.deg2rad(ego_transform.rotation.yaw),
+                x,
+                y,
+                np.deg2rad(yaw),
             ]
         )
-        self._world.waypoints.remove_completed(ego_transform.location)
         end_index = min(
             self._flags.num_waypoints_ahead,
-            len(self._world.waypoints.waypoints) - 1,
+            len(self._world.waypoints) - 1,
         )
+
         if end_index < 0:
             # If no more waypoints left. Then our location is our end wp.
-            end_wp = ego_transform
+            end = np.array(
+                [
+                    x,
+                    y,
+                    np.deg2rad(yaw),
+                ]
+            )
+
         else:
-            end_wp = self._world.waypoints.waypoints[end_index]
-        end = np.array(
-            [
-                end_wp.location.x,
-                end_wp.location.y,
-                np.deg2rad(ego_transform.rotation.yaw),
-            ]
-        )
+            [end_x, end_y] = self._world.waypoints[end_index]
+            end = np.array(
+                [
+                    end_x,
+                    end_y,
+                    np.deg2rad(yaw),
+                ]
+            )
+
         initial_conditions = {
             "start": start,
             "end": end,

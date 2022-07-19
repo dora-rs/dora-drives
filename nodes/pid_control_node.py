@@ -162,16 +162,15 @@ def dora_run(inputs):
     old_waypoints = (waypoints, target_speeds)
 
     ## Retrieve the closest point to the steer distance
-    (argmin_distance, expected_target_locations) = closest_vertex(
-        waypoints, [x, y]
+    (argmin_distance, target_location) = closest_vertex(
+        waypoints, np.array([[x, y]])
     )
-    expected_target_speeds = target_speeds[argmin_distance]
+    target_speed = target_speeds[argmin_distance]
 
-    if len(expected_target_locations) == 0:
+    if len(target_location) == 0:
         target_angle = 0
         target_speed = 0
     else:
-        target_location = expected_target_locations[0]
 
         ## Compute the angle of steering
         forward_vector = target_location - [x, y]
@@ -183,7 +182,6 @@ def dora_run(inputs):
             + "\n target vector"
             + str(forward_vector)
         )
-        target_speed = expected_target_speeds[0]
 
     throttle, brake = compute_throttle_and_brake(
         pid, current_speed, target_speed, logger

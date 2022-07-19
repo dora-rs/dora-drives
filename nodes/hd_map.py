@@ -160,12 +160,15 @@ class HDMap(object):
         )
         # TODO(ionel): The planner returns several options in intersections.
         # We always take the first one, but this is not correct.
-        return [
+        return np.array(
             [
-                [waypoint[0].transform.x, waypoint[0].transform.y]
+                [
+                    waypoint[0].transform.location.x,
+                    waypoint[0].transform.location.y,
+                ]
                 for waypoint in route
             ]
-        ]
+        )
 
     def _get_waypoint(
         self,

@@ -12,10 +12,12 @@ def distance_points(left_point: np.array, right_point: np.array) -> np.array:
     return np.norm(left_point - right_point)
 
 
-def closest_vertex(
-    vertices: List[np.array], point: np.array
-) -> (int, np.array):
-    argmin_vertice = pairwise_distances_argmin(vertices, [point])
+def closest_vertex(vertices: np.array, point: np.array) -> (int, np.array):
+    assert (
+        vertices.shape[1] == point.shape[1]
+    ), "vertice has more coordinate than point"
+    argmin_vertice = pairwise_distances_argmin(vertices, point, axis=0)[0]
+
     min_vertice = vertices[argmin_vertice]
 
     return (argmin_vertice, min_vertice)
