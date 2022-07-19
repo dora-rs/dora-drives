@@ -77,7 +77,9 @@ class World(object):
                 waypoints = hd_map.compute_waypoints(
                     position[:3], self._goal_location
                 )
-                self.target_speeds = [0 for _ in range(len(self.waypoints))]
+                self.target_speeds = np.array(
+                    [0 for _ in range(len(self.waypoints))]
+                )
                 self.waypoints = waypoints
         else:
 
@@ -119,9 +121,9 @@ class World(object):
         ]
 
         if target_speed is not None:
-            self.target_speeds = [
-                target_speed for _ in range(len(self.waypoints))
-            ]
+            self.target_speeds = np.array(
+                [target_speed for _ in range(len(self.waypoints))]
+            )
         else:
             self.target_speeds = self.target_speeds[
                 index : index + self._flags.num_waypoints_ahead

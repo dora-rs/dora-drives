@@ -1,10 +1,8 @@
 import logging
-import math
 import threading
 import time
 
 import numpy as np
-import pylot.utils
 
 from dora_hybrid_astar_planner import HybridAStarPlanner
 from dora_world import World
@@ -164,7 +162,9 @@ def dora_run(inputs):
     old_obstacles = obstacles
     planner._world.update(time.time(), position, [], [], hd_map)
     (waypoints, target_speeds) = planner.run(time.time())  # , open_drive)
-    waypoints_array = np.append(waypoints.T, target_speeds)
+    waypoints_array = np.concatenate(
+        [waypoints.T, target_speeds.reshape(1, -1)]
+    )
     mutex.release()
 
     return {

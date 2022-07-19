@@ -149,7 +149,8 @@ def dora_run(inputs):
     # Vehicle speed in m/s.
     if "waypoints" in keys:
         waypoints = np.frombuffer(inputs["waypoints"])
-        waypoints = waypoints.reshape((-1, 3))
+        waypoints = waypoints.reshape((3, -1))
+
         target_speeds = waypoints[2]
         waypoints = np.ascontiguousarray(waypoints[:2].T)
     elif old_waypoints is not None:
