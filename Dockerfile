@@ -50,21 +50,30 @@ ENV PATH="/home/dora/.cargo/bin:${PATH}"
 RUN echo "export PATH=/home/dora/.cargo/bin:${PATH}" >> ~/.bashrc
 RUN rustup default nightly
 RUN mkdir -p /home/dora/workspace
-RUN pip install dora
+
 # Set up Pylot.
 RUN sudo apt-get install -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk python3-pygame libgeos-dev
 # Get the Pylot directory.
-RUN cd /home/dora/workspace && git clone https://github.com/erdos-project/pylot.git
-WORKDIR /home/dora/workspace/pylot/
-ENV PYLOT_HOME /home/dora/workspace/pylot/
+
+RUN mkdir -p /home/dora/workspace/dora_dependencies
+
+WORKDIR /home/dora/workspace/dora_dependencies
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+ENV PYLOT_HOME /home/dora/workspace/dora_dependencies/
 # Install all the Python dependencies.
-RUN cd /home/dora/workspace/pylot/ && python3 -m pip install -e ./
+COPY scripts/install.sh  /home/dora/workspace/dora_dependencies/install.sh
+
 # Get the Pylot models and code dependencies.
 RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 RUN sudo apt-get install -y -q
-RUN cd /home/dora/workspace/pylot/ && DEBIAN_FRONTEND=noninteractive ./install.sh
+RUN DEBIAN_FRONTEND=noninteractive sudo chmod +x /home/dora/workspace/dora_dependencies/install.sh
+RUN DEBIAN_FRONTEND=noninteractive /home/dora/workspace/dora_dependencies/install.sh
 
-ENV CARLA_HOME /home/dora/workspace/pylot/dependencies/CARLA_0.9.10.1
+ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1
 # Clone scenario_runner.
 RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/scenario_runner.git && cd scenario_runner && git checkout 0.9.10
 # Install scenario_runner's dependencies.
@@ -75,16 +84,16 @@ RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
 # Installing Zenoh
 RUN cd /home/dora/workspace && git clone https://github.com/eclipse-zenoh/zenoh-python.git && cd zenoh-python && pip install -r requirements-dev.txt && export PATH="$HOME/.local/bin:$PATH" && maturin build --release && pip install target/wheels/eclipse_zenoh-0.6.0_dev-cp37-abi3-manylinux_2_31_x86_64.whl
 
-RUN echo "export PYTHONPATH=/home/dora/workspace/pylot/dependencies/:/home/dora/workspace/pylot/dependencies/lanenet:/home/dora/workspace/pylot/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:/home/dora/workspace/pylot/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:/home/dora/workspace/pylot/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:/home/dora/workspace/pylot/dependencies/CARLA_0.9.10.1/PythonAPI/:/home/dora/workspace/scenario_runner:/home/dora/workspace/leaderboard" >> ~/.bashrc
-RUN echo "export PYLOT_HOME=/home/dora/workspace/pylot/" >> ~/.bashrc
-RUN echo "export CARLA_HOME=/home/dora/workspace/pylot/dependencies/CARLA_0.9.10.1" >> ~/.bashrc
+RUN echo "export PYTHONPATH=/home/dora/workspace/dora_dependencies/dependencies/:/home/dora/workspace/dora_dependencies/dependencies/lanenet:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/:/home/dora/workspace/scenario_runner:/home/dora/workspace/leaderboard" >> ~/.bashrc
+RUN echo "export PYLOT_HOME=/home/dora/workspace/dora_dependencies/" >> ~/.bashrc
+RUN echo "export CARLA_HOME=/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1" >> ~/.bashrc
 RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
 
 # Set up ssh access to the container.
 RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y 2>&1 >/dev/null
 RUN sudo sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
 
-WORKDIR /home/dora/workspace/pylot
+WORKDIR /home/dora/workspace/dora_dependencies
 
 RUN rm -rf /home/dora/.rustup/toolchains/stable-x86_64-unknown-linux-gnu
 
@@ -100,12 +109,9 @@ RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_
 
 RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 
-COPY requirements.txt .
-
-RUN pip install -r requirements.txt
 
 COPY . . 
 
 RUN sudo chown dora:dora /home/dora/workspace/dora-rs
 
-RUN sudo chmod +x /home/dora/workspace/dora-rs/scripts/launch_in_container.sh
+RUN sudo chmod +x /home/dora/workspace/dora-rs/scripts/*
