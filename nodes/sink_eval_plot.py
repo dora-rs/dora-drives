@@ -5,11 +5,6 @@ import time
 import cv2
 import numpy as np
 import pygame
-import pylot.perception.detection.utils
-import pylot.planning.waypoints
-from pylot.map.hd_map import HDMap
-from pylot.planning.world import World
-from pylot.simulation.utils import get_map
 
 mutex = threading.Lock()
 pygame.init()
@@ -69,9 +64,6 @@ lineType = 2
 
 counter = time.time()
 
-world = World(FLAGS, logger)
-
-hd_map = HDMap(get_map())
 
 old_waypoints = None
 old_obstacles = None

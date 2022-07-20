@@ -1,11 +1,13 @@
 import logging
+import math
 import threading
 import time
 from collections import deque
 
 import numpy as np
+from sklearn.metrics import pairwise_distances
 
-from dora_utils import closest_vertex
+from dora_utils import closest_vertex, get_angle
 
 mutex = threading.Lock()
 old_waypoints = None
@@ -15,7 +17,7 @@ COAST_FACTOR = 1.75
 pid_p = 1.0
 pid_d = 0.0
 pid_i = 0.05
-dt = 1.0 / 10
+dt = 1.0 / 5
 pid_use_real_time = True
 
 logger = logging.Logger("")
@@ -144,15 +146,15 @@ def dora_run(inputs):
         return {}
 
     position = np.frombuffer(inputs["position"])
-    [x, y, _, _, _, _, current_speed] = position
+    [x, y, _, _, yaw, _, current_speed] = position
 
     # Vehicle speed in m/s.
     if "waypoints" in keys:
         waypoints = np.frombuffer(inputs["waypoints"])
         waypoints = waypoints.reshape((3, -1))
 
-        target_speeds = waypoints[2]
-        waypoints = np.ascontiguousarray(waypoints[:2].T)
+        target_speeds = waypoints[2, :]
+        waypoints = np.ascontiguousarray(waypoints[:2, :].T)
     elif old_waypoints is not None:
         (waypoints, target_speeds) = old_waypoints
     else:
@@ -160,36 +162,41 @@ def dora_run(inputs):
 
     mutex.acquire()
 
-    old_waypoints = (waypoints, target_speeds)
+    distances = pairwise_distances(waypoints, np.array([[x, y]])).T[0]
 
-    ## Retrieve the closest point to the steer distance
-    (argmin_distance, target_location) = closest_vertex(
-        waypoints, np.array([[x, y]])
-    )
-    target_speed = target_speeds[argmin_distance]
+    index = distances > MIN_PID_WAYPOINT_DISTANCE
+    waypoints = waypoints[index]
+    target_speeds = target_speeds[index]
+    distances = distances[index]
 
-    if len(target_location) == 0:
+    if len(waypoints) == 0:
         target_angle = 0
         target_speed = 0
     else:
+        argmin_distance = np.argmin(distances)
+        old_waypoints = (
+            waypoints[argmin_distance:],
+            target_speeds[argmin_distance:],
+        )
+
+        ## Retrieve the closest point to the steer distance
+        target_location = waypoints[argmin_distance]
+
+        target_speed = target_speeds[argmin_distance]
 
         ## Compute the angle of steering
-        forward_vector = target_location - [x, y]
-        target_angle = np.arctan2(forward_vector[1], forward_vector[0])
-        print(
-            str(target_location)
-            + " current location: "
-            + str([x, y])
-            + "\n target vector"
-            + str(forward_vector)
-        )
+        target_vector = target_location - [x, y]
+        forward_vector = [
+            math.cos(math.radians(yaw)),
+            math.sin(math.radians(yaw)),
+        ]
+        target_angle = get_angle(target_vector, forward_vector)
 
     throttle, brake = compute_throttle_and_brake(
         pid, current_speed, target_speed, logger
     )
 
     steer = radians_to_steer(target_angle, STEER_GAIN)
-
     mutex.release()
 
     return {

@@ -3,6 +3,7 @@ from carla import Client, Vehicle, Walker
 from shapely.geometry import LineString
 
 from dora_utils import (
+    distance_points,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,
@@ -326,8 +327,9 @@ def populate_bounding_box_2D(
             obs_x = transform.location.x
             obs_y = transform.location.y
             obs_z = transform.location.z
-            depth = np.linalg.norm(
-                [obs_x, obs_y, obs_z] - depth_frame_position[:3]
+            depth = distance_points(
+                np.array([obs_x, obs_y, obs_z]),
+                np.array(depth_frame_position[:3]),
             )
             if abs(depth - mean_depth) <= DEPTH_THRESHOLD:
                 return bbox_2d
@@ -372,7 +374,9 @@ def dora_run(inputs):
         obs_z = transform.location.z
 
         if (
-            np.linalg.norm([obs_x, obs_y, obs_z] - position[:3])
+            distance_points(
+                np.array([obs_x, obs_y, obs_z]), np.array(position[:3])
+            )
             <= DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD
         ):
 

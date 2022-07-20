@@ -7,8 +7,8 @@ use std::{
 };
 use tokio::time::sleep;
 
-static ATOMIC_TIMEOUT: Duration = Duration::from_millis(20);
-static BATCH_TIMEOUT: Duration = Duration::from_millis(100);
+static ATOMIC_TIMEOUT: Duration = Duration::from_millis(200);
+static BATCH_TIMEOUT: Duration = Duration::from_millis(200);
 use dora_message::{message_capnp, serialize_message};
 
 use dora_metrics::init_meter;
@@ -17,8 +17,8 @@ use dora_python_binding::PythonBinding;
 //use dora_tracing::{init_tracing, serialize_context};
 use opentelemetry::global;
 //use opentelemetry::{
-    //trace::{TraceContextExt, Tracer},
-    //Context,
+//trace::{TraceContextExt, Tracer},
+//Context,
 //};
 use opentelemetry_system_metrics::init_process_observer;
 
@@ -35,7 +35,7 @@ async fn main() -> eyre::Result<()> {
     init_process_observer(meter);
 
     // Opentelemetry Tracing
-  //  let tracer = init_tracing().unwrap();
+    //  let tracer = init_tracing().unwrap();
 
     let py_function = PythonBinding::try_new(&node.id().to_string(), &"dora_run").unwrap();
 
@@ -47,7 +47,7 @@ async fn main() -> eyre::Result<()> {
         let mut workload = BTreeMap::new();
         let time_at_start = Instant::now();
         let py_function = py_function.clone();
-     //   let mut max_depth = 0;
+        //   let mut max_depth = 0;
         //  let span = tracer.start(format!("{}.pushing", node.id()));
         //  let mut cx = Context::current_with_span(span).with_value(Depth(0));
 
@@ -63,16 +63,16 @@ async fn main() -> eyre::Result<()> {
                 };
 
                 //let deserialized = capnp::serialize::read_message(
-                    //&mut input.data.as_slice(),
-                    //capnp::message::ReaderOptions::new(),
+                //&mut input.data.as_slice(),
+                //capnp::message::ReaderOptions::new(),
                 //)
                 //.unwrap();
                 //let message = deserialized
                 //    .get_root::<message_capnp::message::Reader>()
                 //    .unwrap();
-               // let data = message.get_data().unwrap();
-             //   let metadata = message.get_metadata().unwrap();
-             //   let tmp_cx = deserialize_context(&metadata.get_otel_context().unwrap().to_string());
+                // let data = message.get_data().unwrap();
+                //   let metadata = message.get_metadata().unwrap();
+                //   let tmp_cx = deserialize_context(&metadata.get_otel_context().unwrap().to_string());
                 //let depth = cx.get::<Depth>().unwrap_or(&Depth(0)).0;
                 //if max_depth <= depth {
                 //max_depth = depth;
@@ -92,9 +92,7 @@ async fn main() -> eyre::Result<()> {
 
         // Send the data one by one.
         for (k, v) in batch_messages {
-            node.send_output(&DataId::from(k), &v)
-                .await
-                .unwrap();
+            node.send_output(&DataId::from(k), &v).await.unwrap();
         }
     }
 }

@@ -1,3 +1,4 @@
+import math
 from typing import List
 
 import numpy as np
@@ -5,11 +6,11 @@ from sklearn.metrics import pairwise_distances_argmin
 
 
 def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:
-    return np.norm(left_vertix[:3] - right_vertix[:3])
+    return np.linalg.norm(left_vertix[:3] - right_vertix[:3])
 
 
 def distance_points(left_point: np.array, right_point: np.array) -> np.array:
-    return np.norm(left_point - right_point)
+    return np.linalg.norm(left_point - right_point)
 
 
 def closest_vertex(vertices: np.array, point: np.array) -> (int, np.array):
@@ -127,3 +128,17 @@ def get_intrinsic_matrix(width: int, height: int, fov: float):
     # Focal length.
     k[0, 0] = k[1, 1] = (width - 1) / (2.0 * np.tan(fov * np.pi / 360.0))
     return k
+
+
+def get_angle(left, right) -> float:
+    """Computes the angle between the vector and another vector
+    in radians."""
+    [left_x, left_y] = left
+    [right_x, right_y] = right
+
+    angle = math.atan2(left_y, left_x) - math.atan2(right_y, right_x)
+    if angle > math.pi:
+        angle -= 2 * math.pi
+    elif angle < -math.pi:
+        angle += 2 * math.pi
+    return angle

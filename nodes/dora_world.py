@@ -25,7 +25,7 @@ class World(object):
         self._lanes = None
         self._map = None
         self._goal_location = []
-        self.waypoints = []
+        self.waypoints = np.array([])
         self.target_speeds = []
         self.timestamp = None
         self._last_stop_ego_location = None
@@ -72,7 +72,7 @@ class World(object):
 
         # The waypoints are not received on the global trajectory stream.
         # We need to compute them using the map.
-        if not self.waypoints:
+        if len(self.waypoints) < 10:
             if self._map is not None and self._goal_location is not None:
                 waypoints = hd_map.compute_waypoints(
                     position[:3], self._goal_location

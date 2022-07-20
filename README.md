@@ -47,7 +47,7 @@ docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in
 
 And then within the container:
 ```bash
-./workspace/dora/scripts/launch_in_container.sh
+./workspace/dora-rs/scripts/launch_in_container.sh
 ```
 
 ### Configuration
