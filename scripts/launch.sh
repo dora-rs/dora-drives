@@ -11,7 +11,7 @@ cp target/release/dora-drives-node bin/dora-drives-node
 # Carla start
 nvidia-docker build --tag dora .
 nvidia-docker run -itd --name dora -p 20022:22  dora /bin/bash
-nvidia-docker exec -itd dora /home/dora/workspace/pylot/scripts/run_simulator.sh
+nvidia-docker exec -itd dora /home/dora/workspace/dora-rs/scripts/run_simulator.sh
 nvidia-docker cp ~/.ssh/id_rsa.pub dora:/home/dora/.ssh/authorized_keys
 nvidia-docker exec -i -t dora sudo chown dora /home/dora/.ssh/authorized_keys
 nvidia-docker exec -i -t dora sudo service ssh start
