@@ -142,3 +142,37 @@ def get_angle(left, right) -> float:
     elif angle < -math.pi:
         angle += 2 * math.pi
     return angle
+
+
+def location_to_camera_view(
+    location: np.array, intrinsic_matrix, extrinsic_matrix
+):
+    """Converts the given 3D vector to the view of the camera using
+    the extrinsic and the intrinsic matrix.
+    Args:
+        location = [x, y, z]
+        extrinsic_matrix: The extrinsic matrix of the camera.
+    Returns:
+        :py:class:`.Vector3D`: An instance with the coordinates converted
+        to the camera view.
+    """
+    position_vector = location.T
+    position_vector += [[1.0]]
+
+    # Transform the points to the camera in 3D.
+    transformed_3D_pos = np.dot(
+        np.linalg.inv(extrinsic_matrix), position_vector
+    )
+
+    # Transform the points to 2D.
+    position_2D = np.dot(intrinsic_matrix, transformed_3D_pos[:3])
+
+    # Normalize the 2D points.
+    location_2D = np.array(
+        [
+            float(position_2D[0] / position_2D[2]),
+            float(position_2D[1] / position_2D[2]),
+            float(position_2D[2]),
+        ]
+    )
+    return location_2D

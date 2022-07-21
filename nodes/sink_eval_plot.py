@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 import pygame
 
+from dora_utils import get_extrinsic_matrix, location_to_camera_view
+
 mutex = threading.Lock()
 pygame.init()
 
@@ -86,6 +88,7 @@ def dora_run(inputs):
     camera_frame = np.frombuffer(
         buffer_camera_frame[: 800 * 600 * 4], dtype="uint8"
     )
+    get_extrinsic_matrix(transform)
 
     camera_frame_position = np.frombuffer(
         buffer_camera_frame[800 * 600 * 4 :], dtype="float32"
@@ -111,16 +114,16 @@ def dora_run(inputs):
 
     if "waypoints" in keys:
         waypoints = np.frombuffer(inputs["waypoints"])
-        waypoints = waypoints.reshape((-1, 3))
+        waypoints = waypoints.reshape((3, -1))
 
     elif old_waypoints is not None:
         waypoints = old_waypoints
     else:
         waypoints = None
 
-    # if waypoints is not None:
-    # waypoints.remove_completed(pose.transform.location)
-    # waypoints.draw_on_frame(image)
+    if waypoints is not None:
+        for waypoint in waypoints:
+            location = location_to_camera_view(waypoint + [0], extrinsic_matrix)
 
     # for obstacle_prediction in obstacles:
     # obstacle_prediction.draw_trajectory_on_frame(image)

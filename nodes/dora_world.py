@@ -72,7 +72,7 @@ class World(object):
 
         # The waypoints are not received on the global trajectory stream.
         # We need to compute them using the map.
-        if len(self.waypoints) < 10:
+        if len(self.waypoints) < self._flags.num_waypoints_ahead:
             if self._map is not None and self._goal_location is not None:
                 waypoints = hd_map.compute_waypoints(
                     position[:3], self._goal_location

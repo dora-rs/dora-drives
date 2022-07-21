@@ -7,6 +7,7 @@ from dora_utils import (
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,
+    location_to_camera_view,
     to_world_coordinate,
 )
 
@@ -62,37 +63,6 @@ def threshold(p1, p2, camera_thresholds):
                 for coord in p.coords:
                     points.append((coord[0], coord[1]))
     return points
-
-
-def location_to_camera_view(location: np.array, extrinsic_matrix):
-    """Converts the given 3D vector to the view of the camera using
-    the extrinsic and the intrinsic matrix.
-    Args:
-        extrinsic_matrix: The extrinsic matrix of the camera.
-    Returns:
-        :py:class:`.Vector3D`: An instance with the coordinates converted
-        to the camera view.
-    """
-    position_vector = location.T
-    position_vector += [[1.0]]
-
-    # Transform the points to the camera in 3D.
-    transformed_3D_pos = np.dot(
-        np.linalg.inv(extrinsic_matrix), position_vector
-    )
-
-    # Transform the points to 2D.
-    position_2D = np.dot(INTRINSIC_MATRIX, transformed_3D_pos[:3])
-
-    # Normalize the 2D points.
-    location_2D = np.array(
-        [
-            float(position_2D[0] / position_2D[2]),
-            float(position_2D[1] / position_2D[2]),
-            float(position_2D[2]),
-        ]
-    )
-    return location_2D
 
 
 def to_camera_view(
