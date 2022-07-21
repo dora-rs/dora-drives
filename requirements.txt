@@ -10,7 +10,7 @@ cvxpy
 erdos>=0.3.1
 lapsolver
 motmetrics
-numpy<1.20
+numpy>1.22
 open3d==0.13.0
 opencv-python>=4.1.0.25
 opencv-contrib-python>=4.1.0.25
