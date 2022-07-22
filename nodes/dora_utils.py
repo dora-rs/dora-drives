@@ -35,13 +35,14 @@ def get_projection_matrix(position: np.array):
         A 4x4 numpy matrix which represents the transformation matrix.
     """
     matrix = np.identity(4)
-    cy = np.cos(np.radians(position[4]))
-    sy = np.sin(np.radians(position[4]))
-    cr = np.cos(np.radians(position[5]))
-    sr = np.sin(np.radians(position[5]))
-    cp = np.cos(np.radians(position[3]))
-    sp = np.sin(np.radians(position[3]))
-    matrix[:3, 3] = position[:3]
+    [x, y, z, pitch, yaw, roll] = position
+    cy = np.cos(np.radians(yaw))
+    sy = np.sin(np.radians(yaw))
+    cr = np.cos(np.radians(roll))
+    sr = np.sin(np.radians(roll))
+    cp = np.cos(np.radians(pitch))
+    sp = np.sin(np.radians(pitch))
+    matrix[:3, 3] = [x, y, z]
     matrix[0, 0] = cp * cy
     matrix[0, 1] = cy * sp * sr - sy * cr
     matrix[0, 2] = -1 * (cy * sp * cr + sy * sr)
@@ -103,7 +104,7 @@ def get_extrinsic_matrix(transform):
     to_unreal_transform = np.array(
         [[0, 0, 1, 0], [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 0, 1]]
     )
-    return transform * to_unreal_transform
+    return np.dot(transform, to_unreal_transform)
 
 
 def get_intrinsic_matrix(width: int, height: int, fov: float):
@@ -150,14 +151,50 @@ def location_to_camera_view(
     """Converts the given 3D vector to the view of the camera using
     the extrinsic and the intrinsic matrix.
     Args:
-        location = [x, y, z]
+        location = [[x, y, z]]
         extrinsic_matrix: The extrinsic matrix of the camera.
     Returns:
         :py:class:`.Vector3D`: An instance with the coordinates converted
         to the camera view.
     """
     position_vector = location.T
-    position_vector += [[1.0]]
+    position_vector = np.append(position_vector, [[1.0]])
+
+    # Transform the points to the camera in 3D.
+    transformed_3D_pos = np.dot(
+        np.linalg.inv(extrinsic_matrix), position_vector
+    )
+
+    # Transform the points to 2D.
+    position_2D = np.dot(intrinsic_matrix, transformed_3D_pos[:3])
+
+    # Normalize the 2D points.
+    location_2D = np.array(
+        [
+            float(position_2D[0] / position_2D[2]),
+            float(position_2D[1] / position_2D[2]),
+            float(position_2D[2]),
+        ]
+    )
+    return location_2D
+
+
+def waypoints_to_camera_view(
+    waypoints: np.array, intrinsic_matrix, extrinsic_matrix
+):
+    """Converts the given 3D vector to the view of the camera using
+    the extrinsic and the intrinsic matrix.
+    Args:
+        waypoints = [X, Y, Z]
+        extrinsic_matrix: The extrinsic matrix of the camera.
+    Returns:
+        :py:class:`.Vector3D`: An instance with the coordinates converted
+        to the camera view.
+    """
+    position_vector = waypoints
+    position_vector = np.concatenate(
+        position_vector, np.ones((1, waypoints.shape[1]))
+    )
 
     # Transform the points to the camera in 3D.
     transformed_3D_pos = np.dot(

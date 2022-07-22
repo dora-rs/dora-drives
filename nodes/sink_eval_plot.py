@@ -6,7 +6,12 @@ import cv2
 import numpy as np
 import pygame
 
-from dora_utils import get_extrinsic_matrix, location_to_camera_view
+from dora_utils import (
+    get_extrinsic_matrix,
+    get_intrinsic_matrix,
+    get_projection_matrix,
+    location_to_camera_view,
+)
 
 mutex = threading.Lock()
 pygame.init()
@@ -50,11 +55,11 @@ FLAGS.static_obstacle_distance_threshold = 1000
 logger = logging.Logger("")
 
 
-display_width = 800
-display_height = 600
+CAMERA_WIDTH = 800
+CAMERA_HEIGHT = 600
 
 gameDisplay = pygame.display.set_mode(
-    (display_width, display_height),
+    (CAMERA_WIDTH, CAMERA_HEIGHT),
     pygame.HWSURFACE | pygame.DOUBLEBUF,
 )
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -66,6 +71,12 @@ lineType = 2
 
 counter = time.time()
 
+DEPTH_IMAGE_WIDTH = 800
+DEPTH_IMAGE_HEIGHT = 600
+DEPTH_FOV = 90
+INTRINSIC_MATRIX = get_intrinsic_matrix(
+    DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
+)
 
 old_waypoints = None
 old_obstacles = None
@@ -88,14 +99,16 @@ def dora_run(inputs):
     camera_frame = np.frombuffer(
         buffer_camera_frame[: 800 * 600 * 4], dtype="uint8"
     )
-    get_extrinsic_matrix(transform)
 
     camera_frame_position = np.frombuffer(
         buffer_camera_frame[800 * 600 * 4 :], dtype="float32"
     )
 
-    position = np.frombuffer(inputs["position"])
-    [x, y, z, pitch, yaw, roll, current_speed] = position
+    # [x, y, z, pitch, yaw, roll, current_speed] = position
+    extrinsic_matrix = get_extrinsic_matrix(
+        get_projection_matrix(camera_frame_position)
+    )
+
     # pose = pylot.utils.Pose(
     # pylot.utils.Transform(
     # pylot.utils.Location(x, y, z),
@@ -115,26 +128,42 @@ def dora_run(inputs):
     if "waypoints" in keys:
         waypoints = np.frombuffer(inputs["waypoints"])
         waypoints = waypoints.reshape((3, -1))
+        waypoints = waypoints[0:2].T
 
     elif old_waypoints is not None:
         waypoints = old_waypoints
     else:
         waypoints = None
 
-    if waypoints is not None:
-        for waypoint in waypoints:
-            location = location_to_camera_view(waypoint + [0], extrinsic_matrix)
-
     # for obstacle_prediction in obstacles:
     # obstacle_prediction.draw_trajectory_on_frame(image)
 
-    image = camera_frame
-    if len(image) == 800 * 600 * 4:
-        resized_image = np.reshape(image, (display_height, display_width, 4))
+    if len(camera_frame) == 800 * 600 * 4:
+        resized_image = np.reshape(
+            camera_frame, (CAMERA_HEIGHT, CAMERA_WIDTH, 4)
+        )
         resized_image = resized_image[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
     else:
-        resized_image = np.reshape(image, (display_height, display_width, 3))
+        resized_image = np.reshape(
+            camera_frame, (CAMERA_HEIGHT, CAMERA_WIDTH, 3)
+        )
+
+    if waypoints is not None:
+        for waypoint in waypoints:
+            print(waypoint)
+            location = location_to_camera_view(
+                np.append(waypoint.reshape((1, -1)), [[0]]),
+                INTRINSIC_MATRIX,
+                extrinsic_matrix,
+            )
+            cv2.circle(
+                resized_image,
+                (int(location[0]), int(location[1])),
+                3,
+                (255, 255, 255),
+                -1,
+            )
     global counter
     now = time.time()
     cv2.putText(
