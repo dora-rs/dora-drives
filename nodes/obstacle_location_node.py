@@ -143,7 +143,7 @@ def dora_run(inputs):
         buffer_depth_frame[800 * 600 * 4 :], dtype="float32"
     )
 
-    position = np.frombuffer(inputs["position"])
+    position = np.frombuffer(inputs["position"])[:-1]
 
     obstacles_with_location = get_obstacle_locations(
         obstacles, depth_frame, position, depth_frame_position

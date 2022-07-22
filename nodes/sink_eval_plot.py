@@ -80,11 +80,13 @@ INTRINSIC_MATRIX = get_intrinsic_matrix(
 
 old_waypoints = None
 old_obstacles = None
+old_obstacles_bb = None
 
 
 def dora_run(inputs):
     global old_waypoints
     global old_obstacles
+    global old_obstacles_bb
 
     keys = inputs.keys()
     if "image" not in keys:
@@ -109,13 +111,13 @@ def dora_run(inputs):
         get_projection_matrix(camera_frame_position)
     )
 
-    # pose = pylot.utils.Pose(
-    # pylot.utils.Transform(
-    # pylot.utils.Location(x, y, z),
-    # pylot.utils.Rotation(pitch, yaw, roll),
-    # ),
-    # current_speed,
-    # )
+    if "obstacles_bb" in keys:
+        obstacles_bb = inputs["obstacles_bb"]
+        obstacles_bb = obstacles_bb.split(b"\n")
+    elif old_obstacles_bb is not None:
+        obstacles_bb = old_obstacles_bb
+    else:
+        obstacles_bb = []
 
     if "obstacles" in keys:
         obstacles = inputs["obstacles"]
@@ -135,7 +137,6 @@ def dora_run(inputs):
     else:
         waypoints = None
 
-    # for obstacle_prediction in obstacles:
     # obstacle_prediction.draw_trajectory_on_frame(image)
 
     if len(camera_frame) == 800 * 600 * 4:
@@ -149,9 +150,9 @@ def dora_run(inputs):
             camera_frame, (CAMERA_HEIGHT, CAMERA_WIDTH, 3)
         )
 
+    # Draw Waypoints
     if waypoints is not None:
         for waypoint in waypoints:
-            print(waypoint)
             location = location_to_camera_view(
                 np.append(waypoint.reshape((1, -1)), [[0]]),
                 INTRINSIC_MATRIX,
@@ -164,6 +165,37 @@ def dora_run(inputs):
                 (255, 255, 255),
                 -1,
             )
+
+    for obstacle in obstacles:
+        obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
+        obstacle_position = np.reshape(obstacle_buffer[:-2], (-1, 6))
+        for point in obstacle_position:
+
+            location = location_to_camera_view(
+                point[:3].reshape((1, -1)),
+                INTRINSIC_MATRIX,
+                extrinsic_matrix,
+            )
+            cv2.circle(
+                resized_image,
+                (int(location[0]), int(location[1])),
+                3,
+                (255, 255, 0),
+                -1,
+            )
+            print(location)
+
+    for obstacle_bb in obstacles_bb:
+        obstacle_bb_buffer = np.frombuffer(obstacle_bb, dtype="float32")
+        print(obstacle_bb_buffer)
+        if len(obstacle_bb_buffer) != 0:
+            [min_x, max_x, min_y, max_y] = obstacle_bb_buffer[:4]
+
+            start = (int(min_x), int(min_y))
+            end = (int(max_x), int(max_y))
+            cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
+            print((min_x, max_x, min_y, max_y))
+
     global counter
     now = time.time()
     cv2.putText(

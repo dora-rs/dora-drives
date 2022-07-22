@@ -145,7 +145,9 @@ def to_camera_view(
     # contains the 3D bounding box vertices relative to the world.
     camera_coordinates = []
     for vertex in bbox:
-        location_2D = location_to_camera_view(vertex, extrinsic_matrix)
+        location_2D = location_to_camera_view(
+            vertex, INTRINSIC_MATRIX, extrinsic_matrix
+        )
 
         # Add the points to the image.
         camera_coordinates.append(location_2D)
@@ -331,7 +333,7 @@ def dora_run(inputs):
     )
 
     actor_list = world.get_actors()
-    obstacles = actor_list.filter("walker.pedestrian.*|vehicle.*")
+    obstacles = actor_list.filter("vehicle.*")
 
     outputs = []
     for obstacle in obstacles:
@@ -371,7 +373,7 @@ def dora_run(inputs):
 
                 outputs.append(obstacle_bytes)
 
-    byte_array = b"".join(outputs)
+    byte_array = b"\n".join(outputs)
 
     return {
         "obstacles_without_location": byte_array,
