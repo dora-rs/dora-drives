@@ -4,6 +4,7 @@ from shapely.geometry import LineString
 
 from dora_utils import (
     distance_points,
+    distance_vertex,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,
@@ -152,7 +153,7 @@ def to_camera_view(
         # Add the points to the image.
         camera_coordinates.append(location_2D)
 
-    return camera_coordinates
+    return np.array(camera_coordinates)
 
 
 def get_bounding_box_in_camera_view(
@@ -170,9 +171,9 @@ def get_bounding_box_in_camera_view(
             does not fall into the view of the camera.
     """
     # Make sure that atleast 2 of the bounding box coordinates are in front.
-    z_vals = [loc.z for loc in bb_coordinates if loc.z >= 0]
+    z_vals = [loc[2] for loc in bb_coordinates if loc[2] >= 0]
     if len(z_vals) < 2:
-        return None
+        return []
 
     # Create the thresholding line segments of the camera view.
 
@@ -185,7 +186,7 @@ def get_bounding_box_in_camera_view(
     # Go over each of the segments of the bounding box and threshold it to
     # be inside the image.
     thresholded_points = []
-    points = [(int(loc.x), int(loc.y)) for loc in bb_coordinates]
+    points = bb_coordinates[:, :2].astype(int)
     # Bottom plane thresholded.
     thresholded_points.extend(
         threshold(points[0], points[1], camera_thresholds)
@@ -229,14 +230,14 @@ def get_bounding_box_in_camera_view(
     )
 
     if len(thresholded_points) == 0:
-        return None
+        return []
     else:
         x = [int(x) for x, _ in thresholded_points]
         y = [int(y) for _, y in thresholded_points]
         if min(x) < max(x) and min(y) < max(y):
-            return np.array([min(x), max(x), min(y), max(y)], dtype="float32")
+            return np.array([min(x), max(x), min(y), max(y)], dtype="int32")
         else:
-            return None
+            return []
 
 
 def populate_bounding_box_2D(
@@ -253,9 +254,18 @@ def populate_bounding_box_2D(
     """
 
     # Convert the bounding box of the obstacle to the camera coordinates.
+    transform = obstacle.get_transform()
+    obs_x = transform.location.x
+    obs_y = transform.location.y
+    obs_z = transform.location.z
+    obs_pitch = transform.rotation.pitch
+    obs_yaw = transform.rotation.yaw
+    obs_roll = transform.rotation.roll
+    obs_position = np.array([obs_x, obs_y, obs_z, obs_pitch, obs_yaw, obs_roll])
+
     bb_coordinates = to_camera_view(
         obstacle.bounding_box,
-        get_projection_matrix(obstacle.transform),
+        get_projection_matrix(obs_position),
         get_extrinsic_matrix(get_projection_matrix(depth_frame_position)),
     )
 
@@ -266,8 +276,8 @@ def populate_bounding_box_2D(
         DEPTH_IMAGE_HEIGHT,
     )
 
-    if not bbox_2d:
-        return None
+    if len(bbox_2d) == 0:
+        return []
     # Crop the segmented and depth image to the given bounding box.
     cropped_image = segmented_frame[
         bbox_2d[2] : bbox_2d[3], bbox_2d[0] : bbox_2d[1]
@@ -295,17 +305,13 @@ def populate_bounding_box_2D(
             # obstacle is the depth in the image.
             masked_depth = cropped_depth[np.where(masked_image == 1)]
             mean_depth = np.mean(masked_depth) * 1000
-            transform = obstacle.get_transform()
-            obs_x = transform.location.x
-            obs_y = transform.location.y
-            obs_z = transform.location.z
-            depth = distance_points(
-                np.array([obs_x, obs_y, obs_z]),
-                np.array(depth_frame_position[:3]),
+            depth = distance_vertex(
+                obs_position,
+                depth_frame_position,
             )
             if abs(depth - mean_depth) <= DEPTH_THRESHOLD:
                 return bbox_2d
-    return None
+    return []
 
 
 def dora_run(inputs):
@@ -325,9 +331,11 @@ def dora_run(inputs):
     depth_frame = np.frombuffer(
         buffer_depth_frame[: 800 * 600 * 4], dtype="uint8"
     )
+    depth_frame = np.reshape(depth_frame, (800, 600, 4))
     segmented_frame = np.frombuffer(
         buffer_segmented_frame[: 800 * 600 * 4], dtype="uint8"
     )
+    segmented_frame = np.reshape(segmented_frame, (800, 600, 4))
     depth_frame_position = np.frombuffer(
         buffer_depth_frame[800 * 600 * 4 :], dtype="float32"
     )
@@ -355,7 +363,7 @@ def dora_run(inputs):
             bbox = populate_bounding_box_2D(
                 obstacle, depth_frame, segmented_frame, depth_frame_position
             )
-            if bbox:
+            if len(bbox) != 0:
 
                 # Get the instance of the Obstacle
                 if isinstance(obstacle, Vehicle):
