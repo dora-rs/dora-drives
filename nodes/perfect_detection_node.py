@@ -26,13 +26,20 @@ IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
 DEPTH_IMAGE_WIDTH = 800
 DEPTH_IMAGE_HEIGHT = 600
+DEPTH_IMAGE_MAX_DEPTH = 1000
 DEPTH_FOV = 90
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
 
+LEFT = LineString(((0, 0), (0, IMAGE_HEIGHT)))
+BOTTOM = LineString(((0, IMAGE_HEIGHT), (IMAGE_WIDTH, IMAGE_HEIGHT)))
+RIGHT = LineString(((IMAGE_WIDTH, IMAGE_HEIGHT), (IMAGE_WIDTH, 0)))
+TOP = LineString(((IMAGE_WIDTH, 0), (0, 0)))
+CAMERA_THRESHOLDS = [LEFT, BOTTOM, RIGHT, TOP]
 
-def threshold(p1, p2, camera_thresholds):
+
+def threshold(p1, p2):
     points = []
     # If the points are themselves within the image, add them to the
     # set of thresholded points.
@@ -55,7 +62,7 @@ def threshold(p1, p2, camera_thresholds):
     # Compute the intersection of the line segment formed by p1 -- p2
     # with all the thresholds of the camera image.
     p12 = LineString((p1, p2))
-    for camera_threshold in camera_thresholds:
+    for camera_threshold in CAMERA_THRESHOLDS:
         p = p12.intersection(camera_threshold)
         if not p.is_empty:
             if p.geom_type == "Point":
@@ -156,9 +163,7 @@ def to_camera_view(
     return np.array(camera_coordinates)
 
 
-def get_bounding_box_in_camera_view(
-    bb_coordinates, image_width, image_height
-) -> np.array:
+def get_bounding_box_in_camera_view(bb_coordinates) -> np.array:
     """Creates the bounding box in the view of the camera image using the
     coordinates generated with respect to the camera transform.
     Args:
@@ -177,64 +182,34 @@ def get_bounding_box_in_camera_view(
 
     # Create the thresholding line segments of the camera view.
 
-    left = LineString(((0, 0), (0, image_height)))
-    bottom = LineString(((0, image_height), (image_width, image_height)))
-    right = LineString(((image_width, image_height), (image_width, 0)))
-    top = LineString(((image_width, 0), (0, 0)))
-    camera_thresholds = [left, bottom, right, top]
-
     # Go over each of the segments of the bounding box and threshold it to
     # be inside the image.
     thresholded_points = []
     points = bb_coordinates[:, :2].astype(int)
     # Bottom plane thresholded.
-    thresholded_points.extend(
-        threshold(points[0], points[1], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[1], points[2], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[2], points[3], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[3], points[0], camera_thresholds)
-    )
+    thresholded_points.extend(threshold(points[0], points[1]))
+    thresholded_points.extend(threshold(points[1], points[2]))
+    thresholded_points.extend(threshold(points[2], points[3]))
+    thresholded_points.extend(threshold(points[3], points[0]))
 
     # Top plane thresholded.
-    thresholded_points.extend(
-        threshold(points[4], points[5], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[5], points[6], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[6], points[7], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[7], points[4], camera_thresholds)
-    )
+    thresholded_points.extend(threshold(points[4], points[5]))
+    thresholded_points.extend(threshold(points[5], points[6]))
+    thresholded_points.extend(threshold(points[6], points[7]))
+    thresholded_points.extend(threshold(points[7], points[4]))
 
     # Remaining segments thresholded.
-    thresholded_points.extend(
-        threshold(points[0], points[4], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[1], points[5], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[2], points[6], camera_thresholds)
-    )
-    thresholded_points.extend(
-        threshold(points[3], points[7], camera_thresholds)
-    )
+    thresholded_points.extend(threshold(points[0], points[4]))
+    thresholded_points.extend(threshold(points[1], points[5]))
+    thresholded_points.extend(threshold(points[2], points[6]))
+    thresholded_points.extend(threshold(points[3], points[7]))
 
     if len(thresholded_points) == 0:
         return []
     else:
         x = [int(x) for x, _ in thresholded_points]
         y = [int(y) for _, y in thresholded_points]
-        if min(x) < max(x) and min(y) < max(y):
+        if min(x) != max(x) and min(y) != max(y):
             return np.array([min(x), max(x), min(y), max(y)], dtype="int32")
         else:
             return []
@@ -270,11 +245,7 @@ def populate_bounding_box_2D(
     )
 
     # Threshold the bounding box to be within the camera view.
-    bbox_2d = get_bounding_box_in_camera_view(
-        bb_coordinates,
-        DEPTH_IMAGE_WIDTH,
-        DEPTH_IMAGE_HEIGHT,
-    )
+    bbox_2d = get_bounding_box_in_camera_view(bb_coordinates)
 
     if len(bbox_2d) == 0:
         return []
@@ -298,13 +269,12 @@ def populate_bounding_box_2D(
     if cropped_image.size > 0:
         masked_image = np.zeros_like(cropped_image)
         masked_image[np.where(cropped_image == segmentation_class)] = 1
-        seg_threshold = SEGMENTATION_THRESHOLD * masked_image.size
-        if np.sum(masked_image) >= seg_threshold:
+        if np.sum(masked_image) >= SEGMENTATION_THRESHOLD * masked_image.size:
             # The bounding box contains the required number of pixels that
             # belong to the required class. Ensure that the depth of the
             # obstacle is the depth in the image.
             masked_depth = cropped_depth[np.where(masked_image == 1)]
-            mean_depth = np.mean(masked_depth) * 1000
+            mean_depth = np.mean(masked_depth) * DEPTH_IMAGE_MAX_DEPTH
             depth = distance_vertex(
                 obs_position,
                 depth_frame_position,
@@ -329,17 +299,27 @@ def dora_run(inputs):
     buffer_depth_frame = inputs["depth_frame"]
     buffer_segmented_frame = inputs["segmented_frame"]
     depth_frame = np.frombuffer(
-        buffer_depth_frame[: 800 * 600 * 4], dtype="uint8"
+        buffer_depth_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+        dtype="uint8",
     )
-    depth_frame = np.reshape(depth_frame, (800, 600, 4))
+    depth_frame = np.reshape(
+        depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH, 4)
+    )
     segmented_frame = np.frombuffer(
-        buffer_segmented_frame[: 800 * 600 * 4], dtype="uint8"
+        buffer_segmented_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+        dtype="uint8",
     )
-    segmented_frame = np.reshape(segmented_frame, (800, 600, 4))
+    segmented_frame = np.reshape(
+        segmented_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH, 4)
+    )
     depth_frame_position = np.frombuffer(
-        buffer_depth_frame[800 * 600 * 4 :], dtype="float32"
+        buffer_depth_frame[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+        dtype="float32",
     )
-
+    depth_frame = depth_frame.astype(np.float32)
+    depth_frame = np.dot(depth_frame[:, :, :3], [65536.0, 256.0, 1.0])
+    depth_frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
+    segmented_frame = segmented_frame[:, :, 2]
     actor_list = world.get_actors()
     obstacles = actor_list.filter("vehicle.*")
 
@@ -370,7 +350,6 @@ def dora_run(inputs):
                     segmentation_class = 10
                 else:
                     segmentation_class = 4
-
                 obstacle_bytes = (
                     bbox.tobytes()
                     + depth_frame_position.tobytes()

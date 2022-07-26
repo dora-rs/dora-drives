@@ -70,6 +70,7 @@ def get_predictions(obstacles, obstacle_with_locations):
     for obstacle, location in zip(obstacles, obstacle_with_locations):
         obstacle_bytes = np.array([location]).tobytes()
         obstacle_bytes += obstacle[-2:].tobytes()
+        predictions.append(obstacle_bytes)
 
     predictions_bytes = b"\n".join(predictions)
     return predictions_bytes
@@ -113,7 +114,7 @@ def get_obstacle_locations(
 
         # Choose the closest from the locations of the sampled points.
 
-        min_location = closest_vertex(locations, np.array([ego_position[:2]]))
+        min_location = closest_vertex(locations, ego_position[:2])
 
         obstacle_with_locations.append(locations[min_location])
 
@@ -137,10 +138,12 @@ def dora_run(inputs):
 
     buffer_depth_frame = inputs["depth_frame"]
     depth_frame = np.frombuffer(
-        buffer_depth_frame[: 800 * 600 * 4], dtype="uint8"
+        buffer_depth_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+        dtype="uint8",
     )
     depth_frame_position = np.frombuffer(
-        buffer_depth_frame[800 * 600 * 4 :], dtype="float32"
+        buffer_depth_frame[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+        dtype="float32",
     )
 
     position = np.frombuffer(inputs["position"])[:-1]
