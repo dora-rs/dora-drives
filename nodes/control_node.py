@@ -37,7 +37,5 @@ def dora_run(inputs):
         reverse=False,
     )
 
-    client.apply_batch_sync(
-        [command.ApplyVehicleControl(vehicle_id, vec_control)]
-    )
+    client.apply_batch([command.ApplyVehicleControl(vehicle_id, vec_control)])
     return {"control_status": (1).to_bytes(2, "big")}

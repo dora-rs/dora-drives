@@ -105,16 +105,11 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
 
-        global mutex
-        mutex.acquire()
         if input_id == "position":
             self.position = np.frombuffer(value)
 
         if "obstacles" == input_id:
             self.obstacles = value.split(b"\n")
-            return None
-
-        if len(self.position) == 0:
             return None
 
         # open_drive = inputs,"open_drive"].decode("utf-8")
@@ -125,8 +120,8 @@ class Operator:
         waypoints_array = np.concatenate(
             [waypoints.T, target_speeds.reshape(1, -1)]
         )
-        mutex.release()
 
-        return {
-            "waypoints": waypoints_array.tobytes(),
-        }
+        send_output(
+            "waypoints",
+            waypoints_array.tobytes(),
+        )

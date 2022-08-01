@@ -2,15 +2,9 @@ import numpy as np
 from carla import Client, Vehicle, Walker
 from shapely.geometry import LineString
 
-from dora_utils import (
-    distance_points,
-    distance_vertex,
-    get_extrinsic_matrix,
-    get_intrinsic_matrix,
-    get_projection_matrix,
-    location_to_camera_view,
-    to_world_coordinate,
-)
+from dora_utils import (distance_points, distance_vertex, get_extrinsic_matrix,
+                        get_intrinsic_matrix, get_projection_matrix,
+                        location_to_camera_view, to_world_coordinate)
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
@@ -306,11 +300,11 @@ def dora_run(inputs):
         depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH, 4)
     )
     segmented_frame = np.frombuffer(
-        buffer_segmented_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+        buffer_segmented_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT],
         dtype="uint8",
     )
     segmented_frame = np.reshape(
-        segmented_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH, 4)
+        segmented_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
     )
     depth_frame_position = np.frombuffer(
         buffer_depth_frame[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
@@ -319,7 +313,6 @@ def dora_run(inputs):
     depth_frame = depth_frame.astype(np.float32)
     depth_frame = np.dot(depth_frame[:, :, :3], [65536.0, 256.0, 1.0])
     depth_frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
-    segmented_frame = segmented_frame[:, :, 2]
     actor_list = world.get_actors()
     obstacles = actor_list.filter("vehicle.*")
 

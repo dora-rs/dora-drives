@@ -39,7 +39,7 @@ class Operator:
         elif self.vehicle_id is None and "vehicle_id" == input_id:
             #   global mutex
             #   mutex.acquire()
-            self.vehicle_id = loads(value)
+            self.vehicle_id = int.from_bytes(value, "big")
         #   mutex.release()
         elif self.vehicle_id is not None and "vehicle_id" == input_id:
             return {}

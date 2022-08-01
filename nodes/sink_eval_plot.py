@@ -84,19 +84,26 @@ old_obstacles_bb = None
 
 
 def dora_run(inputs):
-
     keys = inputs.keys()
-    if "image" not in keys:
-        return {}
 
-    if "position" not in keys:
-        return {}
-    global mutex
-    mutex.acquire()
     global old_waypoints
     global old_obstacles
     global old_obstacles_bb
 
+    if "waypoints" in keys:
+        waypoints = np.frombuffer(inputs["waypoints"])
+        waypoints = waypoints.reshape((3, -1))
+        waypoints = waypoints[0:2].T
+        old_waypoints = waypoints
+        return {}
+
+    elif old_waypoints is not None:
+        waypoints = old_waypoints
+    else:
+        waypoints = []
+
+    global mutex
+    mutex.acquire()
     buffer_camera_frame = inputs["image"]
     camera_frame = np.frombuffer(
         buffer_camera_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
@@ -108,7 +115,6 @@ def dora_run(inputs):
         dtype="float32",
     )
 
-    # [x, y, z, pitch, yaw, roll, current_speed] = position
     extrinsic_matrix = get_extrinsic_matrix(
         get_projection_matrix(camera_frame_position)
     )
@@ -128,16 +134,6 @@ def dora_run(inputs):
         obstacles = old_obstacles
     else:
         obstacles = []
-
-    if "waypoints" in keys:
-        waypoints = np.frombuffer(inputs["waypoints"])
-        waypoints = waypoints.reshape((3, -1))
-        waypoints = waypoints[0:2].T
-
-    elif old_waypoints is not None:
-        waypoints = old_waypoints
-    else:
-        waypoints = None
 
     # obstacle_prediction.draw_trajectory_on_frame(image)
     if len(camera_frame) == DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4:
@@ -173,7 +169,7 @@ def dora_run(inputs):
             obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
 
             obstacle_position = np.reshape(obstacle_buffer, (-1, 3))
-            for point in obstacle_position:
+            for location in obstacle_position:
                 location = location_to_camera_view(
                     np.append(location[:2].reshape((1, -1)), [[0]]),
                     INTRINSIC_MATRIX,
@@ -219,7 +215,6 @@ def dora_run(inputs):
     pygame.surfarray.blit_array(gameDisplay, data)
     pygame.display.flip()
     old_obstacles = obstacles
-    old_waypoints = waypoints
     mutex.release()
 
     return {}
