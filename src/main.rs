@@ -55,31 +55,29 @@ async fn main() -> eyre::Result<()> {
         if is_source {
             sleep(BATCH_TIMEOUT).await;
         } else {
-            while time_at_start.elapsed() < BATCH_TIMEOUT {
-                let input = match tokio::time::timeout(ATOMIC_TIMEOUT, inputs.next()).await {
-                    Ok(Some(input)) => input,
-                    Ok(None) => continue,
-                    Err(_) => continue,
-                };
+            let input = match tokio::time::timeout(ATOMIC_TIMEOUT, inputs.next()).await {
+                Ok(Some(input)) => input,
+                Ok(None) => continue,
+                Err(_) => continue,
+            };
 
-                //let deserialized = capnp::serialize::read_message(
-                //&mut input.data.as_slice(),
-                //capnp::message::ReaderOptions::new(),
-                //)
-                //.unwrap();
-                //let message = deserialized
-                //    .get_root::<message_capnp::message::Reader>()
-                //    .unwrap();
-                // let data = message.get_data().unwrap();
-                //   let metadata = message.get_metadata().unwrap();
-                //   let tmp_cx = deserialize_context(&metadata.get_otel_context().unwrap().to_string());
-                //let depth = cx.get::<Depth>().unwrap_or(&Depth(0)).0;
-                //if max_depth <= depth {
-                //max_depth = depth;
-                //cx = tmp_cx;
-                //}
-                workload.insert(input.id.to_string(), input.data.to_vec());
-            }
+            //let deserialized = capnp::serialize::read_message(
+            //&mut input.data.as_slice(),
+            //capnp::message::ReaderOptions::new(),
+            //)
+            //.unwrap();
+            //let message = deserialized
+            //    .get_root::<message_capnp::message::Reader>()
+            //    .unwrap();
+            // let data = message.get_data().unwrap();
+            //   let metadata = message.get_metadata().unwrap();
+            //   let tmp_cx = deserialize_context(&metadata.get_otel_context().unwrap().to_string());
+            //let depth = cx.get::<Depth>().unwrap_or(&Depth(0)).0;
+            //if max_depth <= depth {
+            //max_depth = depth;
+            //cx = tmp_cx;
+            //}
+            workload.insert(input.id.to_string(), input.data.to_vec());
         }
 
         //   let span = tracer.start_with_context(format!("{}.pushing", node.id()), &cx);

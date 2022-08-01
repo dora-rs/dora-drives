@@ -648,7 +648,6 @@ version = "0.1.0"
 dependencies = [
  "opentelemetry",
  "opentelemetry-jaeger",
- "tokio",
 ]
 
 [[package]]

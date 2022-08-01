@@ -7,7 +7,7 @@ license = "Apache 2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dora-message = { path = "../dora/libraries/extensions/serialisation" }
+dora-message = { path = "../dora/libraries/extensions/message" }
 dora-metrics = { path = "../dora/libraries/extensions/telemetry/metrics" }
 dora-tracing = { path = "../dora/libraries/extensions/telemetry/tracing" }
 dora-python-binding = { path = "../dora/apis/python/binding" }
