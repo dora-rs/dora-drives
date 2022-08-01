@@ -68,8 +68,8 @@ def get_predictions(obstacles, obstacle_with_locations):
     predictions = []
     # Transform the obstacle into a prediction.
     for obstacle, location in zip(obstacles, obstacle_with_locations):
-        obstacle_bytes = np.array([location]).tobytes()
-        obstacle_bytes += obstacle[-2:].tobytes()
+        obstacle_bytes = np.array(location, dtype="float32").tobytes()
+        # obstacle_bytes += obstacle[-2:].tobytes()
         predictions.append(obstacle_bytes)
 
     predictions_bytes = b"\n".join(predictions)
@@ -79,14 +79,10 @@ def get_predictions(obstacles, obstacle_with_locations):
 def get_obstacle_locations(
     obstacles,
     depth_frame,
-    ego_position: np.array,
     depth_frame_position: np.array,
 ):
 
-    depth_frame_matrix = np.dot(
-        get_projection_matrix(ego_position),
-        get_projection_matrix(depth_frame_position),
-    )
+    depth_frame_matrix = get_projection_matrix(depth_frame_position)
 
     point_cloud = get_point_cloud(depth_frame, depth_frame_matrix)
 
@@ -110,13 +106,24 @@ def get_obstacle_locations(
         )
         sample_points = sample_points.astype(int)
 
-        locations = point_cloud[sample_points]
+        locations = np.array(
+            [
+                point_cloud[point[1] * DEPTH_IMAGE_WIDTH + point[0]]
+                for point in sample_points
+                if point[1] > 0
+                and point[0] > 0
+                and (point[1] * DEPTH_IMAGE_WIDTH + point[0])
+                < (DEPTH_IMAGE_HEIGHT * DEPTH_IMAGE_WIDTH)
+            ]
+        )
 
         # Choose the closest from the locations of the sampled points.
+        if len(locations) > 0:
+            _, min_location = closest_vertex(
+                locations, depth_frame_position[:3].reshape((1, -1))
+            )
 
-        min_location = closest_vertex(locations, ego_position[:2])
-
-        obstacle_with_locations.append(locations[min_location])
+            obstacle_with_locations.append(min_location)
 
     return obstacle_with_locations
 
@@ -124,18 +131,18 @@ def get_obstacle_locations(
 def dora_run(inputs):
     keys = inputs.keys()
 
-    if (
-        "depth_frame" not in keys
-        or "obstacles_without_location" not in keys
-        or "position" not in keys
-    ):
+    if "depth_frame" not in keys or "obstacles_without_location" not in keys:
         return {}
 
-    obstacles = np.frombuffer(
-        inputs["obstacles_without_location"], dtype="float32"
-    )
-    obstacles = obstacles.reshape((-1, 12))
-
+    obstacles = inputs["obstacles_without_location"].split(b"\n")
+    if len(obstacles) == 0:
+        return {"obstacles": b""}
+    obstacles = [
+        np.frombuffer(obs[:16], dtype="int32")
+        for obs in obstacles
+        if len(obs) > 16
+    ]
+    obstacles = np.array(obstacles).astype(np.float32)
     buffer_depth_frame = inputs["depth_frame"]
     depth_frame = np.frombuffer(
         buffer_depth_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
@@ -146,10 +153,8 @@ def dora_run(inputs):
         dtype="float32",
     )
 
-    position = np.frombuffer(inputs["position"])[:-1]
-
     obstacles_with_location = get_obstacle_locations(
-        obstacles, depth_frame, position, depth_frame_position
+        obstacles, depth_frame, depth_frame_position
     )
 
     predictions_bytes = get_predictions(obstacles, obstacles_with_location)

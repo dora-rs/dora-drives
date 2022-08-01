@@ -84,9 +84,6 @@ old_obstacles_bb = None
 
 
 def dora_run(inputs):
-    global old_waypoints
-    global old_obstacles
-    global old_obstacles_bb
 
     keys = inputs.keys()
     if "image" not in keys:
@@ -96,6 +93,9 @@ def dora_run(inputs):
         return {}
     global mutex
     mutex.acquire()
+    global old_waypoints
+    global old_obstacles
+    global old_obstacles_bb
 
     buffer_camera_frame = inputs["image"]
     camera_frame = np.frombuffer(
@@ -159,41 +159,46 @@ def dora_run(inputs):
                 INTRINSIC_MATRIX,
                 extrinsic_matrix,
             )
-            cv2.circle(
-                resized_image,
-                (int(location[0]), int(location[1])),
-                3,
-                (255, 255, 255),
-                -1,
-            )
+            if location[0] > 0 and location[1] > 0:
+                cv2.circle(
+                    resized_image,
+                    (int(location[0]), int(location[1])),
+                    3,
+                    (255, 255, 255),
+                    -1,
+                )
 
-    # for obstacle in obstacles:
-    # obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
-    # obstacle_position = np.reshape(obstacle_buffer[:-2], (-1, 6))
-    # for point in obstacle_position:
+    for obstacle in obstacles:
+        if len(obstacle) % 12 == 0:
+            obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
 
-    # location = location_to_camera_view(
-    # point[:3].reshape((1, -1)),
-    # INTRINSIC_MATRIX,
-    # extrinsic_matrix,
-    # )
-    # cv2.circle(
-    # resized_image,
-    # (int(location[0]), int(location[1])),
-    # 3,
-    # (255, 255, 0),
-    # -1,
-    # )
-    # print(location)
+            obstacle_position = np.reshape(obstacle_buffer, (-1, 3))
+            for point in obstacle_position:
+                location = location_to_camera_view(
+                    np.append(location[:2].reshape((1, -1)), [[0]]),
+                    INTRINSIC_MATRIX,
+                    extrinsic_matrix,
+                )
+                cv2.circle(
+                    resized_image,
+                    (int(location[0]), int(location[1])),
+                    3,
+                    (255, 255, 0),
+                    -1,
+                )
+        # else:
+        # obstacle_buffer = np.frombuffer(obstacle)
+        # print(obstacle_buffer)
 
     for obstacle_bb in obstacles_bb:
-        obstacle_bb_buffer = np.frombuffer(obstacle_bb[:16], dtype="int32")
-        if len(obstacle_bb_buffer) != 0:
-            [min_x, max_x, min_y, max_y] = obstacle_bb_buffer[:4]
+        if len(obstacle_bb) > 16:
+            obstacle_bb_buffer = np.frombuffer(obstacle_bb[:16], dtype="int32")
+            if len(obstacle_bb_buffer) != 0:
+                [min_x, max_x, min_y, max_y] = obstacle_bb_buffer
 
-            start = (int(min_x), int(min_y))
-            end = (int(max_x), int(max_y))
-            cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
+                start = (int(min_x), int(min_y))
+                end = (int(max_x), int(max_y))
+                cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
 
     global counter
     now = time.time()

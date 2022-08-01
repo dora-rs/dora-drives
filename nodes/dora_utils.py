@@ -81,7 +81,7 @@ def to_world_coordinate(points: np.array, matrix: np.array) -> np.array:
     points = np.dot(matrix, points)
 
     # Get all but the last row in array form.
-    points = np.asarray(points[0:3].transpose()).astype(np.float16)
+    points = np.asarray(points[0:3].transpose()).astype(np.float32)
 
     return points
 
