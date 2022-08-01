@@ -82,40 +82,51 @@ time.sleep(5)  # Wait for the world to load.
 world = World(FLAGS, logger)
 world._goal_location = goal_location
 hd_map = HDMap(get_map())
-planner = HybridAStarPlanner(world, FLAGS, logger)
 old_obstacles = None
 
 
-def dora_run(inputs):
-    global old_obstacles
+from typing import Callable
 
-    keys = inputs.keys()
-    if "position" not in keys:  # or "open_drive" not in keys:
-        return {}
 
-    position = np.frombuffer(inputs["position"])
+class Operator:
+    """
+    Compute a `control` based on the position and the waypoints of the car.
+    """
 
-    if "obstacles" in keys:
-        obstacles = inputs["obstacles"]
-        obstacles = obstacles.split(b"\n")
-        return {}
-    elif old_obstacles is not None:
-        obstacles = old_obstacles
-    else:
-        obstacles = []
+    def __init__(self):
+        self.obstacles = []
+        self.position = []
+        self.planner = HybridAStarPlanner(world, FLAGS, logger)
 
-    global mutex
-    mutex.acquire()
-    # open_drive = inputs,"open_drive"].decode("utf-8")
-    global planning
-    old_obstacles = obstacles
-    planner._world.update(time.time(), position, [], [], hd_map)
-    (waypoints, target_speeds) = planner.run(time.time())  # , open_drive)
-    waypoints_array = np.concatenate(
-        [waypoints.T, target_speeds.reshape(1, -1)]
-    )
-    mutex.release()
+    def on_input(
+        self,
+        input_id: str,
+        value: bytes,
+        send_output: Callable[[str, bytes], None],
+    ):
 
-    return {
-        "waypoints": waypoints_array.tobytes(),
-    }
+        global mutex
+        mutex.acquire()
+        if input_id == "position":
+            self.position = np.frombuffer(value)
+
+        if "obstacles" == input_id:
+            self.obstacles = value.split(b"\n")
+            return None
+
+        if len(self.position) == 0:
+            return None
+
+        # open_drive = inputs,"open_drive"].decode("utf-8")
+        self.planner._world.update(time.time(), self.position, [], [], hd_map)
+        (waypoints, target_speeds) = self.planner.run(
+            time.time()
+        )  # , open_drive)
+        waypoints_array = np.concatenate(
+            [waypoints.T, target_speeds.reshape(1, -1)]
+        )
+        mutex.release()
+
+        return {
+            "waypoints": waypoints_array.tobytes(),
+        }

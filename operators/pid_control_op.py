@@ -166,27 +166,25 @@ class Operator:
             [x, y, _, _, yaw, _, current_speed] = position
             # Vehicle speed in m/s.
         if "waypoints" == input_id:
-            mutex.acquire()
             waypoints = np.frombuffer(value)
             waypoints = waypoints.reshape((3, -1))
 
             self.target_speeds = waypoints[2, :]
             self.waypoints = np.ascontiguousarray(waypoints[:2, :].T)
-            mutex.release()
             return {}
 
-        if self.waypoints == None:
+        if len(self.waypoints) == 0:
             return None
-        mutex.acquire()
 
-        distances = pairwise_distances(waypoints, np.array([[x, y]])).T[0]
+        mutex.acquire()
+        distances = pairwise_distances(self.waypoints, np.array([[x, y]])).T[0]
 
         index = distances > MIN_PID_WAYPOINT_DISTANCE
         self.waypoints = self.waypoints[index]
         self.target_speeds = self.target_speeds[index]
         distances = distances[index]
 
-        if len(waypoints) == 0:
+        if len(self.waypoints) == 0:
             target_angle = 0
             target_speed = 0
         else:
