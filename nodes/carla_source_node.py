@@ -107,10 +107,9 @@ def on_depth_msg(frame):
     frame = frame.astype(np.float32)
     frame = np.dot(frame[:, :, :3], [65536.0, 256.0, 1.0])
     frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
+    frame = frame.astype(np.float32)
     global depth_frame
     depth_frame = frame.tobytes() + camera_data
-
-    # pptk.viewer(depth_pc)
 
 
 def add_lidar(world, transform, callback, vehicle):
