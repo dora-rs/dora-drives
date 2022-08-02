@@ -1,4 +1,5 @@
 import copy
+import time
 from collections import deque
 
 import numpy as np
@@ -76,7 +77,7 @@ class World(object):
             if self._map is not None and self._goal_location is not None:
                 waypoints = hd_map.compute_waypoints(
                     position[:3], self._goal_location
-                )
+                )[: self._flags.num_waypoints_ahead]
                 self.target_speeds = np.array(
                     [0 for _ in range(len(self.waypoints))]
                 )
@@ -89,6 +90,9 @@ class World(object):
             )
 
             self.waypoints = self.waypoints[
+                index : index + self._flags.num_waypoints_ahead
+            ]
+            self.target_speeds = self.target_speeds[
                 index : index + self._flags.num_waypoints_ahead
             ]
 
@@ -111,23 +115,10 @@ class World(object):
 
     def follow_waypoints(self, target_speed: float):
 
-        (index, _) = closest_vertex(
-            self.waypoints,
-            np.array([self.position[:2]]),
-        )
-
-        self.waypoints = self.waypoints[
-            index : index + self._flags.num_waypoints_ahead
-        ]
-
         if target_speed is not None:
             self.target_speeds = np.array(
                 [target_speed for _ in range(len(self.waypoints))]
             )
-        else:
-            self.target_speeds = self.target_speeds[
-                index : index + self._flags.num_waypoints_ahead
-            ]
 
         return self.waypoints, self.target_speeds
 

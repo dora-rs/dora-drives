@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from sklearn.metrics import pairwise_distances_argmin
+from sklearn.metrics import pairwise_distances, pairwise_distances_argmin
 
 
 def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:
@@ -16,7 +16,7 @@ def closest_vertex(vertices: np.array, point: np.array) -> (int, np.array):
     assert (
         vertices.shape[1] == point.shape[1]
     ), "vertice has more coordinate than point"
-    argmin_vertice = pairwise_distances_argmin(vertices, point, axis=0)[0]
+    argmin_vertice = pairwise_distances(vertices, point).argmin()[0]
 
     min_vertice = vertices[argmin_vertice]
 
