@@ -1,10 +1,18 @@
+from typing import Callable
+
 import numpy as np
 from carla import Client, Vehicle, Walker
 from shapely.geometry import LineString
 
-from dora_utils import (distance_points, distance_vertex, get_extrinsic_matrix,
-                        get_intrinsic_matrix, get_projection_matrix,
-                        location_to_camera_view, to_world_coordinate)
+from dora_utils import (
+    distance_points,
+    distance_vertex,
+    get_extrinsic_matrix,
+    get_intrinsic_matrix,
+    get_projection_matrix,
+    location_to_camera_view,
+    to_world_coordinate,
+)
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
@@ -278,84 +286,101 @@ def populate_bounding_box_2D(
     return []
 
 
-def dora_run(inputs):
-    keys = inputs.keys()
+class Operator:
+    """
+    Compute a `control` based on the position and the waypoints of the car.
+    """
 
-    if (
-        "position" not in keys
-        or "segmented_frame" not in keys
-        or "depth_frame" not in keys
+    def __init__(self):
+        self.position = []
+        self.depth_frame = []
+        self.depth_frame_position = []
+        self.segmented_frame = []
+
+    def on_input(
+        self,
+        input_id: str,
+        value: bytes,
+        send_output: Callable[[str, bytes], None],
     ):
-        return {}
 
-    position = np.frombuffer(inputs["position"])
-
-    buffer_depth_frame = inputs["depth_frame"]
-    buffer_segmented_frame = inputs["segmented_frame"]
-    depth_frame = np.frombuffer(
-        buffer_depth_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
-        dtype="uint8",
-    )
-    depth_frame = np.reshape(
-        depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH, 4)
-    )
-    segmented_frame = np.frombuffer(
-        buffer_segmented_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT],
-        dtype="uint8",
-    )
-    segmented_frame = np.reshape(
-        segmented_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
-    )
-    depth_frame_position = np.frombuffer(
-        buffer_depth_frame[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
-        dtype="float32",
-    )
-    depth_frame = depth_frame.astype(np.float32)
-    depth_frame = np.dot(depth_frame[:, :, :3], [65536.0, 256.0, 1.0])
-    depth_frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
-    actor_list = world.get_actors()
-    obstacles = actor_list.filter("vehicle.*")
-
-    outputs = []
-    for obstacle in obstacles:
-        # Calculate the distance of the obstacle from the vehicle, and
-        # convert to camera view if it is less than
-        # DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD metres away.
-        transform = obstacle.get_transform()
-        obs_x = transform.location.x
-        obs_y = transform.location.y
-        obs_z = transform.location.z
-
-        if (
-            distance_points(
-                np.array([obs_x, obs_y, obs_z]), np.array(position[:3])
+        if input_id == "depth_frame":
+            depth_frame = np.frombuffer(
+                value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+                dtype="float32",
             )
-            <= DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD
-        ):
-
-            bbox = populate_bounding_box_2D(
-                obstacle, depth_frame, segmented_frame, depth_frame_position
+            depth_frame = np.reshape(
+                depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
             )
-            if len(bbox) != 0:
 
-                # Get the instance of the Obstacle
-                if isinstance(obstacle, Vehicle):
-                    segmentation_class = 10
-                else:
-                    segmentation_class = 4
-                obstacle_bytes = (
-                    bbox.tobytes()
-                    + depth_frame_position.tobytes()
-                    + np.array(
-                        [1.0, segmentation_class], dtype="float32"
-                    ).tobytes()
+            self.depth_frame = depth_frame
+            self.depth_frame_position = np.frombuffer(
+                value[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+                dtype="float32",
+            )
+            return {}
+
+        if input_id == "segmented_frame":
+            segmented_frame = np.frombuffer(
+                value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT],
+                dtype="uint8",
+            )
+            self.segmented_frame = np.reshape(
+                segmented_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
+            )
+            return {}
+
+        if len(self.depth_frame) == 0 or len(self.segmented_frame) == 0:
+            return {}
+
+        if input_id == "position":
+            self.position = np.frombuffer(value)
+        actor_list = world.get_actors()
+        obstacles = actor_list.filter("vehicle.*")
+
+        outputs = []
+        for obstacle in obstacles:
+            # Calculate the distance of the obstacle from the vehicle, and
+            # convert to camera view if it is less than
+            # DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD metres away.
+            transform = obstacle.get_transform()
+            obs_x = transform.location.x
+            obs_y = transform.location.y
+            obs_z = transform.location.z
+
+            if (
+                distance_points(
+                    np.array([obs_x, obs_y, obs_z]), np.array(self.position[:3])
                 )
+                <= DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD
+            ):
 
-                outputs.append(obstacle_bytes)
+                bbox = populate_bounding_box_2D(
+                    obstacle,
+                    self.depth_frame,
+                    self.segmented_frame,
+                    self.depth_frame_position,
+                )
+                if len(bbox) != 0:
 
-    byte_array = b"\n".join(outputs)
+                    # Get the instance of the Obstacle
+                    if isinstance(obstacle, Vehicle):
+                        segmentation_class = 10
+                    else:
+                        segmentation_class = 4
+                    obstacle_bytes = (
+                        bbox.tobytes()
+                        + self.depth_frame_position.tobytes()
+                        + np.array(
+                            [1.0, segmentation_class], dtype="float32"
+                        ).tobytes()
+                    )
 
-    return {
-        "obstacles_without_location": byte_array,
-        #   "traffic_lights": dump(visible_tls),
-    }
+                    outputs.append(obstacle_bytes)
+
+        byte_array = b"\n".join(outputs)
+        send_output(
+            "obstacles_without_location",
+            byte_array,
+            #   "traffic_lights": dump(visible_tls),
+        )

@@ -102,26 +102,27 @@ def dora_run(inputs):
     else:
         waypoints = []
 
-    global mutex
-    mutex.acquire()
-    buffer_camera_frame = inputs["image"]
-    camera_frame = np.frombuffer(
-        buffer_camera_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
-        dtype="uint8",
-    )
+    if "image" in keys:
+        buffer_camera_frame = inputs["image"]
+        camera_frame = np.frombuffer(
+            buffer_camera_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+            dtype="uint8",
+        )
 
-    camera_frame_position = np.frombuffer(
-        buffer_camera_frame[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
-        dtype="float32",
-    )
+        camera_frame_position = np.frombuffer(
+            buffer_camera_frame[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+            dtype="float32",
+        )
 
-    extrinsic_matrix = get_extrinsic_matrix(
-        get_projection_matrix(camera_frame_position)
-    )
+        extrinsic_matrix = get_extrinsic_matrix(
+            get_projection_matrix(camera_frame_position)
+        )
 
     if "obstacles_bb" in keys:
         obstacles_bb = inputs["obstacles_bb"]
         obstacles_bb = obstacles_bb.split(b"\n")
+        old_obstacles_bb = obstacles_bb
+        return {}
     elif old_obstacles_bb is not None:
         obstacles_bb = old_obstacles_bb
     else:
@@ -130,6 +131,8 @@ def dora_run(inputs):
     if "obstacles" in keys:
         obstacles = inputs["obstacles"]
         obstacles = obstacles.split(b"\n")
+        old_obstacles = obstacles
+        return {}
     elif old_obstacles is not None:
         obstacles = old_obstacles
     else:
@@ -215,6 +218,5 @@ def dora_run(inputs):
     pygame.surfarray.blit_array(gameDisplay, data)
     pygame.display.flip()
     old_obstacles = obstacles
-    mutex.release()
 
     return {}

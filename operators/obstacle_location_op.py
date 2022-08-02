@@ -1,4 +1,5 @@
 import logging
+from typing import Callable
 
 import numpy as np
 import numpy.matlib
@@ -27,13 +28,6 @@ def get_point_cloud(depth_frame, depth_frame_matrix):
     """Converts the depth frame to a 1D array containing the 3D
     position of each pixel in world coordinates.
     """
-    frame = depth_frame.astype(np.float32)
-    frame = np.reshape(
-        frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_CHANNEL)
-    )
-    # Apply (R + G * 256 + B * 256 * 256) / (256 * 256 * 256 - 1).
-    frame = np.dot(frame[:, :, :3], [65536.0, 256.0, 1.0])
-    frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
 
     # 2d pixel coordinates
     u_coord = np.matlib.repmat(
@@ -42,7 +36,7 @@ def get_point_cloud(depth_frame, depth_frame_matrix):
     v_coord = np.matlib.repmat(
         np.c_[0:DEPTH_IMAGE_HEIGHT:1], 1, DEPTH_IMAGE_WIDTH
     ).reshape(PIXEL_LENGTH)
-    normalized_depth = np.reshape(frame, PIXEL_LENGTH)
+    normalized_depth = np.reshape(depth_frame, PIXEL_LENGTH)
 
     # p2d = [u,v,1]
     p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])
@@ -72,8 +66,7 @@ def get_predictions(obstacles, obstacle_with_locations):
         # obstacle_bytes += obstacle[-2:].tobytes()
         predictions.append(obstacle_bytes)
 
-    predictions_bytes = b"\n".join(predictions)
-    return predictions_bytes
+    return predictions
 
 
 def get_obstacle_locations(
@@ -128,35 +121,58 @@ def get_obstacle_locations(
     return obstacle_with_locations
 
 
-def dora_run(inputs):
-    keys = inputs.keys()
+class Operator:
+    """
+    Compute a `control` based on the position and the waypoints of the car.
+    """
 
-    if "depth_frame" not in keys or "obstacles_without_location" not in keys:
-        return {}
+    def __init__(self):
+        self.depth_frame = []
+        self.depth_frame_position = []
+        self.obstacles = []
 
-    obstacles = inputs["obstacles_without_location"].split(b"\n")
-    if len(obstacles) == 0:
-        return {"obstacles": b""}
-    obstacles = [
-        np.frombuffer(obs[:16], dtype="int32")
-        for obs in obstacles
-        if len(obs) > 16
-    ]
-    obstacles = np.array(obstacles).astype(np.float32)
-    buffer_depth_frame = inputs["depth_frame"]
-    depth_frame = np.frombuffer(
-        buffer_depth_frame[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
-        dtype="uint8",
-    )
-    depth_frame_position = np.frombuffer(
-        buffer_depth_frame[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
-        dtype="float32",
-    )
+    def on_input(
+        self,
+        input_id: str,
+        value: bytes,
+        send_output: Callable[[str, bytes], None],
+    ):
 
-    obstacles_with_location = get_obstacle_locations(
-        obstacles, depth_frame, depth_frame_position
-    )
+        if input_id == "depth_frame":
+            depth_frame = np.frombuffer(
+                value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+                dtype="float32",
+            )
+            depth_frame = np.reshape(
+                depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
+            )
 
-    predictions_bytes = get_predictions(obstacles, obstacles_with_location)
+            self.depth_frame = depth_frame
+            self.depth_frame_position = np.frombuffer(
+                value[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+                dtype="float32",
+            )
+            return {}
 
-    return {"obstacles": predictions_bytes}
+        if (
+            input_id == "obstacles_without_location"
+            and len(self.depth_frame) != 0
+        ):
+            obstacles = value.split(b"\n")
+
+            if len(obstacles) == 0:
+                return {"obstacles": b""}
+            obstacles = [
+                np.frombuffer(obs[:16], dtype="int32")
+                for obs in obstacles
+                if len(obs) > 16
+            ]
+            self.obstacles = np.array(obstacles).astype(np.float32)
+            obstacles_with_location = get_obstacle_locations(
+                obstacles, self.depth_frame, self.depth_frame_position
+            )
+
+            predictions = get_predictions(obstacles, obstacles_with_location)
+            predictions_bytes = b"\n".join(predictions)
+
+            send_output("obstacles", predictions_bytes)

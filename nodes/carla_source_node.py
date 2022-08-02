@@ -39,8 +39,11 @@ def on_segmented_msg(frame):
         [x, y, z, pitch, yaw, roll], dtype="float32"
     ).tobytes()
 
+    frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
+    frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+    frame = frame[:, :, 2]
     global segmented_frame
-    segmented_frame = frame.raw_data.tobytes() + camera_data
+    segmented_frame = frame.tobytes() + camera_data
 
 
 def on_lidar_msg(frame):
@@ -96,8 +99,16 @@ def on_depth_msg(frame):
         [x, y, z, pitch, yaw, roll], dtype="float32"
     ).tobytes()
 
+    frame = np.frombuffer(
+        frame.raw_data[: IMAGE_WIDTH * IMAGE_HEIGHT * 4],
+        dtype="uint8",
+    )
+    frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+    frame = frame.astype(np.float32)
+    frame = np.dot(frame[:, :, :3], [65536.0, 256.0, 1.0])
+    frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
     global depth_frame
-    depth_frame = frame.raw_data.tobytes() + camera_data
+    depth_frame = frame.tobytes() + camera_data
 
     # pptk.viewer(depth_pc)
 

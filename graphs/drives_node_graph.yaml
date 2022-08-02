@@ -13,52 +13,60 @@ nodes:
         - image
       run: dora-drives-node
 
-  - id: perfect_detection_node
-    custom:
+  - id: perfect_detection_op
+    operator:
       outputs:
         - obstacles_without_location
       inputs:
         position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
         segmented_frame: carla_source_node/segmented_frame
-      run: dora-drives-node
+      python: /home/dora/workspace/dora-rs/operators/perfect_detection_op.py
 
-  - id: obstacle_location_node
-    custom: 
+  - id: obstacle_location_op
+    operator: 
       outputs:
         - obstacles
       inputs:
-        position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
-        obstacles_without_location: perfect_detection_node/obstacles_without_location
-      run: dora-drives-node
+        obstacles_without_location: perfect_detection_op/obstacles_without_location
+      python: /home/dora/workspace/dora-rs/operators/obstacle_location_op.py
 
-  - id: planning_node
-    custom:
+  - id: planning_op
+    operator:
+      python: /home/dora/workspace/dora-rs/operators/planning_op.py
       outputs:
         - waypoints
       inputs:
         position: carla_source_node/position
-        obstacles: obstacle_location_node/obstacles
-      run: dora-drives-node
+        obstacles: obstacle_location_op/obstacles
 
-  - id: pid_control_node
-    custom:
+  #- id: pid_control_node
+    #custom:
+      #outputs:
+        #- control
+      #inputs:
+        #position: carla_source_node/position
+        #waypoints: planning_node/waypoints
+      #run: dora-drives-node
+
+  - id: pid_control_op
+    operator:
+      python: /home/dora/workspace/dora-rs/operators/pid_control_op.py
       outputs:
         - control
       inputs:
         position: carla_source_node/position
-        waypoints: planning_node/waypoints
-      run: dora-drives-node
+        waypoints: planning_op/waypoints
 
-  - id: control_node
-    custom:
+  - id: control_op
+    operator:
+      python: /home/dora/workspace/dora-rs/operators/control_op.py
       outputs:
         - control_status
       inputs:
-        control: pid_control_node/control
+        control: pid_control_op/control
         vehicle_id: carla_source_node/vehicle_id
-      run: dora-drives-node
 
 
   # - id: influxdb_node
@@ -74,8 +82,8 @@ nodes:
     custom:
       description: Optional
       inputs: 
-        waypoints: planning_node/waypoints
-        position: carla_source_node/position
+        waypoints: planning_op/waypoints
         image: carla_source_node/image
-        obstacles: obstacle_location_node/obstacles
+        obstacles: obstacle_location_op/obstacles
+        obstacles_bb: perfect_detection_op/obstacles_without_location
       run: dora-drives-node
