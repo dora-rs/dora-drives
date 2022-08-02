@@ -1,18 +1,12 @@
-import logging
 from typing import Callable
 
 import numpy as np
 import numpy.matlib
 
-from dora_utils import (
-    closest_vertex,
-    get_extrinsic_matrix,
-    get_intrinsic_matrix,
-    get_projection_matrix,
-    to_world_coordinate,
-)
+from dora_utils import (closest_vertex, get_extrinsic_matrix,
+                        get_intrinsic_matrix, get_projection_matrix,
+                        to_world_coordinate)
 
-logger = logging.Logger("Obstacle Location")
 DEPTH_CAMERA_MAX_DEPTH = 1000
 DEPTH_IMAGE_WIDTH = 800
 DEPTH_IMAGE_HEIGHT = 600

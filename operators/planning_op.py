@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+from typing import Callable
 
 import numpy as np
 
@@ -83,9 +84,6 @@ world = World(FLAGS, logger)
 world._goal_location = goal_location
 hd_map = HDMap(get_map())
 old_obstacles = None
-
-
-from typing import Callable
 
 
 class Operator:

@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from sklearn.metrics import pairwise_distances, pairwise_distances_argmin
+from sklearn.metrics import pairwise_distances
 
 
 def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:

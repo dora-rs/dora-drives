@@ -1,5 +1,5 @@
 import threading
-from pickle import dumps, loads
+from typing import Callable
 
 import numpy as np
 from carla import Client, VehicleControl, command
@@ -10,7 +10,6 @@ client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)
 
 mutex = threading.Lock()
-from typing import Callable
 
 
 class Operator:
@@ -37,10 +36,7 @@ class Operator:
         if self.vehicle_id is None and "vehicle_id" != input_id:
             return {}
         elif self.vehicle_id is None and "vehicle_id" == input_id:
-            #   global mutex
-            #   mutex.acquire()
             self.vehicle_id = int.from_bytes(value, "big")
-        #   mutex.release()
         elif self.vehicle_id is not None and "vehicle_id" == input_id:
             return {}
 

@@ -1,7 +1,3 @@
-import copy
-import time
-from collections import deque
-
 import numpy as np
 
 from dora_utils import closest_vertex, distance_vertex
@@ -20,7 +16,7 @@ class World(object):
         self.obstacle_predictions = []
         self._ego_obstacle_predictions = []
         self.position = []
-        self.ego_trajectory = deque(maxlen=self._flags.tracking_num_steps)
+        self.ego_trajectory = []
         self.ego_transform = None
         self.ego_velocity_vector = None
         self._lanes = None
@@ -46,7 +42,7 @@ class World(object):
         self.position = position
         self.ego_trajectory.append(self.position)
         self.obstacle_predictions = obstacle_predictions
-        self._ego_obstacle_predictions = copy.deepcopy(obstacle_predictions)
+        self._ego_obstacle_predictions = obstacle_predictions
         # Tranform predictions to world frame of reference.
         for obstacle_prediction in self.obstacle_predictions:
             obstacle_prediction.to_world_coordinates(self.ego_transform)

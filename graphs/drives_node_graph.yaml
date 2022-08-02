@@ -78,12 +78,12 @@ nodes:
         # obstacles: obstacle_location_node/obstacles
       # run: dora-drives-node
     
-  - id: sink_eval_plot
-    custom:
-      description: Optional
+  - id: plot_op
+    operator:
+      description: Plot operator
       inputs: 
         waypoints: planning_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
         obstacles_bb: perfect_detection_op/obstacles_without_location
-      run: dora-drives-node
+      python: /home/dora/workspace/dora-rs/operators/plot_op.py
