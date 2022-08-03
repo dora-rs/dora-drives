@@ -466,6 +466,8 @@ segmented_camera = add_segmented_camera(
 
 node = Node()
 
+node.send_output("vehicle_id", vehicle_id.to_bytes(2, "big"))
+
 
 def main():
 
@@ -493,15 +495,11 @@ def main():
 
     # position = [x, y, z, pitch, yaw, roll, forward_speed]
     position = np.array([x, y, z, pitch, yaw, roll, forward_speed])
-    now = time.time()
 
+    node.send_output("position", position.tobytes())
     node.send_output("image", camera_frame)
     node.send_output("depth_frame", depth_frame)
     node.send_output("segmented_frame", segmented_frame)
-    node.send_output("position", position.tobytes())
-    node.send_output("vehicle_id", vehicle_id.to_bytes(2, "big"))
-
-    print(f"sending time: {time.time() - now}")
 
 
 for _ in range(1000):

@@ -15,22 +15,10 @@ This project is in early development, and many features have yet to be implement
 |-|-|
 |OS| Linux
 |Python| Version 3.8
-|Rust| Latest
 |Docker|Latest
-|Conda|Latest
-|Capnp|Latest
 
 
 ## Getting started
-
-- Create a conda environment and activate it for building `dora`:
-
-```bash
-conda create -n dora3.8 python=3.8
-conda activate dora3.8
-```
-
-- Clone `dora` and `dora-drives ` using the following commands:
 
 ```bash
 git clone git@github.com:futurewei-tech/dora.git
@@ -42,6 +30,7 @@ cd dora-drives
 
 ```bash
 docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
+# TODO: Add Maturin build script
 ./scripts/launch.sh
 ```
 
