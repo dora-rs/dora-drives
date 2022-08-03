@@ -4,6 +4,7 @@ import time
 
 import numpy as np
 from carla import Client, Location, Rotation, Transform, command
+from dora import Node
 
 logger = logging.Logger("")
 
@@ -463,8 +464,10 @@ segmented_camera = add_segmented_camera(
     world, sensor_transform, on_segmented_msg, ego_vehicle
 )
 
+node = Node()
 
-def dora_run(_):
+
+def main():
 
     global camera_frame
     global segmented_frame
@@ -490,12 +493,17 @@ def dora_run(_):
 
     # position = [x, y, z, pitch, yaw, roll, forward_speed]
     position = np.array([x, y, z, pitch, yaw, roll, forward_speed])
+    now = time.time()
 
-    return {
-        "image": camera_frame,
-        "depth_frame": depth_frame,
-        "segmented_frame": segmented_frame,
-        "position": position.tobytes(),
-        "vehicle_id": vehicle_id.to_bytes(2, "big")
-        #  "open_drive": world.get_map().to_opendrive().encode("utf-8"),
-    }
+    node.send_output("image", camera_frame)
+    node.send_output("depth_frame", depth_frame)
+    node.send_output("segmented_frame", segmented_frame)
+    node.send_output("position", position.tobytes())
+    node.send_output("vehicle_id", vehicle_id.to_bytes(2, "big"))
+
+    print(f"sending time: {time.time() - now}")
+
+
+for _ in range(1000):
+    time.sleep(0.1)
+    main()

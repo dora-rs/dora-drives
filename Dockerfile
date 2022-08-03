@@ -103,15 +103,16 @@ RUN sudo apt-get update
 
 RUN sudo apt-get install vim -y
 
-WORKDIR /home/dora/workspace/dora-rs
+WORKDIR /home/dora/workspace/dora-drives
 
 RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_amd64.tar.gz
 
 RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 
-
 COPY . . 
 
-RUN sudo chown dora:dora /home/dora/workspace/dora-rs
+RUN python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora_node_api_python-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
 
-RUN sudo chmod +x /home/dora/workspace/dora-rs/scripts/*
+RUN sudo chown dora:dora /home/dora/workspace/dora-drives
+
+RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*

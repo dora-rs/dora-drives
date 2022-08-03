@@ -11,7 +11,7 @@ nodes:
         - segmented_frame
         - vehicle_id
         - image
-      run: dora-drives-node
+      run: python3 /home/dora/workspace/dora-drives/nodes/carla_source_node.py
 
   - id: perfect_detection_op
     operator:
@@ -21,7 +21,7 @@ nodes:
         position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
         segmented_frame: carla_source_node/segmented_frame
-      python: /home/dora/workspace/dora-rs/operators/perfect_detection_op.py
+      python: /home/dora/workspace/dora-drives/operators/perfect_detection_op.py
 
   - id: obstacle_location_op
     operator: 
@@ -30,11 +30,11 @@ nodes:
       inputs:
         depth_frame: carla_source_node/depth_frame
         obstacles_without_location: perfect_detection_op/obstacles_without_location
-      python: /home/dora/workspace/dora-rs/operators/obstacle_location_op.py
+      python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
 
   - id: planning_op
     operator:
-      python: /home/dora/workspace/dora-rs/operators/planning_op.py
+      python: /home/dora/workspace/dora-drives/operators/planning_op.py
       outputs:
         - waypoints
       inputs:
@@ -52,7 +52,7 @@ nodes:
 
   - id: pid_control_op
     operator:
-      python: /home/dora/workspace/dora-rs/operators/pid_control_op.py
+      python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
       outputs:
         - control
       inputs:
@@ -61,7 +61,7 @@ nodes:
 
   - id: control_op
     operator:
-      python: /home/dora/workspace/dora-rs/operators/control_op.py
+      python: /home/dora/workspace/dora-drives/operators/control_op.py
       outputs:
         - control_status
       inputs:
@@ -86,4 +86,4 @@ nodes:
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
         obstacles_bb: perfect_detection_op/obstacles_without_location
-      python: /home/dora/workspace/dora-rs/operators/plot_op.py
+      python: /home/dora/workspace/dora-drives/operators/plot_op.py
