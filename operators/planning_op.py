@@ -83,7 +83,6 @@ time.sleep(5)  # Wait for the world to load.
 world = World(FLAGS, logger)
 world._goal_location = goal_location
 hd_map = HDMap(get_map())
-old_obstacles = None
 
 
 class Operator:
@@ -107,14 +106,26 @@ class Operator:
             self.position = np.frombuffer(value)
 
         if "obstacles" == input_id:
-            self.obstacles = value.split(b"\n")
+            obstacles = value.split(b"\n")
+            obstacles_prediction = []
+            for obstacle in obstacles:
+                if len(obstacle) % 12 == 0:
+                    obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
+
+                    obstacle_position = np.reshape(obstacle_buffer, (-1, 3))
+                    obstacles_prediction.append(obstacle_position)
+            self.obstacles = obstacles_prediction
             return None
 
-        # open_drive = inputs,"open_drive"].decode("utf-8")
-        self.planner._world.update(time.time(), self.position, [], [], hd_map)
+        self.planner._world.update(
+            time.time(), self.position, self.obstacles, [], hd_map
+        )
+
         (waypoints, target_speeds) = self.planner.run(
             time.time()
         )  # , open_drive)
+        self.planner._world.waypoints = waypoints
+
         waypoints_array = np.concatenate(
             [waypoints.T, target_speeds.reshape(1, -1)]
         )

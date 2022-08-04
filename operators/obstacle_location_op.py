@@ -3,9 +3,13 @@ from typing import Callable
 import numpy as np
 import numpy.matlib
 
-from dora_utils import (closest_vertex, get_extrinsic_matrix,
-                        get_intrinsic_matrix, get_projection_matrix,
-                        to_world_coordinate)
+from dora_utils import (
+    closest_vertex,
+    get_extrinsic_matrix,
+    get_intrinsic_matrix,
+    get_projection_matrix,
+    to_world_coordinate,
+)
 
 DEPTH_CAMERA_MAX_DEPTH = 1000
 DEPTH_IMAGE_WIDTH = 800
@@ -161,7 +165,7 @@ class Operator:
                 for obs in obstacles
                 if len(obs) > 16
             ]
-            self.obstacles = np.array(obstacles).astype(np.float32)
+            self.obstacles = np.array(obstacles, dtype=np.float32)
             obstacles_with_location = get_obstacle_locations(
                 obstacles, self.depth_frame, self.depth_frame_position
             )

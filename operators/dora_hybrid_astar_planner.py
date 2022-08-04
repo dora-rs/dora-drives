@@ -54,28 +54,28 @@ class HybridAStarPlanner:
 
         if len(obstacle_list) == 0:
             # Do not use Hybrid A* if there are no obstacles.
-            output_wps = self._world.follow_waypoints(self._flags.target_speed)
-        else:
-            # Hybrid a* does not take into account the driveable region.
-            # It constructs search space as a top down, minimum bounding
-            # rectangle with padding in each dimension.
+            return self._world.follow_waypoints(self._flags.target_speed)
 
-            initial_conditions = self._compute_initial_conditions(obstacle_list)
+        # Hybrid a* does not take into account the driveable region.
+        # It constructs search space as a top down, minimum bounding
+        # rectangle with padding in each dimension.
 
-            path_x, path_y, _, success = apply_hybrid_astar(
-                initial_conditions, self._hyperparameters
-            )
-            if success:
-                speeds = [self._flags.target_speed] * len(path_x)
+        initial_conditions = self._compute_initial_conditions(obstacle_list)
+        path_x, path_y, _, success = apply_hybrid_astar(
+            initial_conditions, self._hyperparameters
+        )
 
-                output_wps = np.array([path_x, path_y, speeds])
-            else:
+        if not success:
+            return self._world.follow_waypoints(0)
 
-                output_wps = self._world.follow_waypoints(0)
-        return output_wps
+        speeds = np.array([self._flags.target_speed] * len(path_x))
+
+        output_wps = np.array([path_x, path_y]).T
+
+        return output_wps, speeds
 
     def _compute_initial_conditions(self, obstacles):
-        [x, y, _, _, yaw, _] = self._world.position
+        [x, y, _, _, yaw, _, _] = self._world.position
         start = np.array(
             [
                 x,

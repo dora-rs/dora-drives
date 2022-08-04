@@ -16,7 +16,7 @@ def closest_vertex(vertices: np.array, point: np.array) -> (int, np.array):
     assert (
         vertices.shape[1] == point.shape[1]
     ), "vertice has more coordinate than point"
-    argmin_vertice = pairwise_distances(vertices, point).argmin()[0]
+    argmin_vertice = pairwise_distances(vertices, point).argmin()
 
     min_vertice = vertices[argmin_vertice]
 

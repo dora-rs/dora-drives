@@ -44,8 +44,6 @@ class World(object):
         self.obstacle_predictions = obstacle_predictions
         self._ego_obstacle_predictions = obstacle_predictions
         # Tranform predictions to world frame of reference.
-        for obstacle_prediction in self.obstacle_predictions:
-            obstacle_prediction.to_world_coordinates(self.ego_transform)
         # Road signs are in world coordinates. Only maintain the road signs
         # that are within the threshold.
         self.static_obstacles = []
@@ -122,27 +120,17 @@ class World(object):
         obstacle_list = []
         for prediction in self.obstacle_predictions:
             # Use all prediction times as potential obstacles.
-            previous_origin = None
-            for transform in prediction.predicted_trajectory:
-                # Ignore predictions that are too close.
-                if (
-                    previous_origin is None
-                    or previous_origin.location.l2_distance(transform.location)
-                    > self._flags.obstacle_filtering_distance
-                ):
-                    previous_origin = transform
-                    # Ensure the prediction is nearby.
-                    if (
-                        self.ego_transform.location.l2_distance(
-                            transform.location
-                        )
-                        <= self._flags.dynamic_obstacle_distance_threshold
-                    ):
-                        obstacle = prediction.obstacle_trajectory.obstacle
-                        obstacle_corners = obstacle.get_bounding_box_corners(
-                            transform, self._flags.obstacle_radius
-                        )
-                        obstacle_list.append(obstacle_corners)
+            for location in prediction:
+                [x, y, _] = location
+                obstacle_size = np.array(
+                    [
+                        x - self._flags.obstacle_radius,
+                        y - self._flags.obstacle_radius,
+                        x + self._flags.obstacle_radius,
+                        y + self._flags.obstacle_radius,
+                    ]
+                )
+                obstacle_list.append(obstacle_size)
         if len(obstacle_list) == 0:
             return np.empty((0, 4))
         return np.array(obstacle_list)
