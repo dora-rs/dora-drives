@@ -63,7 +63,7 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-ENV PYLOT_HOME /home/dora/workspace/dora_dependencies/
+ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies/
 # Install all the Python dependencies.
 COPY scripts/install.sh  /home/dora/workspace/dora_dependencies/install.sh
 
@@ -85,7 +85,7 @@ RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
 RUN cd /home/dora/workspace && git clone https://github.com/eclipse-zenoh/zenoh-python.git && cd zenoh-python && pip install -r requirements-dev.txt && export PATH="$HOME/.local/bin:$PATH" && maturin build --release && pip install target/wheels/eclipse_zenoh-0.6.0_dev-cp37-abi3-manylinux_2_31_x86_64.whl
 
 RUN echo "export PYTHONPATH=/home/dora/workspace/dora_dependencies/dependencies/:/home/dora/workspace/dora_dependencies/dependencies/lanenet:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/:/home/dora/workspace/scenario_runner:/home/dora/workspace/leaderboard" >> ~/.bashrc
-RUN echo "export PYLOT_HOME=/home/dora/workspace/dora_dependencies/" >> ~/.bashrc
+RUN echo "export DORA_DEP_HOME=/home/dora/workspace/dora_dependencies/" >> ~/.bashrc
 RUN echo "export CARLA_HOME=/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1" >> ~/.bashrc
 RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
 

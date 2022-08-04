@@ -1,12 +1,12 @@
 cd ../dora
 export RUSTFLAGS="--cfg tokio_unstable"
-# cargo build  --manifest-path binaries/coordinator/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
-# cargo build  --manifest-path binaries/runtime/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
+cargo build  --manifest-path binaries/coordinator/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
+cargo build  --manifest-path binaries/runtime/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
 cd ../dora-drives
 cp ../dora/target/release/dora-coordinator bin/dora-coordinator
 cp ../dora/target/release/dora-runtime bin/dora-runtime
 cp -r ../dora/target/wheels .
-cp target/release/dora-drives-node bin/dora-drives-node
+
 
 # Carla start
 nvidia-docker build --tag dora .
