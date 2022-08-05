@@ -1,3 +1,5 @@
+# TODO: Refactor
+
 import os
 import random
 import threading
@@ -5,10 +7,9 @@ from datetime import datetime
 
 import numpy as np
 import pylot.utils
+from dora_watermark import load
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
-
-from dora_watermark import load
 
 # You can generate an API token from the "API Tokens Tab" in the UI
 token = os.getenv("INFLUX_TOKEN")

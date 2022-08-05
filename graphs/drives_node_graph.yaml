@@ -13,24 +13,32 @@ nodes:
         - image
       run: python3 /home/dora/workspace/dora-drives/nodes/carla_source_node.py
 
-  - id: perfect_detection_op
-    operator:
-      outputs:
-        - obstacles_without_location
-      inputs:
-        position: carla_source_node/position
-        depth_frame: carla_source_node/depth_frame
-        segmented_frame: carla_source_node/segmented_frame
-      python: /home/dora/workspace/dora-drives/operators/perfect_detection_op.py
+  #- id: perfect_detection_op
+    #operator:
+      #outputs:
+        #- obstacles_without_location
+      #inputs:
+        #position: carla_source_node/position
+        #depth_frame: carla_source_node/depth_frame
+        #segmented_frame: carla_source_node/segmented_frame
+      #python: /home/dora/workspace/dora-drives/operators/perfect_detection_op.py
 
-  - id: obstacle_location_op
+  #- id: obstacle_location_op
+    #operator: 
+      #outputs:
+        #- obstacles
+      #inputs:
+        #depth_frame: carla_source_node/depth_frame
+        #obstacles_without_location: perfect_detection_op/obstacles_without_location
+      #python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
+ 
+  - id: efficientdet_op
     operator: 
       outputs:
         - obstacles
       inputs:
-        depth_frame: carla_source_node/depth_frame
-        obstacles_without_location: perfect_detection_op/obstacles_without_location
-      python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
+        image: carla_source_node/image
+      python: /home/dora/workspace/dora-drives/operators/efficient_detection_op.py
 
   - id: planning_op
     operator:

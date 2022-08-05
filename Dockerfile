@@ -45,14 +45,10 @@ RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install setuptools setuptools-rust numpy==1.19.5
 
 # Setup Rust and install dora.
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/home/dora/.cargo/bin:${PATH}"
-RUN echo "export PATH=/home/dora/.cargo/bin:${PATH}" >> ~/.bashrc
-RUN rustup default nightly
 RUN mkdir -p /home/dora/workspace
 
 # Set up Pylot.
-RUN sudo apt-get install -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk python3-pygame libgeos-dev
+RUN sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk python3-pygame libgeos-dev vim
 # Get the Pylot directory.
 
 RUN mkdir -p /home/dora/workspace/dora_dependencies
@@ -63,7 +59,7 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies/
+ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies
 # Install all the Python dependencies.
 COPY scripts/install.sh  /home/dora/workspace/dora_dependencies/install.sh
 
@@ -81,11 +77,12 @@ RUN python3 -m pip install -r /home/dora/workspace/scenario_runner/requirements.
 # Clone leaderboard.
 RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/leaderboard.git && cd leaderboard && git checkout stable
 RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
-# Installing Zenoh
-RUN cd /home/dora/workspace && git clone https://github.com/eclipse-zenoh/zenoh-python.git && cd zenoh-python && pip install -r requirements-dev.txt && export PATH="$HOME/.local/bin:$PATH" && maturin build --release && pip install target/wheels/eclipse_zenoh-0.6.0_dev-cp37-abi3-manylinux_2_31_x86_64.whl
 
 RUN echo "export PYTHONPATH=/home/dora/workspace/dora_dependencies/dependencies/:/home/dora/workspace/dora_dependencies/dependencies/lanenet:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/:/home/dora/workspace/scenario_runner:/home/dora/workspace/leaderboard" >> ~/.bashrc
-RUN echo "export DORA_DEP_HOME=/home/dora/workspace/dora_dependencies/" >> ~/.bashrc
+RUN echo "export DORA_DEP_HOME=/home/dora/workspace/dora_dependencies" >> ~/.bashrc
+# TODO: Remove $PYLOT_HOME Dependencies in Dora Dependencies
+RUN echo "export PYLOT_HOME=/home/dora/workspace/dora_dependencies" >> ~/.bashrc
+
 RUN echo "export CARLA_HOME=/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1" >> ~/.bashrc
 RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
 
@@ -95,13 +92,8 @@ RUN sudo sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_conf
 
 WORKDIR /home/dora/workspace/dora_dependencies
 
-RUN rm -rf /home/dora/.rustup/toolchains/stable-x86_64-unknown-linux-gnu
 
-RUN rustup update stable
 
-RUN sudo apt-get update
-
-RUN sudo apt-get install vim -y
 
 WORKDIR /home/dora/workspace/dora-drives
 

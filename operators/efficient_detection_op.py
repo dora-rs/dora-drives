@@ -42,12 +42,12 @@ MODEL_PATH = (
     os.environ["DORA_DEP_HOME"]
     + "/dependencies/models/obstacle_detection/efficientdet/efficientdet-d0/efficientdet-d0_frozen.pb"
 )
-LABELS_PATH = os.environ["DORA_DEP_HOME"] + "/dependencies/models/coco.names"
+# LABELS_PATH = os.environ["DORA_DEP_HOME"] + "/dependencies/models/coco.names"
 
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
 OBSTACLE_THRESHOLD = 0.1
-coco_labels = load_coco_labels(LABELS_PATH)
+# coco_labels = load_coco_labels(LABELS_PATH)
 models, tf_session = load_serving_model(
     "efficientdet-d0", model_path=MODEL_PATH, gpu_memory_fraction=0.9
 )
@@ -95,15 +95,15 @@ class Operator:
 
         for _, ymin, xmin, ymax, xmax, score, _class in outputs_np:
             xmin, ymin, xmax, ymax = int(xmin), int(ymin), int(xmax), int(ymax)
-            if _class in coco_labels:
-                if score >= OBSTACLE_THRESHOLD:
-                    xmin, xmax = max(0, xmin), min(xmax, IMAGE_WIDTH)
-                    ymin, ymax = max(0, ymin), min(ymax, IMAGE_HEIGHT)
-                    if xmin < xmax and ymin < ymax:
-                        obstacles.append(
-                            np.array(
-                                [xmin, xmax, ymin, ymax], dtype=np.float32
-                            ).tobytes()
-                        )
+            # if _class in coco_labels:
+            if score >= OBSTACLE_THRESHOLD:
+                xmin, xmax = max(0, xmin), min(xmax, IMAGE_WIDTH)
+                ymin, ymax = max(0, ymin), min(ymax, IMAGE_HEIGHT)
+                if xmin < xmax and ymin < ymax:
+                    obstacles.append(
+                        np.array(
+                            [xmin, xmax, ymin, ymax], dtype=np.float32
+                        ).tobytes()
+                    )
 
         send_output("obstacles", b"\n".join(obstacles))

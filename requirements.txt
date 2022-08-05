@@ -5,6 +5,7 @@ opentelemetry-exporter-jaeger-thrift
 scikit-learn==1.1
 pytest
 absl-py
+gdown
 # Old dependencies to double check  
 cvxpy
 erdos>=0.3.1
