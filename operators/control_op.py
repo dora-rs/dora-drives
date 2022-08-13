@@ -4,6 +4,8 @@ from typing import Callable
 import numpy as np
 from carla import Client, VehicleControl, command
 
+from dora_utils import DoraStatus
+
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
@@ -34,14 +36,14 @@ class Operator:
         """
 
         if self.vehicle_id is None and "vehicle_id" != input_id:
-            return {}
+            return DoraStatus.CONTINUE
         elif self.vehicle_id is None and "vehicle_id" == input_id:
             self.vehicle_id = int.from_bytes(value, "big")
         elif self.vehicle_id is not None and "vehicle_id" == input_id:
-            return {}
+            return DoraStatus.CONTINUE
 
         if "control" != input_id:
-            return {}
+            return DoraStatus.CONTINUE
 
         control = np.frombuffer(value)
 
@@ -56,3 +58,4 @@ class Operator:
         client.apply_batch_sync(
             [command.ApplyVehicleControl(self.vehicle_id, vec_control)]
         )
+        return DoraStatus.CONTINUE

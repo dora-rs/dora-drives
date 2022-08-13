@@ -4,6 +4,8 @@ from typing import Callable
 import numpy as np
 import tensorflow as tf
 
+from dora_utils import DoraStatus
+
 
 def load_coco_labels(labels_path):
     """Returns a map from index to label.
@@ -107,3 +109,4 @@ class Operator:
                     )
 
         send_output("obstacles", b"\n".join(obstacles))
+        return DoraStatus.CONTINUE

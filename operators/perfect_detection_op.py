@@ -5,6 +5,7 @@ from carla import Client, Vehicle, Walker
 from shapely.geometry import LineString
 
 from dora_utils import (
+    DoraStatus,
     distance_points,
     distance_vertex,
     get_extrinsic_matrix,
@@ -318,7 +319,7 @@ class Operator:
                 value[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
                 dtype="float32",
             )
-            return {}
+            return DoraStatus.CONTINUE
 
         if input_id == "segmented_frame":
             segmented_frame = np.frombuffer(
@@ -328,10 +329,10 @@ class Operator:
             self.segmented_frame = np.reshape(
                 segmented_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
             )
-            return {}
+            return DoraStatus.CONTINUE
 
         if len(self.depth_frame) == 0 or len(self.segmented_frame) == 0:
-            return {}
+            return DoraStatus.CONTINUE
 
         if input_id == "position":
             self.position = np.frombuffer(value)
@@ -384,3 +385,4 @@ class Operator:
             byte_array,
             #   "traffic_lights": dump(visible_tls),
         )
+        return DoraStatus.CONTINUE

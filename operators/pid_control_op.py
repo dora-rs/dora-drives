@@ -8,7 +8,7 @@ from typing import Callable
 import numpy as np
 from sklearn.metrics import pairwise_distances
 
-from dora_utils import get_angle
+from dora_utils import DoraStatus, get_angle
 
 mutex = threading.Lock()
 
@@ -171,10 +171,10 @@ class Operator:
 
             self.target_speeds = waypoints[2, :]
             self.waypoints = np.ascontiguousarray(waypoints[:2, :].T)
-            return {}
+            return DoraStatus.CONTINUE
 
         if len(self.waypoints) == 0:
-            return None
+            return DoraStatus.CONTINUE
 
         mutex.acquire()
         distances = pairwise_distances(self.waypoints, np.array([[x, y]])).T[0]
@@ -211,3 +211,4 @@ class Operator:
         mutex.release()
 
         send_output("control", np.array([throttle, steer, brake]).tobytes())
+        return DoraStatus.CONTINUE

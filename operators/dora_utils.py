@@ -1,4 +1,5 @@
 import math
+from enum import Enum
 
 import numpy as np
 from sklearn.metrics import pairwise_distances
@@ -212,3 +213,8 @@ def waypoints_to_camera_view(
         ]
     )
     return location_2D
+
+
+class DoraStatus(Enum):
+    CONTINUE = 0
+    STOP = 1

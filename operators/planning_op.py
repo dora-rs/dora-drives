@@ -9,6 +9,7 @@ from hybrid_astar_planner.HybridAStar.hybrid_astar_wrapper import (
     apply_hybrid_astar,
 )
 
+from dora_utils import DoraStatus
 from dora_world import World
 from hd_map import HDMap
 
@@ -234,7 +235,7 @@ class Operator:
                     obstacle_position = np.reshape(obstacle_buffer, (-1, 3))
                     obstacles_prediction.append(obstacle_position)
             self.obstacles = obstacles_prediction
-            return None
+            return DoraStatus.CONTINUE
 
         self.planner._world.update(
             time.time(), self.position, self.obstacles, [], hd_map
@@ -253,3 +254,4 @@ class Operator:
             "waypoints",
             waypoints_array.tobytes(),
         )
+        return DoraStatus.CONTINUE

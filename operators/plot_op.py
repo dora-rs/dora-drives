@@ -6,6 +6,7 @@ import numpy as np
 import pygame
 
 from dora_utils import (
+    DoraStatus,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,
@@ -57,20 +58,20 @@ class Operator:
             waypoints = waypoints.reshape((3, -1))
             waypoints = waypoints[0:2].T
             self.waypoints = waypoints
-            return {}
+            return DoraStatus.CONTINUE
 
         if "obstacles_bb" == input_id:
             obstacles_bb = value.split(b"\n")
             self.obstacles_bb = obstacles_bb
-            return {}
+            return DoraStatus.CONTINUE
 
         if "obstacles" == input_id:
             obstacles = value.split(b"\n")
             self.obstacles = obstacles
-            return {}
+            return DoraStatus.CONTINUE
 
         if "image" != input_id:
-            return {}
+            return DoraStatus.CONTINUE
 
         camera_frame = np.frombuffer(
             value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
@@ -157,4 +158,4 @@ class Operator:
         pygame.surfarray.blit_array(gameDisplay, data)
         pygame.display.flip()
 
-        return {}
+        return DoraStatus.CONTINUE

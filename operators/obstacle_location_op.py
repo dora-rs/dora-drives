@@ -4,6 +4,7 @@ import numpy as np
 import numpy.matlib
 
 from dora_utils import (
+    DoraStatus,
     closest_vertex,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
@@ -150,7 +151,7 @@ class Operator:
                 value[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
                 dtype="float32",
             )
-            return {}
+            return DoraStatus.CONTINUE
 
         if (
             input_id == "obstacles_without_location"
@@ -174,3 +175,4 @@ class Operator:
             predictions_bytes = b"\n".join(predictions)
 
             send_output("obstacles", predictions_bytes)
+        return DoraStatus.CONTINUE
