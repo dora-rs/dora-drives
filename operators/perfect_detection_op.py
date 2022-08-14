@@ -1,5 +1,7 @@
+import zlib
 from typing import Callable
 
+import cv2
 import numpy as np
 from carla import Client, Vehicle, Walker
 from shapely.geometry import LineString
@@ -304,10 +306,9 @@ class Operator:
         value: bytes,
         send_output: Callable[[str, bytes], None],
     ):
-
         if input_id == "depth_frame":
             depth_frame = np.frombuffer(
-                value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+                zlib.decompress(value[24:]),
                 dtype="float32",
             )
             depth_frame = np.reshape(
@@ -316,19 +317,20 @@ class Operator:
 
             self.depth_frame = depth_frame
             self.depth_frame_position = np.frombuffer(
-                value[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+                value[:24],
                 dtype="float32",
             )
             return DoraStatus.CONTINUE
 
         if input_id == "segmented_frame":
-            segmented_frame = np.frombuffer(
-                value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT],
-                dtype="uint8",
+            segmented_frame = cv2.imdecode(
+                np.frombuffer(
+                    value[24:],
+                    dtype="uint8",
+                ),
+                -1,
             )
-            self.segmented_frame = np.reshape(
-                segmented_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
-            )
+            self.segmented_frame = segmented_frame
             return DoraStatus.CONTINUE
 
         if len(self.depth_frame) == 0 or len(self.segmented_frame) == 0:
@@ -337,8 +339,11 @@ class Operator:
         if input_id == "position":
             self.position = np.frombuffer(value)
         actor_list = world.get_actors()
-        obstacles = actor_list.filter("vehicle.*")
-
+        vehicles = actor_list.filter("vehicle.*")
+        pedestrians = actor_list.filter("walker.pedestrian.")
+        obstacles = [vehicle for vehicle in vehicles] + [
+            ped for ped in pedestrians
+        ]
         outputs = []
         for obstacle in obstacles:
             # Calculate the distance of the obstacle from the vehicle, and

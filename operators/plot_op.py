@@ -73,23 +73,23 @@ class Operator:
         if "image" != input_id:
             return DoraStatus.CONTINUE
 
-        camera_frame = np.frombuffer(
-            value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
-            dtype="uint8",
+        camera_frame = cv2.imdecode(
+            np.frombuffer(
+                value[24:],
+                dtype="uint8",
+            ),
+            -1,
         )
 
         camera_frame_position = np.frombuffer(
-            value[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+            value[:24],
             dtype="float32",
         )
 
         extrinsic_matrix = get_extrinsic_matrix(
             get_projection_matrix(camera_frame_position)
         )
-        resized_image = np.reshape(
-            camera_frame, (CAMERA_HEIGHT, CAMERA_WIDTH, 4)
-        )
-        resized_image = resized_image[:, :, :3]
+        resized_image = camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
 
         ## Drawing on frame

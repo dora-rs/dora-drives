@@ -1,6 +1,7 @@
 import os
 from typing import Callable
 
+import cv2
 import numpy as np
 import tensorflow as tf
 
@@ -80,13 +81,14 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
 
-        camera_frame = np.frombuffer(
-            value[: IMAGE_WIDTH * IMAGE_HEIGHT * 4],
-            dtype="uint8",
+        camera_frame = cv2.imdecode(
+            np.frombuffer(
+                value[24:],
+                dtype="uint8",
+            ),
+            -1,
         )
-
-        resized_image = np.reshape(camera_frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-        resized_image = resized_image[:, :, :3]
+        resized_image = camera_frame[:, :, :3]
         input_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
         outputs_np = tf_session.run(
             signitures["prediction"],
@@ -104,7 +106,8 @@ class Operator:
                 if xmin < xmax and ymin < ymax:
                     obstacles.append(
                         np.array(
-                            [xmin, xmax, ymin, ymax], dtype=np.float32
+                            [int(xmin), int(xmax), int(ymin), int(ymax)],
+                            dtype=np.int32,
                         ).tobytes()
                     )
 

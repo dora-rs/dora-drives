@@ -1,3 +1,4 @@
+import zlib
 from typing import Callable
 
 import numpy as np
@@ -139,7 +140,7 @@ class Operator:
 
         if input_id == "depth_frame":
             depth_frame = np.frombuffer(
-                value[: DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4],
+                zlib.decompress(value[24:]),
                 dtype="float32",
             )
             depth_frame = np.reshape(
@@ -148,7 +149,7 @@ class Operator:
 
             self.depth_frame = depth_frame
             self.depth_frame_position = np.frombuffer(
-                value[DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT * 4 :],
+                value[:24],
                 dtype="float32",
             )
             return DoraStatus.CONTINUE
@@ -173,6 +174,5 @@ class Operator:
 
             predictions = get_predictions(obstacles, obstacles_with_location)
             predictions_bytes = b"\n".join(predictions)
-
             send_output("obstacles", predictions_bytes)
         return DoraStatus.CONTINUE

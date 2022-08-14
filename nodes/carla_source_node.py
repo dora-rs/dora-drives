@@ -3,7 +3,9 @@
 import logging
 import random
 import time
+import zlib
 
+import cv2
 import numpy as np
 from carla import Client, Location, Rotation, Transform, command
 from dora import Node
@@ -46,7 +48,7 @@ def on_segmented_msg(frame):
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
     frame = frame[:, :, 2]
     global segmented_frame
-    segmented_frame = frame.tobytes() + camera_data
+    segmented_frame = camera_data + cv2.imencode(".jpg", frame)[1].tobytes()
 
 
 def on_lidar_msg(frame):
@@ -80,9 +82,11 @@ def on_camera_msg(frame):
     camera_data = np.array(
         [x, y, z, pitch, yaw, roll], dtype="float32"
     ).tobytes()
+    frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
+    frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
     global camera_frame
-    camera_frame = frame.raw_data.tobytes() + camera_data
+    camera_frame = camera_data + cv2.imencode(".jpg", frame)[1].tobytes()
 
 
 def on_depth_msg(frame):
@@ -103,7 +107,7 @@ def on_depth_msg(frame):
     ).tobytes()
 
     frame = np.frombuffer(
-        frame.raw_data[: IMAGE_WIDTH * IMAGE_HEIGHT * 4],
+        frame.raw_data,
         dtype="uint8",
     )
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
@@ -112,7 +116,7 @@ def on_depth_msg(frame):
     frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
     frame = frame.astype(np.float32)
     global depth_frame
-    depth_frame = frame.tobytes() + camera_data
+    depth_frame = camera_data + zlib.compress(frame.tobytes())
 
 
 def add_lidar(world, transform, callback, vehicle):
@@ -505,5 +509,5 @@ def main():
 
 
 for _ in range(1000):
-    time.sleep(0.5)
+    time.sleep(0.3)
     main()
