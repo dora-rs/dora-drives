@@ -8,5 +8,6 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)/nodes:$(pwd)/operators
 export DORA_RUNTIME_PATH=/home/dora/workspace/dora-drives/bin/dora-runtime
 export PATH=$PATH:/home/dora/workspace/dora-drives/bin/
 export DORA_PATH=/home/dora/workspace/dora-drives
-dora-coordinator run $DORA_PATH/graphs/drives_node_graph.yaml $DORA_RUNTIME_PATH
+sudo chmod +x /home/dora/workspace/dora-drives/nodes/carla_source_node.py
+dora-coordinator run $DORA_PATH/graphs/yolov5_dataflow.yaml $DORA_RUNTIME_PATH
 # ./dora-drives start-python sink_eval_plot plot image waypoints obstacles pose &
