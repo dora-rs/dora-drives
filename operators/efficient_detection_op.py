@@ -106,10 +106,11 @@ class Operator:
                 if xmin < xmax and ymin < ymax:
                     obstacles.append(
                         np.array(
-                            [int(xmin), int(xmax), int(ymin), int(ymax)],
+                            [xmin, xmax, ymin, ymax],
                             dtype=np.int32,
                         ).tobytes()
                     )
+        print(f"Sent obstacles {len(obstacles)}")
 
         send_output("obstacles", b"\n".join(obstacles))
         return DoraStatus.CONTINUE

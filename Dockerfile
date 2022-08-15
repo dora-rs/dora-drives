@@ -55,9 +55,9 @@ RUN mkdir -p /home/dora/workspace/dora_dependencies
 
 WORKDIR /home/dora/workspace/dora_dependencies
 
-COPY requirements.txt .
+COPY scripts/install_requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install -r install_requirements.txt
 
 ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies
 # Install all the Python dependencies.
@@ -92,9 +92,6 @@ RUN sudo sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_conf
 
 WORKDIR /home/dora/workspace/dora_dependencies
 
-
-
-
 WORKDIR /home/dora/workspace/dora-drives
 
 RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_amd64.tar.gz
@@ -102,6 +99,8 @@ RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_
 RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 
 COPY . . 
+
+run python3 -m pip install -r requirements.txt
 
 RUN python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora_node_api_python-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
 

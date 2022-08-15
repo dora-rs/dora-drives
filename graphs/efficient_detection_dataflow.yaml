@@ -1,0 +1,88 @@
+communication:
+  zenoh:
+    prefix: /foo
+
+nodes:
+  - id: carla_source_node
+    custom:
+      outputs:
+        - position
+        - depth_frame
+        - segmented_frame
+        - vehicle_id
+        - image
+      run: /home/dora/workspace/dora-drives/nodes/carla_source_node.py
+
+
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+      inputs:
+        depth_frame: carla_source_node/depth_frame
+        obstacles_without_location: efficientdet_op/obstacles
+      python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
+ 
+  - id: efficientdet_op
+    operator: 
+      outputs:
+        - obstacles
+      inputs:
+        image: carla_source_node/image
+      python: /home/dora/workspace/dora-drives/operators/efficient_detection_op.py
+
+  - id: planning_op
+    operator:
+      python: /home/dora/workspace/dora-drives/operators/planning_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: carla_source_node/position
+        obstacles: obstacle_location_op/obstacles
+
+  #- id: pid_control_node
+    #custom:
+      #outputs:
+        #- control
+      #inputs:
+        #position: carla_source_node/position
+        #waypoints: planning_node/waypoints
+      #run: dora-drives-node
+
+  - id: pid_control_op
+    operator:
+      python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
+      outputs:
+        - control
+      inputs:
+        position: carla_source_node/position
+        waypoints: planning_op/waypoints
+
+  - id: control_op
+    operator:
+      python: /home/dora/workspace/dora-drives/operators/control_op.py
+      outputs:
+        - control_status
+      inputs:
+        control: pid_control_op/control
+        vehicle_id: carla_source_node/vehicle_id
+
+
+  # - id: influxdb_node
+    # custom:
+      # description: Optional
+      # inputs:
+        # control_status: control_node/control_status
+        # position: carla_source_node/position
+        # obstacles: obstacle_location_node/obstacles
+      # run: dora-drives-node
+    
+  - id: plot_op
+    operator:
+      description: Plot operator
+      inputs: 
+        waypoints: planning_op/waypoints
+        image: carla_source_node/image
+        obstacles: obstacle_location_op/obstacles
+        obstacles_bb: efficientdet_op/obstacles
+      python: /home/dora/workspace/dora-drives/operators/plot_op.py
