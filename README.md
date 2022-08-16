@@ -35,6 +35,8 @@ And then within the container:
 ./workspace/dora-drives/scripts/launch_in_container.sh
 ```
 
+> This docker image has been built with my setup and it might not work on all machines. In case it doesn't work. Please check the following `Getting Started`.
+
 ## Getting started
 
 ```bash
