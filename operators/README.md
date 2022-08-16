@@ -24,11 +24,11 @@ bounding_box_2d = np.array([min_x, max_x, min_y, max_y])
 obstacle_camera_transform = np.array([x, y, z, pitch, yaw, roll]).tobytes() # obstacle transform 
 confidence # float 
 label # int
-obstacles = bounding_box_2d + obstacle_camera_transform + confidence + label + b"\n"
+obstacles = bounding_box_2d + obstacle_camera_transform + confidence + label
 
 ## Obstacles with locations
 obstacle_transform = np.array([[x, y, z, pitch, yaw, roll], ...]).tobytes() # obstacle transform 
-confidence # float 
+confidence # int 
 label # int
 obstacles = obstacle_transform + confidence + label + b"\n" 
 

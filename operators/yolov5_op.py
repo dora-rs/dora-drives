@@ -42,7 +42,8 @@ class Operator:
         frame = frame[:, :, :3]
 
         results = self.model(frame)  # includes NMS
-        arrays = np.array(results.xyxy[0].cpu())[:, [0, 2, 1, 3]]
+        arrays = np.array(results.xyxy[0].cpu())[:, [0, 2, 1, 3, 4, 5]]
+        arrays[:, 4] *= 100
         arrays = arrays.astype(np.int32)
         arrays = arrays.tobytes()
         send_output("obstacles", arrays)

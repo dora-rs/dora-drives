@@ -6,6 +6,7 @@ import numpy as np
 import pygame
 
 from dora_utils import (
+    LABELS,
     DoraStatus,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
@@ -21,6 +22,7 @@ DEPTH_FOV = 90
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
+
 
 pygame.init()
 gameDisplay = pygame.display.set_mode(
@@ -61,8 +63,9 @@ class Operator:
             return DoraStatus.CONTINUE
 
         if "obstacles_bb" == input_id:
-            obstacles_bb = value.split(b"\n")
-            self.obstacles_bb = obstacles_bb
+            self.obstacles_bb = np.frombuffer(value, dtype="int32").reshape(
+                (-1, 6)
+            )
             return DoraStatus.CONTINUE
 
         if "obstacles" == input_id:
@@ -113,7 +116,7 @@ class Operator:
             if len(obstacle) % 12 == 0:
                 obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
 
-                obstacle_position = np.reshape(obstacle_buffer, (-1, 3))
+                obstacle_position = np.reshape(obstacle_buffer, (-1, 5))
                 for location in obstacle_position:
                     location = location_to_camera_view(
                         np.append(location[:2].reshape((1, -1)), [[0]]),
@@ -129,16 +132,22 @@ class Operator:
                     )
 
         for obstacle_bb in self.obstacles_bb:
-            if len(obstacle_bb) > 16:
-                obstacle_bb_buffer = np.frombuffer(
-                    obstacle_bb[:16], dtype="int32"
-                )
-                if len(obstacle_bb_buffer) != 0:
-                    [min_x, max_x, min_y, max_y] = obstacle_bb_buffer
+            [min_x, max_x, min_y, max_y, confidence, label] = obstacle_bb
 
-                    start = (int(min_x), int(min_y))
-                    end = (int(max_x), int(max_y))
-                    cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
+            start = (int(min_x), int(min_y))
+            end = (int(max_x), int(max_y))
+            cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
+
+            cv2.putText(
+                resized_image,
+                LABELS[label] + f", {confidence}%",
+                (int(max_x), int(max_y)),
+                font,
+                0.75,
+                (0, 255, 0),
+                2,
+                1,
+            )
 
         now = time.time()
         cv2.putText(
@@ -153,6 +162,7 @@ class Operator:
         )
         data = resized_image[:, :, (2, 1, 0)]
         data = np.rot90(data)
+        data = cv2.flip(data, 0)
 
         self.last_timestamp = now
         pygame.surfarray.blit_array(gameDisplay, data)
