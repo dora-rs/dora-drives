@@ -97,7 +97,6 @@ def spawn_driving_vehicle(client, world):
         )
     ]
 
-    global vehicle_id
     vehicle_id = client.apply_batch_sync(batch)[0].actor_id
     while world.get_actors().find(vehicle_id) is None:
 
@@ -106,7 +105,7 @@ def spawn_driving_vehicle(client, world):
             5
         )  # This is so that the vehicle gets registered in the actors.
         print("waiting for ego vehicle to create")
-    return world.get_actors().find(vehicle_id)
+    return world.get_actors().find(vehicle_id), vehicle_id
 
 
 def check_simulator_version(

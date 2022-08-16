@@ -30,7 +30,7 @@ lidar_pc = None
 depth_frame = None
 camera_frame = None
 segmented_frame = None
-vehicle_id = None
+
 
 sensor_transform = Transform(
     Location(3, 0, 1), Rotation(pitch=0, yaw=0, roll=0)
@@ -143,7 +143,7 @@ world = client.get_world()
 )
 
 
-ego_vehicle = spawn_driving_vehicle(client, world)
+ego_vehicle, vehicle_id = spawn_driving_vehicle(client, world)
 # lidar = add_lidar(world, sensor_transform, on_lidar_msg, vehicle)
 depth_camera = add_depth_camera(
     world, sensor_transform, on_depth_msg, ego_vehicle
