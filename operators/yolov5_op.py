@@ -21,7 +21,7 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
+        _input_id: str,
         value: bytes,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
@@ -39,7 +39,7 @@ class Operator:
             ),
             -1,
         )
-        frame = frame[:, :, :3]  # OpenCV image (BGR to RGB)
+        frame = frame[:, :, :3]
 
         results = self.model(frame)  # includes NMS
         arrays = np.array(results.xyxy[0].cpu())[:, [0, 2, 1, 3]]

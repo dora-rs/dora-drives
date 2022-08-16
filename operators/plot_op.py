@@ -50,7 +50,7 @@ class Operator:
         self,
         input_id: str,
         value: bytes,
-        send_output: Callable[[str, bytes], None],
+        _send_output: Callable[[str, bytes], None],
     ):
 
         if "waypoints" == input_id:
