@@ -17,6 +17,23 @@ This project is in early development, and many features have yet to be implement
 |Python| Version 3.8
 |Docker|Latest
 
+## Docker started
+
+To start with docker which is the easiest:
+```bash
+docker pull haixuantao/dora-drives
+nvidia-docker run -itd --name dora -p 20022:22 haixuantao/dora-drives /bin/bash
+nvidia-docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
+nvidia-docker cp ~/.ssh/id_rsa.pub dora:/home/dora/.ssh/authorized_keys
+nvidia-docker exec -i -t dora sudo chown dora /home/dora/.ssh/authorized_keys
+nvidia-docker exec -i -t dora sudo service ssh start
+ssh -p 20022 -X dora@localhost 
+```
+
+And then within the container:
+```bash
+./workspace/dora-drives/scripts/launch_in_container.sh
+```
 
 ## Getting started
 
