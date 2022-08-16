@@ -11,7 +11,7 @@ NUM_WAYPOINTS_AHEAD = 30
 NUM_WAYPOINTS_BEHIND = 0
 OBSTACLE_FILTERING_DISTANCE = 1.0
 STATIC_OBSTACLE_DISTANCE_THRESHOLD = 70
-OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD = 10
+OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD = 20
 
 
 class World(object):
@@ -121,16 +121,16 @@ class World(object):
         return self.waypoints, self.target_speeds
 
     def get_obstacle_list(self):
-        obstacle_list = []
-        if len(obstacle_list) == 0:
-            return np.empty((0, 4))
-
         obstacles = np.array(self.obstacle_predictions).reshape((-1, 3))
-        distances = pairwise_distances(self.waypoints, obstacles[-1, :2])
+        if len(obstacles) == 0 or len(self.waypoints) == 0:
+            return np.empty((0, 4))
+        obstacle_list = []
+
+        distances = pairwise_distances(self.waypoints, obstacles[:, :2])
         for distance, prediction in zip(distances, self.obstacle_predictions):
             # Use all prediction times as potential obstacles.
-            if distance < OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD:
-                for location in prediction:
+            for location in prediction:
+                if distance < OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD:
                     [x, y, _] = location
                     obstacle_size = np.array(
                         [
@@ -141,4 +141,7 @@ class World(object):
                         ]
                     )
                     obstacle_list.append(obstacle_size)
+
+        if len(obstacle_list) == 0:
+            return np.empty((0, 4))
         return np.array(obstacle_list)

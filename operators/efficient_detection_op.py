@@ -14,7 +14,7 @@ def load_coco_labels(labels_path):
         labels_path (:obj:`str`): Path to a file storing a label on each line.
     """
     labels_map = {}
-    with open(labels_path) as labels_file:
+    with open(labels_path, encoding="utf-8") as labels_file:
         labels = labels_file.read().splitlines()
         index = 1
         for label in labels:
