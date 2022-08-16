@@ -25,7 +25,7 @@ class HDMap(object):
         _grp: An instance of a CARLA global route planner (uses A*).
     """
 
-    def __init__(self, simulator_map, log_file=None):
+    def __init__(self, simulator_map, _log_file=None):
         self._map = simulator_map
         # Setup global planner.
         self._grp = GlobalRoutePlanner(
@@ -176,13 +176,10 @@ class HDMap(object):
         project_to_road: bool = False,
         lane_type=LaneType.Any,
     ):
-        try:
-            [x, y, z] = location
-            waypoint = self._map.get_waypoint(
-                Location(x, y, z),
-                project_to_road=project_to_road,
-                lane_type=lane_type,
-            )
-        except RuntimeError as err:
-            waypoint = None
+        [x, y, z] = location
+        waypoint = self._map.get_waypoint(
+            Location(x, y, z),
+            project_to_road=project_to_road,
+            lane_type=lane_type,
+        )
         return waypoint

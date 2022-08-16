@@ -31,9 +31,9 @@ nodes:
         image: carla_source_node/image
       python: /home/dora/workspace/dora-drives/operators/efficient_detection_op.py
 
-  - id: planning_op
+  - id: hybrid_astar_op
     operator:
-      python: /home/dora/workspace/dora-drives/operators/planning_op.py
+      python: /home/dora/workspace/dora-drives/operators/hybrid_astar_op.py
       outputs:
         - waypoints
       inputs:
@@ -56,7 +56,7 @@ nodes:
         - control
       inputs:
         position: carla_source_node/position
-        waypoints: planning_op/waypoints
+        waypoints: hybrid_astar_op/waypoints
 
   - id: control_op
     operator:
@@ -81,7 +81,7 @@ nodes:
     operator:
       description: Plot operator
       inputs: 
-        waypoints: planning_op/waypoints
+        waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
         obstacles_bb: efficientdet_op/obstacles

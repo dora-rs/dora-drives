@@ -1,17 +1,23 @@
 import numpy as np
+from sklearn.metrics import pairwise_distances
 
 from dora_utils import closest_vertex, distance_vertex
 
 # Number of predicted locations to consider when computing speed factors.
 NUM_FUTURE_TRANSFORMS = 10
+TARGET_SPEED = 10.0
+OBSTACLE_RADIUS = 1.0
+NUM_WAYPOINTS_AHEAD = 30
+NUM_WAYPOINTS_BEHIND = 0
+OBSTACLE_FILTERING_DISTANCE = 1.0
+STATIC_OBSTACLE_DISTANCE_THRESHOLD = 70
+OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD = 10
 
 
 class World(object):
     """A representation of the world that is used by the planners."""
 
-    def __init__(self, flags, logger):
-        self._flags = flags
-        self._logger = logger
+    def __init__(self):
         self.static_obstacles = None
         self.obstacle_predictions = []
         self._ego_obstacle_predictions = []
@@ -52,12 +58,12 @@ class World(object):
                 obstacle.transform.location.distance(
                     self.ego_transform.location
                 )
-                <= self._flags.static_obstacle_distance_threshold
+                <= STATIC_OBSTACLE_DISTANCE_THRESHOLD
             ):
                 self.static_obstacles.append(obstacle)
 
         if hd_map is None and lanes is None:
-            self._logger.error(
+            print(
                 "@{}: planning world does not have lanes or HD map".format(
                     timestamp
                 )
@@ -67,11 +73,11 @@ class World(object):
 
         # The waypoints are not received on the global trajectory stream.
         # We need to compute them using the map.
-        if len(self.waypoints) < self._flags.num_waypoints_ahead / 2:
+        if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
             if self._map is not None and self._goal_location is not None:
                 waypoints = hd_map.compute_waypoints(
                     position[:3], self._goal_location
-                )[: self._flags.num_waypoints_ahead]
+                )[:NUM_WAYPOINTS_AHEAD]
                 self.target_speeds = np.array(
                     [0 for _ in range(len(self.waypoints))]
                 )
@@ -83,11 +89,9 @@ class World(object):
                 np.array([self.position[:2]]),
             )
 
-            self.waypoints = self.waypoints[
-                index : index + self._flags.num_waypoints_ahead
-            ]
+            self.waypoints = self.waypoints[index : index + NUM_WAYPOINTS_AHEAD]
             self.target_speeds = self.target_speeds[
-                index : index + self._flags.num_waypoints_ahead
+                index : index + NUM_WAYPOINTS_AHEAD
             ]
 
         if position[-1] < 0.7:  # Speed check
@@ -118,19 +122,23 @@ class World(object):
 
     def get_obstacle_list(self):
         obstacle_list = []
-        for prediction in self.obstacle_predictions:
-            # Use all prediction times as potential obstacles.
-            for location in prediction:
-                [x, y, _] = location
-                obstacle_size = np.array(
-                    [
-                        x - self._flags.obstacle_radius,
-                        y - self._flags.obstacle_radius,
-                        x + self._flags.obstacle_radius,
-                        y + self._flags.obstacle_radius,
-                    ]
-                )
-                obstacle_list.append(obstacle_size)
         if len(obstacle_list) == 0:
             return np.empty((0, 4))
+
+        obstacles = np.array(self.obstacle_predictions).reshape((-1, 3))
+        distances = pairwise_distances(self.waypoints, obstacles[-1, :2])
+        for distance, prediction in zip(distances, self.obstacle_predictions):
+            # Use all prediction times as potential obstacles.
+            if distance < OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD:
+                for location in prediction:
+                    [x, y, _] = location
+                    obstacle_size = np.array(
+                        [
+                            x - OBSTACLE_RADIUS,
+                            y - OBSTACLE_RADIUS,
+                            x + OBSTACLE_RADIUS,
+                            y + OBSTACLE_RADIUS,
+                        ]
+                    )
+                    obstacle_list.append(obstacle_size)
         return np.array(obstacle_list)

@@ -1,4 +1,3 @@
-import logging
 import threading
 import time
 from typing import Callable
@@ -16,77 +15,30 @@ from hd_map import HDMap
 mutex = threading.Lock()
 
 
-class Flags(object):
-    pass
+# Hybrid ASTAR
+STEP_SIZE_HYBRID_ASTAR = 3.0
+MAX_ITERATIONS_HYBRID_ASTAR = 2000
+COMPLETION_THRESHOLD = 1.0
+ANGLE_COMPLETION_THRESHOLD = 100
+RAD_STEP = 4.0
+RAD_UPPER_RANGE = 4.0
+RAD_LOWER_RANGE = 4.0
+OBSTACLE_CLEARANCE_HYBRID_ASTAR = 1.0
+LANE_WIDTH_HYBRID_ASTAR = 6.0
+RADIUS = 6.0
+CAR_LENGTH = 4.0
+CAR_WIDTH = 1.8
 
-
-FLAGS = Flags()
-FLAGS.tracking_num_steps = 10
-FLAGS.planning_type = "rrt"
-FLAGS.max_speed = 10.0
-FLAGS.max_accel = 6.0
-FLAGS.max_curvature = 1.0
-
-# Hybrid AStar flags
-FLAGS.step_size_hybrid_astar = 3.0
-FLAGS.max_iterations_hybrid_astar = 2000
-FLAGS.completion_threshold = 1.0
-FLAGS.angle_completion_threshold = 100
-FLAGS.rad_step = 4.0
-FLAGS.rad_upper_range = 4.0
-FLAGS.rad_lower_range = 4.0
-FLAGS.obstacle_clearance_hybrid_astar = 1.0
-FLAGS.lane_width_hybrid_astar = 6.0
-FLAGS.radius = 6.0
-FLAGS.car_length = 4.0
-FLAGS.car_width = 1.8
-
-FLAGS.dynamic_obstacle_distance_threshold = 50
 
 # Planning general
-FLAGS.target_speed = 10.0
-FLAGS.obstacle_radius = 1.0
-FLAGS.num_waypoints_ahead = 30
-FLAGS.num_waypoints_behind = 0
-FLAGS.obstacle_filtering_distance = 1.0
-
-# RRT Star
-FLAGS.step_size = 0.5
-FLAGS.max_iterations = 200
-FLAGS.end_dist_threshold = 2.0
-FLAGS.obstacle_clearance_rrt = 0.5
-FLAGS.lane_width = 3.0
-
-# FOT
-FLAGS.max_speed = 35.0  # Maximum vehicle speed [m/s]
-FLAGS.max_accel = 6.0  # Maximum vehicle acceleration [m/s^2]
-FLAGS.max_curvature = 1.0  # Maximum curvature speed [1/m]
-FLAGS.max_road_width_l = 5.0  # Maximum left road width [m]
-FLAGS.max_road_width_r = 1.0  # Maximum right road width [m]
-FLAGS.d_road_w = 0.25  # Road width sampling discretization [m]
-FLAGS.dt = 0.25  # Time sampling discretization [s]
-FLAGS.maxt = 8.0  # Max prediction horizon [s]
-FLAGS.mint = 2.0  # Min prediction horizon [s]
-FLAGS.d_t_s = 0.25  # Target speed sampling discretization [m/s]
-FLAGS.n_s_sample = 2.0  # Number speeds to sample
-FLAGS.obstacle_clearance_fot = 0.5  # 'Obstacle clearance threshold [m]'
-FLAGS.kd = 1.0  # Deviation cost
-FLAGS.kv = 0.1  # Velocity cost
-FLAGS.ka = 0.1  # Acceleration cost
-FLAGS.kj = 0.01  # Jerk cost
-FLAGS.kt = 0.01  # Time cost
-FLAGS.ko = 0.1  # Obstacle cost
-FLAGS.klat = 1.0  # Lateral cost
-FLAGS.klon = 1.0  # Longitudinal cost
-
-goal_location = [234, 59, 39]
+TARGET_SPEED = 10.0
+NUM_WAYPOINTS_AHEAD = 30
+GOAL_LOCATION = [234, 59, 39]
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
 
-logger = logging.getLogger("")
-time.sleep(5)  # Wait for the world to load.
-world = World(FLAGS, logger)
-world._goal_location = goal_location
+world = World()
+world._goal_location = GOAL_LOCATION
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)  # seconds
 carla_world = client.get_world()
@@ -102,34 +54,30 @@ class HybridAStarPlanner:
     Args:
         world: (:py:class:`~pylot.planning.world.World`): A reference to the
             planning world.
-        flags (absl.flags): Object to be used to access absl flags.
+        (absl.: Object to be used to access absl
 
     .. _Hybrid A* Planner:
        https://github.com/erdos-project/hybrid_astar_planner
     """
 
-    def __init__(self, world, flags, logger):
-        self._flags = flags
-        self._logger = logger
+    def __init__(self, world):
         self._world = world
-        # TODO: Deal with the map
-        self._map = None
         self._hyperparameters = {
-            "step_size": flags.step_size_hybrid_astar,
-            "max_iterations": flags.max_iterations_hybrid_astar,
-            "completion_threshold": flags.completion_threshold,
-            "angle_completion_threshold": flags.angle_completion_threshold,
-            "rad_step": flags.rad_step,
-            "rad_upper_range": flags.rad_upper_range,
-            "rad_lower_range": flags.rad_lower_range,
-            "obstacle_clearance": flags.obstacle_clearance_hybrid_astar,
-            "lane_width": flags.lane_width_hybrid_astar,
-            "radius": flags.radius,
-            "car_length": flags.car_length,
-            "car_width": flags.car_width,
+            "step_size": STEP_SIZE_HYBRID_ASTAR,
+            "max_iterations": MAX_ITERATIONS_HYBRID_ASTAR,
+            "completion_threshold": COMPLETION_THRESHOLD,
+            "angle_completion_threshold": ANGLE_COMPLETION_THRESHOLD,
+            "rad_step": RAD_STEP,
+            "rad_upper_range": RAD_UPPER_RANGE,
+            "rad_lower_range": RAD_LOWER_RANGE,
+            "obstacle_clearance": OBSTACLE_CLEARANCE_HYBRID_ASTAR,
+            "lane_width": LANE_WIDTH_HYBRID_ASTAR,
+            "radius": RADIUS,
+            "car_length": CAR_LENGTH,
+            "car_width": CAR_WIDTH,
         }
 
-    def run(self, timestamp, ttd=None):
+    def run(self, _timestamp, _ttd=None):
         """Runs the planner.
 
         Note:
@@ -139,11 +87,12 @@ class HybridAStarPlanner:
             :py:class:`~pylot.planning.waypoints.Waypoints`: Waypoints of the
             planned trajectory.
         """
+
         obstacle_list = self._world.get_obstacle_list()
 
         if len(obstacle_list) == 0:
             # Do not use Hybrid A* if there are no obstacles.
-            return self._world.follow_waypoints(self._flags.target_speed)
+            return self._world.follow_waypoints(TARGET_SPEED)
 
         # Hybrid a* does not take into account the driveable region.
         # It constructs search space as a top down, minimum bounding
@@ -157,7 +106,7 @@ class HybridAStarPlanner:
         if not success:
             return self._world.follow_waypoints(0)
 
-        speeds = np.array([self._flags.target_speed] * len(path_x))
+        speeds = np.array([TARGET_SPEED] * len(path_x))
 
         output_wps = np.array([path_x, path_y]).T
 
@@ -173,7 +122,7 @@ class HybridAStarPlanner:
             ]
         )
         end_index = min(
-            self._flags.num_waypoints_ahead,
+            NUM_WAYPOINTS_AHEAD,
             len(self._world.waypoints) - 1,
         )
 
@@ -213,7 +162,7 @@ class Operator:
     def __init__(self):
         self.obstacles = []
         self.position = []
-        self.planner = HybridAStarPlanner(world, FLAGS, logger)
+        self.planner = HybridAStarPlanner(world)
 
     def on_input(
         self,
