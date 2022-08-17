@@ -2,7 +2,9 @@
 
 ## From Docker Hub
 
-You will need [nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+### Requirements
+
+You will only need [nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
 To start with docker which is the easiest:
 ```bash
@@ -24,19 +26,23 @@ And then within the container:
 
 ## From Source
 
+### Requirements
+
+You will need:
+- [Rust](https://rustup.rs/)
+- [nvidia-docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+- Python v3.8.10
+- maturin `pip install maturin`
+
+For linux, run:
 ```bash
 git clone git@github.com:futurewei-tech/dora.git
 git clone git@github.com:futurewei-tech/dora-drives.git
 cd dora-drives
-```
-
-- Run with:
-
-```bash
-docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
-# TODO: Add Maturin build script
 ./scripts/launch.sh
 ```
+
+> For other OS, you will need to adapt the launch.sh script.
 
 And then within the container:
 ```bash
@@ -44,3 +50,9 @@ And then within the container:
 ```
 
 > This script has been built with my setup and you might need to install further dependencies that I have not listed, and additional configration for cross-compiling.
+
+### Hardware requirements
+
+- NVIDIA GPU Card
+- x86 Intel CPU (preferable)
+- Linux
