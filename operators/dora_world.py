@@ -11,7 +11,7 @@ NUM_WAYPOINTS_AHEAD = 30
 NUM_WAYPOINTS_BEHIND = 0
 OBSTACLE_FILTERING_DISTANCE = 1.0
 STATIC_OBSTACLE_DISTANCE_THRESHOLD = 70
-OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD = 20
+OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD = 10
 
 
 class World(object):
@@ -121,25 +121,28 @@ class World(object):
         return self.waypoints, self.target_speeds
 
     def get_obstacle_list(self):
-        obstacles = np.array(self.obstacle_predictions).reshape((-1, 3))
-        if len(obstacles) == 0 or len(self.waypoints) == 0:
+        if len(self.obstacle_predictions) == 0 or len(self.waypoints) == 0:
             return np.empty((0, 4))
         obstacle_list = []
 
-        distances = pairwise_distances(self.waypoints, obstacles[:, :2])
+        distances = pairwise_distances(
+            self.waypoints, self.obstacle_predictions[:, :2]
+        ).min(0)
         for distance, prediction in zip(distances, self.obstacle_predictions):
             # Use all prediction times as potential obstacles.
-            for location in prediction:
-                if distance < OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD:
-                    [x, y, _] = location
-                    obstacle_size = np.array(
-                        [
-                            x - OBSTACLE_RADIUS,
-                            y - OBSTACLE_RADIUS,
-                            x + OBSTACLE_RADIUS,
-                            y + OBSTACLE_RADIUS,
-                        ]
-                    )
+            if distance < OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD:
+                [x, y, _, _confidence, _label] = prediction
+                obstacle_size = np.array(
+                    [
+                        x - OBSTACLE_RADIUS,
+                        y - OBSTACLE_RADIUS,
+                        x + OBSTACLE_RADIUS,
+                        y + OBSTACLE_RADIUS,
+                    ]
+                )
+
+                # Remove traffic light. TODO: Take into account traffic light.
+                if _label != 9:
                     obstacle_list.append(obstacle_size)
 
         if len(obstacle_list) == 0:

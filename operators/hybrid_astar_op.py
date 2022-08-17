@@ -175,15 +175,9 @@ class Operator:
             self.position = np.frombuffer(value)
 
         if "obstacles" == input_id:
-            obstacles = value.split(b"\n")
-            obstacles_prediction = []
-            for obstacle in obstacles:
-                if len(obstacle) % 12 == 0:
-                    obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
+            obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
 
-                    obstacle_position = np.reshape(obstacle_buffer, (-1, 3))
-                    obstacles_prediction.append(obstacle_position)
-            self.obstacles = obstacles_prediction
+            self.obstacles = obstacles
             return DoraStatus.CONTINUE
 
         self.planner._world.update(

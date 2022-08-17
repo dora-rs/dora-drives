@@ -383,7 +383,7 @@ class Operator:
 
         byte_array = np.array(outputs).tobytes()
         send_output(
-            "obstacles_without_location",
+            "bbox",
             byte_array,
             #   "traffic_lights": dump(visible_tls),
         )

@@ -16,7 +16,7 @@ nodes:
   - id: perfect_detection_op
     operator:
       outputs:
-        - obstacles_without_location
+        - bbox
       inputs:
         position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
@@ -29,7 +29,7 @@ nodes:
         - obstacles
       inputs:
         depth_frame: carla_source_node/depth_frame
-        obstacles_without_location: perfect_detection_op/obstacles_without_location
+        bbox: perfect_detection_op/bbox
       python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
 
   - id: hybrid_astar_op
@@ -66,5 +66,5 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: perfect_detection_op/obstacles_without_location
+        obstacles_bb: perfect_detection_op/bbox
       python: /home/dora/workspace/dora-drives/operators/plot_op.py

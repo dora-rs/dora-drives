@@ -46,5 +46,5 @@ class Operator:
         arrays[:, 4] *= 100
         arrays = arrays.astype(np.int32)
         arrays = arrays.tobytes()
-        send_output("obstacles", arrays)
+        send_output("bbox", arrays)
         return DoraStatus.CONTINUE

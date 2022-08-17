@@ -19,13 +19,13 @@ nodes:
         - obstacles
       inputs:
         depth_frame: carla_source_node/depth_frame
-        obstacles_without_location: yolov5/obstacles
+        bbox: yolov5/bbox
       python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
  
   - id: yolov5
     operator: 
       outputs:
-        - obstacles
+        - bbox
       inputs:
         image: carla_source_node/image
       python: /home/dora/workspace/dora-drives/operators/yolov5_op.py
@@ -64,5 +64,5 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: yolov5/obstacles
+        obstacles_bb: yolov5/bbox
       python: /home/dora/workspace/dora-drives/operators/plot_op.py

@@ -62,9 +62,8 @@ def get_predictions(obstacles, obstacle_with_locations):
     predictions = []
     # Transform the obstacle into a prediction.
     for obstacle, location in zip(obstacles, obstacle_with_locations):
-        obstacle_bytes = np.array(location, dtype="float32").tobytes()
-        obstacle_bytes += obstacle[-2:].tobytes()
-        predictions.append(obstacle_bytes)
+        obstacle = np.append(location, obstacle[-2:])
+        predictions.append(obstacle)
 
     return predictions
 
@@ -154,10 +153,7 @@ class Operator:
             )
             return DoraStatus.CONTINUE
 
-        if (
-            input_id == "obstacles_without_location"
-            and len(self.depth_frame) != 0
-        ):
+        if input_id == "bbox" and len(self.depth_frame) != 0:
             if len(value) == 0:
                 return DoraStatus.CONTINUE
             obstacles = np.frombuffer(value, dtype="int32").reshape((-1, 6))
@@ -167,6 +163,6 @@ class Operator:
             )
 
             predictions = get_predictions(obstacles, obstacles_with_location)
-            predictions_bytes = b"\n".join(predictions)
+            predictions_bytes = np.array(predictions, dtype="float32").tobytes()
             send_output("obstacles", predictions_bytes)
         return DoraStatus.CONTINUE

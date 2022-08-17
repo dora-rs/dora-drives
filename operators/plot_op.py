@@ -69,7 +69,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         if "obstacles" == input_id:
-            obstacles = value.split(b"\n")
+            obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
             self.obstacles = obstacles
             return DoraStatus.CONTINUE
 
@@ -113,23 +113,19 @@ class Operator:
                 )
 
         for obstacle in self.obstacles:
-            if len(obstacle) % 12 == 0:
-                obstacle_buffer = np.frombuffer(obstacle, dtype="float32")
-
-                obstacle_position = np.reshape(obstacle_buffer, (-1, 5))
-                for location in obstacle_position:
-                    location = location_to_camera_view(
-                        np.append(location[:2].reshape((1, -1)), [[0]]),
-                        INTRINSIC_MATRIX,
-                        extrinsic_matrix,
-                    )
-                    cv2.circle(
-                        resized_image,
-                        (int(location[0]), int(location[1])),
-                        3,
-                        (255, 255, 0),
-                        -1,
-                    )
+            [x, y, z, _confidence, _label] = obstacle
+            location = location_to_camera_view(
+                np.array([[x, y, z]]),
+                INTRINSIC_MATRIX,
+                extrinsic_matrix,
+            )
+            cv2.circle(
+                resized_image,
+                (int(location[0]), int(location[1])),
+                3,
+                (255, 255, 0),
+                -1,
+            )
 
         for obstacle_bb in self.obstacles_bb:
             [min_x, max_x, min_y, max_y, confidence, label] = obstacle_bb
