@@ -31,14 +31,6 @@ nodes:
         depth_frame: carla_source_node/depth_frame
         obstacles_without_location: perfect_detection_op/obstacles_without_location
       python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
- 
-  #- id: efficientdet_op
-    #operator: 
-      #outputs:
-        #- obstacles
-      #inputs:
-        #image: carla_source_node/image
-      #python: /home/dora/workspace/dora-drives/operators/efficient_detection_op.py
 
   - id: hybrid_astar_op
     operator:
@@ -48,15 +40,6 @@ nodes:
       inputs:
         position: carla_source_node/position
         obstacles: obstacle_location_op/obstacles
-
-  #- id: pid_control_node
-    #custom:
-      #outputs:
-        #- control
-      #inputs:
-        #position: carla_source_node/position
-        #waypoints: planning_node/waypoints
-      #run: dora-drives-node
 
   - id: pid_control_op
     operator:
@@ -76,16 +59,6 @@ nodes:
         control: pid_control_op/control
         vehicle_id: carla_source_node/vehicle_id
 
-
-  # - id: influxdb_node
-    # custom:
-      # description: Optional
-      # inputs:
-        # control_status: control_node/control_status
-        # position: carla_source_node/position
-        # obstacles: obstacle_location_node/obstacles
-      # run: dora-drives-node
-    
   - id: plot_op
     operator:
       description: Plot operator

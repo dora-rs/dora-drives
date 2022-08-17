@@ -371,20 +371,17 @@ class Operator:
 
                     # Get the instance of the Obstacle
                     if isinstance(obstacle, Vehicle):
-                        segmentation_class = 10
+                        segmentation_class = 2
                     else:
-                        segmentation_class = 4
-                    obstacle_bytes = (
-                        bbox.tobytes()
-                        + self.depth_frame_position.tobytes()
-                        + np.array(
-                            [1.0, segmentation_class], dtype="float32"
-                        ).tobytes()
+                        segmentation_class = 0
+                    obstacle = np.append(
+                        bbox,
+                        np.array([100, segmentation_class], dtype="int32"),
                     )
 
-                    outputs.append(obstacle_bytes)
+                    outputs.append(obstacle)
 
-        byte_array = b"\n".join(outputs)
+        byte_array = np.array(outputs).tobytes()
         send_output(
             "obstacles_without_location",
             byte_array,

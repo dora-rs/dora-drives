@@ -13,7 +13,6 @@ nodes:
         - image
       run: /home/dora/workspace/dora-drives/nodes/carla_source_node.py
 
-
   - id: obstacle_location_op
     operator: 
       outputs:
@@ -40,15 +39,6 @@ nodes:
         position: carla_source_node/position
         obstacles: obstacle_location_op/obstacles
 
-  #- id: pid_control_node
-    #custom:
-      #outputs:
-        #- control
-      #inputs:
-        #position: carla_source_node/position
-        #waypoints: planning_node/waypoints
-      #run: dora-drives-node
-
   - id: pid_control_op
     operator:
       python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
@@ -67,16 +57,6 @@ nodes:
         control: pid_control_op/control
         vehicle_id: carla_source_node/vehicle_id
 
-
-  # - id: influxdb_node
-    # custom:
-      # description: Optional
-      # inputs:
-        # control_status: control_node/control_status
-        # position: carla_source_node/position
-        # obstacles: obstacle_location_node/obstacles
-      # run: dora-drives-node
-    
   - id: plot_op
     operator:
       description: Plot operator

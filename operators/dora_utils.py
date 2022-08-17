@@ -221,7 +221,7 @@ class DoraStatus(Enum):
 
 
 LABELS = [
-    "ABC",
+    "person",
     "bicycle",
     "car",
     "motorcycle",
