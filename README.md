@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./logo.svg" width="400">
+    <img src="./docs/book/logo.svg" width="400">
 </p>
 
 ---
@@ -71,7 +71,7 @@ flowchart TB
   carla_source_node -- position --> perfect_detection_node
   carla_source_node -- segmented_frame --> perfect_detection_node
   carla_source_node -- depth_frame --> obstacles_location_node
-  perfect_detection_node -- obstacles_without_location --> obstacles_location_node
+  perfect_detection_node -- bbox --> obstacles_location_node
   carla_source_node -- position --> obstacles_location_node
   obstacles_location_node -- obstacles --> planning_node
   carla_source_node -- position --> planning_node
