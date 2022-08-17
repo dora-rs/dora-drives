@@ -10,12 +10,6 @@ This project is in early development, and many features have yet to be implement
 
 ---
 
-## Requirements:
-|Dependencies|Version|
-|-|-|
-|OS| Linux
-|Python| Version 3.8
-|Docker|Latest
 
 ## Docker started
 
@@ -61,19 +55,6 @@ And then within the container:
 ### Configuration
 
 - Current configurations are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
-
-#### InfluxDB visualisation
-
-- Create a free plan at:  https://cloud2.influxdata.com/signup
-- Create a bucket and an API token.
-- Change the current static constant variables.
-
-### Jaeger Export
-
-- To export to Jaeger, you will need to first launch a Jaeger container:
-```
-docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
-```
 
 ### Graph
 
