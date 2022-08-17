@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - dora-drives</title>
+        <title>PID Control operator - dora-drives</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html" class="active">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">2.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">3.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">4.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">5.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">6.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">7.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">8.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">9.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">10.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">2.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">3.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">4.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">5.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">6.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html" class="active"><strong aria-hidden="true">7.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">8.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">9.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">10.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,67 +143,26 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p align="center">
-    <img src="./logo.svg" width="400">
-</p>
-<h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><code>dora-drives</code> is the starter kit for <code>dora</code>. <code>dora-drives</code> is an autonomous vehicle that runs within the <a href="https://carla.org/">Carla simulator</a>.</p>
-<p>This project is in early development, and many features have yet to be implemented with breaking changes. Please don't take for granted the current design.</p>
-<h1 id="current-operators"><a class="header" href="#current-operators">Current Operators</a></h1>
-<p>Currently <code>dora-drives</code> is made of:</p>
+                        <h1 id="pid-control-operator"><a class="header" href="#pid-control-operator">PID Control operator</a></h1>
+<p><code>pid</code> control operator computes the command that needs to be executed to follow the <code>hybrid_astar</code> waypoints.</p>
+<h2 id="inputs"><a class="header" href="#inputs">Inputs</a></h2>
 <ul>
-<li>A Carla source node that generates pedestrians, vehicles, as well as an <code>ego</code> vehicle with camera and sensors attached to it.</li>
-<li>A perfect object detection operator that use information from the simulator to generate bounding box on image frame.</li>
-<li>A <code>yolov5</code> object detection operator that generates bounding boxes on images where it detects object. </li>
-<li>An obstacle location operator that match bouding box with depth frame images, to get the exact location of an obstacle.</li>
-<li>A <code>hybrid_astar</code> operator that avoid obstacles detected and use cartography information when there is no obstacles.</li>
-<li>A <code>pid</code> control operator that computes the command that needs to be executed to follow the <code>hybrid_astar</code> waypoints.</li>
-<li>A control operator that sends the command to the Carla simulator.</li>
-<li>A plot operator that plots: bounding boxes, obstacles locations, and waypoints on a frame and displays it.</li>
+<li>waypoints coordinates to follow.</li>
 </ul>
-<h2 id="-license"><a class="header" href="#-license">⚖️ LICENSE</a></h2>
-<p>This project is licensed under Apache-2.0. Check out <a href="NOTICE.html">NOTICE.md</a> for more information.</p>
-<pre><code class="language-mermaid">flowchart TB
-  carla_source_node[\carla_source_node/]
-subgraph obstacle_location_op
-  obstacle_location_op/op[op]
-end
-subgraph yolov5
-  yolov5/op[op]
-end
-subgraph hybrid_astar_op
-  hybrid_astar_op/op[op]
-end
-subgraph pid_control_op
-  pid_control_op/op[op]
-end
-subgraph control_op
-  control_op/op[op]
-end
-subgraph plot_op
-  plot_op/op[/op\]
-end
-  carla_source_node -- depth_frame --&gt; obstacle_location_op/op
-  yolov5/op -- obstacles as bbox --&gt; obstacle_location_op/op
-  carla_source_node -- image --&gt; yolov5/op
-  obstacle_location_op/op -- obstacles --&gt; hybrid_astar_op/op
-  carla_source_node -- position --&gt; hybrid_astar_op/op
-  carla_source_node -- position --&gt; pid_control_op/op
-  hybrid_astar_op/op -- waypoints --&gt; pid_control_op/op
-  pid_control_op/op -- control --&gt; control_op/op
-  carla_source_node -- vehicle_id --&gt; control_op/op
-  carla_source_node -- image --&gt; plot_op/op
-  obstacle_location_op/op -- obstacles --&gt; plot_op/op
-  yolov5/op -- obstacles as obstacles_bb --&gt; plot_op/op
-  hybrid_astar_op/op -- waypoints --&gt; plot_op/op
-</code></pre>
+<h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
+<ul>
+<li>Command control.</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="hybrid_astar_operator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
                         
-                                                    <a rel="next" href="installation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="control_operator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -213,8 +172,11 @@ end
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="hybrid_astar_operator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
                 
-                                    <a rel="next" href="installation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="control_operator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
