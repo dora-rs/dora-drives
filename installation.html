@@ -145,7 +145,8 @@
                     <main>
                         <h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
 <h2 id="from-docker-hub"><a class="header" href="#from-docker-hub">From Docker Hub</a></h2>
-<p>You will need <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></p>
+<h3 id="requirements"><a class="header" href="#requirements">Requirements</a></h3>
+<p>You will only need <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></p>
 <p>To start with docker which is the easiest:</p>
 <pre><code class="language-bash">docker pull haixuantao/dora-drives
 nvidia-docker run -itd --name dora -p 20022:22 haixuantao/dora-drives /bin/bash
@@ -162,23 +163,35 @@ ssh -p 20022 -X dora@localhost
 <p>This docker image has been built with my setup and it might not work on all machines. In case it doesn't work. Please check the following <code>From Source</code>.</p>
 </blockquote>
 <h2 id="from-source"><a class="header" href="#from-source">From Source</a></h2>
+<h3 id="requirements-1"><a class="header" href="#requirements-1">Requirements</a></h3>
+<p>You will need:</p>
+<ul>
+<li><a href="https://rustup.rs/">Rust</a></li>
+<li><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></li>
+<li>Python v3.8.10</li>
+<li>maturin <code>pip install maturin</code></li>
+</ul>
+<p>For linux, run:</p>
 <pre><code class="language-bash">git clone git@github.com:futurewei-tech/dora.git
 git clone git@github.com:futurewei-tech/dora-drives.git
 cd dora-drives
-</code></pre>
-<ul>
-<li>Run with:</li>
-</ul>
-<pre><code class="language-bash">docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
-# TODO: Add Maturin build script
 ./scripts/launch.sh
 </code></pre>
+<blockquote>
+<p>For other OS, you will need to adapt the launch.sh script.</p>
+</blockquote>
 <p>And then within the container:</p>
 <pre><code class="language-bash">./workspace/dora-drives/scripts/launch_in_container.sh
 </code></pre>
 <blockquote>
 <p>This script has been built with my setup and you might need to install further dependencies that I have not listed, and additional configration for cross-compiling.</p>
 </blockquote>
+<h3 id="hardware-requirements"><a class="header" href="#hardware-requirements">Hardware requirements</a></h3>
+<ul>
+<li>NVIDIA GPU Card</li>
+<li>x86 Intel CPU (preferable)</li>
+<li>Linux</li>
+</ul>
 
                     </main>
 
