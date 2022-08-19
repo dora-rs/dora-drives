@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./docs/book/logo.svg" width="400">
+    <img src="./docs/src/logo.svg" width="400">
 </p>
 
 ---
