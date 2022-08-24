@@ -59,11 +59,7 @@ And then within the container:
 
 - Current configurations are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
 
-### Current Roadmap of Operator implementation
-
-## Dora-drives additional operator
-
-Big categories of operators we want to cover within `dora-drives`:
+### Operator category already implemented
 
 - [Object dectection](https://paperswithcode.com/task/object-detection)
     - Perfect detection
@@ -79,7 +75,7 @@ Big categories of operators we want to cover within `dora-drives`:
 - Path Tracking
     - PID
 
-### Future tasks + priority:
+### Future operator categories with high priority:
 
 - [Traffic sign recognition](https://paperswithcode.com/task/traffic-sign-recognition)
     - Currently falling back to yolov5. 
@@ -90,7 +86,7 @@ Big categories of operators we want to cover within `dora-drives`:
 - [Multiple Object tracking(MOT)](https://paperswithcode.com/task/multi-object-tracking)
     - Currently unimplemented. We will probably go with Strong sort as yolov5+StrongSort seems to have better performance. See: https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
     
-### Future tasks - priority:
+### Future operator categories with less priority:
 - [Pedestrian detection](https://paperswithcode.com/task/pedestrian-detection)
     - Fall back to yolov5 currently
 - [Semantic segmentation](https://paperswithcode.com/task/semantic-segmentation)
