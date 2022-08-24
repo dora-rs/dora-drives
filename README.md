@@ -59,31 +59,43 @@ And then within the container:
 
 - Current configurations are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
 
-### Graph
+### Current Roadmap of Operator implementation
 
-```mermaid
-flowchart TB
-  carla_source_node[\carla_source_node/]
-  perfect_detection_node
-  obstacles_location_node
-  planning_node
-  pid_control_node
-  control_node
-  influxdb_node[/influxdb_node\]
-  carla_source_node -- depth_frame --> perfect_detection_node
-  carla_source_node -- position --> perfect_detection_node
-  carla_source_node -- segmented_frame --> perfect_detection_node
-  carla_source_node -- depth_frame --> obstacles_location_node
-  perfect_detection_node -- bbox --> obstacles_location_node
-  carla_source_node -- position --> obstacles_location_node
-  obstacles_location_node -- obstacles --> planning_node
-  carla_source_node -- position --> planning_node
-  carla_source_node -- position --> pid_control_node
-  planning_node -- waypoints --> pid_control_node
-  pid_control_node -- control --> control_node
-  carla_source_node -- vehicle_id --> control_node
-  control_node -- control_status --> influxdb_node
-  obstacles_location_node -- obstacles --> influxdb_node
-  carla_source_node -- position --> influxdb_node
+## Dora-drives additional operator
 
-```
+Big categories of operators we want to cover within `dora-drives`:
+
+- [Object dectection](https://paperswithcode.com/task/object-detection)
+    - Perfect detection
+    - yolov5 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
+- [Lane detection](https://paperswithcode.com/task/lane-detection)
+    - currently implementing: yolop [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/lane-detection-on-bdd100k)](https://paperswithcode.com/sota/lane-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
+        - *eta: End of August*
+- [Drivable Area detection](https://paperswithcode.com/task/drivable-area-detection)
+    - currently implementing: yolop [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/drivable-area-detection-on-bdd100k)](https://paperswithcode.com/sota/drivable-area-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
+        - *eta: End of August*
+- [Motion Planning](https://paperswithcode.com/task/motion-planning)
+    - Hybrid A-star.
+- Path Tracking
+    - PID
+
+### Future tasks + priority:
+
+- [Traffic sign recognition](https://paperswithcode.com/task/traffic-sign-recognition)
+    - Currently falling back to yolov5. 
+- [Motion Planning](https://paperswithcode.com/task/motion-planning)
+    - Better motion planning. 
+- [Trajectory Prediction (pedestrian and vehicles)](https://paperswithcode.com/task/trajectory-prediction)
+    - Currently unimplemented. 
+- [Multiple Object tracking(MOT)](https://paperswithcode.com/task/multi-object-tracking)
+    - Currently unimplemented. We will probably go with Strong sort as yolov5+StrongSort seems to have better performance. See: https://github.com/mikel-brostrom/Yolov5_StrongSORT_OSNet [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
+    
+### Future tasks - priority:
+- [Pedestrian detection](https://paperswithcode.com/task/pedestrian-detection)
+    - Fall back to yolov5 currently
+- [Semantic segmentation](https://paperswithcode.com/task/semantic-segmentation)
+    - Current: fall back to drivable area only. 
+- [Depth estimation](https://paperswithcode.com/task/depth-estimation)
+    - Current: fall back to depth frame and lidar sensor. 
+- [Multiple object tracking and segmentation(MOTS)](https://paperswithcode.com/task/multi-object-tracking)
+    - Current: Fall back to object detection + Object tracking. 
