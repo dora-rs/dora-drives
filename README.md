@@ -14,13 +14,11 @@ This project is in early development, and many features have yet to be implement
 
 - [Object dectection](https://paperswithcode.com/task/object-detection)
     - Perfect detection
-    - yolov5 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
+    - [yolov5](https://github.com/ultralytics/yolov5) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
 - [Lane detection](https://paperswithcode.com/task/lane-detection)
-    - currently implementing: yolop [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/lane-detection-on-bdd100k)](https://paperswithcode.com/sota/lane-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
-        - *eta: End of August*
+    - [yolop](https://github.com/hustvl/YOLOP) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/lane-detection-on-bdd100k)](https://paperswithcode.com/sota/lane-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
 - [Drivable Area detection](https://paperswithcode.com/task/drivable-area-detection)
-    - currently implementing: yolop [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/drivable-area-detection-on-bdd100k)](https://paperswithcode.com/sota/drivable-area-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
-        - *eta: End of August*
+    - [yolop](https://github.com/hustvl/YOLOP) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/drivable-area-detection-on-bdd100k)](https://paperswithcode.com/sota/drivable-area-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
 - [Motion Planning](https://paperswithcode.com/task/motion-planning)
     - Hybrid A-star.
 - Path Tracking
