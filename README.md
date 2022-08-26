@@ -88,6 +88,11 @@ docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in
 ./scripts/launch.sh
 ```
 
+> Make sure to kill running dora containers if you are trying to build a new image via
+> ```bash
+> docker stop dora && docker rm dora
+> ```
+
 And then within the container:
 ```bash
 ./workspace/dora-drives/scripts/launch_in_container.sh

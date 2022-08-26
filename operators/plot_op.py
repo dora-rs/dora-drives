@@ -46,6 +46,8 @@ class Operator:
         self.waypoints = []
         self.obstacles = []
         self.obstacles_bb = []
+        self.lanes = []
+        self.drivable_area = []
         self.last_timestamp = time.time()
 
     def on_input(
@@ -71,6 +73,18 @@ class Operator:
         if "obstacles" == input_id:
             obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
             self.obstacles = obstacles
+            return DoraStatus.CONTINUE
+
+        if "lanes" == input_id:
+            lanes = np.frombuffer(value, dtype="int32").reshape((-1, 10, 2))
+            self.lanes = lanes
+            return DoraStatus.CONTINUE
+
+        if "drivable_area" == input_id:
+            drivable_area = np.frombuffer(value, dtype="int32").reshape(
+                (1, -1, 2)
+            )
+            self.drivable_area = drivable_area
             return DoraStatus.CONTINUE
 
         if "image" != input_id:
@@ -143,6 +157,19 @@ class Operator:
                 (0, 255, 0),
                 2,
                 1,
+            )
+
+        for lane in self.lanes:
+            cv2.polylines(resized_image, [lane], False, (0, 0, 255), 3)
+
+        for contour in self.drivable_area:
+            back = resized_image.copy()
+            cv2.drawContours(back, [contour], 0, (0, 255, 0), -1)
+
+            # blend with original image
+            alpha = 0.25
+            resized_image = cv2.addWeighted(
+                resized_image, 1 - alpha, back, alpha, 0
             )
 
         now = time.time()

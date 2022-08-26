@@ -5,10 +5,7 @@ import cv2
 import numpy as np
 import torch
 
-
-class DoraStatus(Enum):
-    CONTINUE = 0
-    STOP = 1
+from dora_utils import DoraStatus
 
 
 class Operator:
