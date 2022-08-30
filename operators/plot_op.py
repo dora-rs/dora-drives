@@ -46,6 +46,7 @@ class Operator:
         self.waypoints = []
         self.obstacles = []
         self.obstacles_bb = []
+        self.obstacles_id = []
         self.lanes = []
         self.drivable_area = []
         self.last_timestamp = time.time()
@@ -67,6 +68,12 @@ class Operator:
         if "obstacles_bb" == input_id:
             self.obstacles_bb = np.frombuffer(value, dtype="int32").reshape(
                 (-1, 6)
+            )
+            return DoraStatus.CONTINUE
+
+        if "obstacles_id" == input_id:
+            self.obstacles_id = np.frombuffer(value, dtype="int32").reshape(
+                (-1, 7)
             )
             return DoraStatus.CONTINUE
 
@@ -155,6 +162,31 @@ class Operator:
                 font,
                 0.75,
                 (0, 255, 0),
+                2,
+                1,
+            )
+
+        for obstacle_id in self.obstacles_id:
+            [
+                min_x,
+                max_x,
+                min_y,
+                max_y,
+                track_id,
+                confidence,
+                label,
+            ] = obstacle_id
+            start = (int(min_x), int(min_y))
+            end = (int(max_x), int(max_y))
+            # cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
+
+            cv2.putText(
+                resized_image,
+                f"#{track_id}",
+                (int(max_x), int(max_y + 20)),
+                font,
+                0.75,
+                (255, 140, 0),
                 2,
                 1,
             )

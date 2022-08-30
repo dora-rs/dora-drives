@@ -156,7 +156,7 @@ def fitlane(mask, sel_labels, labels, stats):
             try:
                 func = np.polyfit(samples_x, samples_y, 2)
             except:
-                print("polyit did not work")
+                print("polyfit did not work")
             # y_limits = np.polyval(func, 0)
             # if y_limits > 720 or y_limits < 0:
             # if (x + w - 1) >= 1280:

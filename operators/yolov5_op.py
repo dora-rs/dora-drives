@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Callable
 
 import cv2
@@ -39,7 +38,9 @@ class Operator:
         frame = frame[:, :, :3]
 
         results = self.model(frame)  # includes NMS
-        arrays = np.array(results.xyxy[0].cpu())[:, [0, 2, 1, 3, 4, 5]]
+        arrays = np.array(results.xyxy[0].cpu())[
+            :, [0, 2, 1, 3, 4, 5]
+        ]  # xyxy -> xxyy
         arrays[:, 4] *= 100
         arrays = arrays.astype(np.int32)
         arrays = arrays.tobytes()

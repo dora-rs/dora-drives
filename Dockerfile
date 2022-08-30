@@ -47,9 +47,7 @@ RUN python3 -m pip install setuptools setuptools-rust numpy==1.19.5
 # Setup Rust and install dora.
 RUN mkdir -p /home/dora/workspace
 
-# Set up Pylot.
 RUN sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk python3-pygame libgeos-dev vim
-# Get the Pylot directory.
 
 RUN mkdir -p /home/dora/workspace/dora_dependencies
 
@@ -98,9 +96,11 @@ RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_
 
 RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 
-COPY . . 
+COPY requirements.txt requirements.txt 
 
 run python3 -m pip install -r requirements.txt
+
+COPY . .
 
 RUN python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora_node_api_python-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
 

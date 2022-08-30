@@ -42,10 +42,27 @@ thop>=0.1.1  # FLOPs computation
 # pycocotools>=2.0  # COCO mAP
 # roboflow
 
-
 # YOLOP 
 yacs
 Cython
 PyYAML>=5.3
 prefetch_generator
 imageio
+
+# strong_sort -----------------------------------
+
+Cython
+h5py
+six
+tb-nightly
+future
+yacs
+gdown
+flake8
+yapf
+isort==4.3.21
+imageio
+torchreid @ https://github.com/KaiyangZhou/deep-person-reid/archive/master.zip
+git+https://github.com/haixuanTao/yolov5_strongsort_package.git#b9f257872ea632a20a9faabebc3463793c53cdb2
+
+# ---
