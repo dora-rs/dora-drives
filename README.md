@@ -20,7 +20,7 @@ This project is in early development, and many features have yet to be implement
 - [Drivable Area detection](https://paperswithcode.com/task/drivable-area-detection)
     - [yolop](https://github.com/hustvl/YOLOP) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/drivable-area-detection-on-bdd100k)](https://paperswithcode.com/sota/drivable-area-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
 - [Multiple Object tracking(MOT)](https://paperswithcode.com/task/multi-object-tracking)
-    - Strong Sort [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
+    - [strong sort](https://github.com/haixuanTao/yolov5_strongsort_package) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
 - [Motion Planning](https://paperswithcode.com/task/motion-planning)
     - Hybrid A-star.
 - Path Tracking
@@ -99,3 +99,17 @@ And then within the container:
 ### Configuration
 
 - Current configurations are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
+
+### Demos 
+
+- yolov5
+
+![yolov5](https://user-images.githubusercontent.com/22787340/187723794-3623bee2-91d6-436a-a5d7-d2e363483c76.gif)
+
+- yolop
+
+![drivable_area](https://user-images.githubusercontent.com/22787340/187723841-7f3ba560-dbbe-4d43-886a-fb3b0be9247a.gif)
+
+- strong_sort
+
+![strong_sort](https://user-images.githubusercontent.com/22787340/187723873-473cda4f-573d-4663-a5b9-a4df2611c482.gif)
