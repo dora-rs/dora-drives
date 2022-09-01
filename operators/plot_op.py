@@ -3,7 +3,6 @@ from typing import Callable
 
 import cv2
 import numpy as np
-import pygame
 
 from dora_utils import (
     LABELS,
@@ -22,13 +21,13 @@ DEPTH_FOV = 90
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
-
-
-pygame.init()
-gameDisplay = pygame.display.set_mode(
+writer = cv2.VideoWriter(
+    "output.avi",
+    cv2.VideoWriter_fourcc(*"MJPG"),
+    30,
     (CAMERA_WIDTH, CAMERA_HEIGHT),
-    pygame.HWSURFACE | pygame.DOUBLEBUF,
 )
+
 font = cv2.FONT_HERSHEY_SIMPLEX
 bottomLeftCornerOfText = (10, 500)
 fontScale = 1
@@ -205,22 +204,20 @@ class Operator:
             )
 
         now = time.time()
-        cv2.putText(
-            resized_image,
-            f"Hertz {1 / (now - self.last_timestamp):.2f}",
-            bottomLeftCornerOfText,
-            font,
-            fontScale,
-            fontColor,
-            thickness,
-            lineType,
-        )
-        data = resized_image[:, :, (2, 1, 0)]
-        data = np.rot90(data)
-        data = cv2.flip(data, 0)
+        # cv2.putText(
+        # resized_image,
+        # f"Hertz {1 / (now - self.last_timestamp):.2f}",
+        # bottomLeftCornerOfText,
+        # font,
+        # fontScale,
+        # fontColor,
+        # thickness,
+        # lineType,
+        # )
 
         self.last_timestamp = now
-        pygame.surfarray.blit_array(gameDisplay, data)
-        pygame.display.flip()
+        writer.write(resized_image)
+        cv2.imshow("image", resized_image)
+        cv2.waitKey(1)
 
         return DoraStatus.CONTINUE
