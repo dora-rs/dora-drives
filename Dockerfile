@@ -102,8 +102,9 @@ run python3 -m pip install -r requirements.txt
 
 COPY . .
 
-RUN python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora_node_api_python-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
+RUN python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
 
 RUN sudo chown dora:dora /home/dora/workspace/dora-drives
 
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*
+
