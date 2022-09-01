@@ -28,7 +28,7 @@ def xywh2xyxy(x):
 
 def non_max_suppression(
     prediction,
-    conf_thres=0.45,
+    conf_thres=0.65,
     iou_thres=0.25,
 ):
     """Performs Non-Maximum Suppression (NMS) on inference results
@@ -313,7 +313,9 @@ class Operator:
         da_seg_mask = da_seg_mask.int().squeeze().cpu().numpy()
         da_seg_mask = morphological_process(da_seg_mask, kernel_size=7)
 
-        contours, _ = cv2.findContours(da_seg_mask, 1, 2)
+        contours, _ = cv2.findContours(
+            da_seg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
         contour = max(contours, key=cv2.contourArea)
         contour = contour.astype(np.int32)
         send_output("drivable_area", contour.tobytes())  # TODO: Contour
