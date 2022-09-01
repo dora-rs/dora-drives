@@ -26,7 +26,7 @@ class Operator:
     def __init__(self):
         model = StrongSORT(
             "osnet_x0_25_msmt17.pt",
-            torch.device("cpu"),
+            torch.device("cuda"),
             False,
         )
         model.model.warmup()
@@ -55,7 +55,8 @@ class Operator:
         if input_id == "obstacles_bb" and len(self.frame) != 0:
             obstacles = np.frombuffer(value, dtype="int32").reshape((-1, 6))
             if obstacles.shape[0] == 1:
-                # self.model.increment_ages()
+                self.model.increment_ages()
+                send_output("obstacles_id", np.array([]).tobytes())
                 return DoraStatus.CONTINUE
 
             # Post Processing yolov5
