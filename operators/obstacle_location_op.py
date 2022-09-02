@@ -22,9 +22,33 @@ DEPTH_FOV = 90
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
+INV_INTRINSIC_MATRIX = np.linalg.inv(INTRINSIC_MATRIX)
 
 
-def get_point_cloud(depth_frame, depth_frame_matrix):
+def get_closest_point_in_point_cloud(
+    point_cloud: np.array, point: np.array, normalized: bool = False
+):
+    """Finds the closest point in the point cloud to the given point."""
+    # Select x and y.
+    pc_xy = point_cloud[:, 0:2]
+
+    # Compute distance
+    if normalized:
+        # Select z
+        pc_z = point_cloud[:, 2]
+        # Divize x, y by z
+        normalized_pc = pc_xy / pc_z[:, None]
+    else:
+        normalized_pc = pc_xy
+
+    # Select index of the closest point.
+    (closest_point, _) = closest_vertex(normalized_pc, point)
+
+    # Return the closest point.
+    return point_cloud[closest_point]
+
+
+def get_point_cloud(depth_frame):
     """Converts the depth frame to a 1D array containing the 3D
     position of each pixel in world coordinates.
     """
@@ -42,15 +66,13 @@ def get_point_cloud(depth_frame, depth_frame_matrix):
     p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])
 
     # P = [X,Y,Z]
-    p3d = np.dot(np.linalg.inv(INTRINSIC_MATRIX), p2d)
+    p3d = np.dot(INV_INTRINSIC_MATRIX, p2d)
     p3d *= normalized_depth * DEPTH_CAMERA_MAX_DEPTH
 
     # [[X1,Y1,Z1],[X2,Y2,Z2], ... [Xn,Yn,Zn]]
     locations = np.asarray(np.transpose(p3d))
     # Transform the points in 3D world coordinates.
-    extrinsic_matrix = get_extrinsic_matrix(depth_frame_matrix)
-    point_cloud = to_world_coordinate(locations, extrinsic_matrix)
-    return point_cloud
+    return locations
 
 
 def get_predictions(obstacles, obstacle_with_locations):
@@ -70,52 +92,38 @@ def get_predictions(obstacles, obstacle_with_locations):
 
 def get_obstacle_locations(
     obstacles,
-    depth_frame,
-    depth_frame_position: np.array,
+    point_cloud: np.array,
 ):
-
-    depth_frame_matrix = get_projection_matrix(depth_frame_position)
-
-    point_cloud = get_point_cloud(depth_frame, depth_frame_matrix)
-
+    point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
     obstacle_with_locations = []
     for obstacle in obstacles:
         # Sample several points around the center of the bounding box
         # in case the bounding box is not well centered on the obstacle.
         # In such situations the center point might be in between legs,
         # and thus we might overestimate the distance.
-        sample_points = []
-        coefficient = (
-            (obstacle[1] - obstacle[0]) / 2,
-            (obstacle[3] - obstacle[2]) / 2,
-        )
-        left_corner = (
-            (obstacle[1] + obstacle[0]) / 2,
-            (obstacle[3] + obstacle[2]) / 2,
-        )
-        sample_points = (
-            np.random.uniform(size=(32, 2)) * coefficient + left_corner
-        )
-        sample_points = sample_points.astype(int)
 
-        locations = np.array(
+        obstacle_center = np.array(
             [
-                point_cloud[point[1] * DEPTH_IMAGE_WIDTH + point[0]]
-                for point in sample_points
-                if point[1] > 0
-                and point[0] > 0
-                and (point[1] * DEPTH_IMAGE_WIDTH + point[0])
-                < (DEPTH_IMAGE_HEIGHT * DEPTH_IMAGE_WIDTH)
+                [
+                    (obstacle[1] + obstacle[0]) / 2,
+                    (obstacle[3] + obstacle[2]) / 2,
+                    1.0,
+                ]
             ]
         )
 
-        # Choose the closest from the locations of the sampled points.
-        if len(locations) > 0:
-            _, min_location = closest_vertex(
-                locations, depth_frame_position[:3].reshape((1, -1))
-            )
+        # Project our 2D pixel location into 3D space, onto the z=1 plane.
+        p3d = np.dot(
+            INV_INTRINSIC_MATRIX, obstacle_center.transpose()
+        ).transpose()
 
-            obstacle_with_locations.append(min_location)
+        # Choose the closest from the locations of the sampled points.
+        min_location = get_closest_point_in_point_cloud(
+            point_cloud, p3d[:, :2], True
+        )
+        p3d *= min_location[2]
+
+        obstacle_with_locations.append(min_location)
 
     return obstacle_with_locations
 
@@ -126,8 +134,8 @@ class Operator:
     """
 
     def __init__(self):
-        self.depth_frame = []
-        self.depth_frame_position = []
+        self.point_cloud = []
+        self.point_cloud_position = []
         self.obstacles = []
 
     def on_input(
@@ -136,6 +144,28 @@ class Operator:
         value: bytes,
         send_output: Callable[[str, bytes], None],
     ):
+
+        if input_id == "lidar_pc":
+            point_cloud = np.frombuffer(
+                zlib.decompress(value[24:]), dtype=np.dtype("f4")
+            )
+            point_cloud = np.reshape(
+                point_cloud, (int(point_cloud.shape[0] / 4), 4)
+            )
+            self.point_cloud_position = np.frombuffer(
+                value[:24],
+                dtype="float32",
+            )
+            # To camera coordinate
+            # The latest coordinate space is the unreal space.
+            point_cloud = np.dot(
+                point_cloud,
+                np.array(
+                    [[0, 1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]]
+                ),
+            )
+            self.point_cloud = point_cloud[:, :3]
+            return DoraStatus.CONTINUE
 
         if input_id == "depth_frame":
             depth_frame = np.frombuffer(
@@ -146,23 +176,34 @@ class Operator:
                 depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
             )
 
-            self.depth_frame = depth_frame
-            self.depth_frame_position = np.frombuffer(
+            depth_frame_position = np.frombuffer(
                 value[:24],
                 dtype="float32",
             )
+
+            self.point_cloud_position = depth_frame_position
+            self.point_cloud = get_point_cloud(depth_frame)
+
             return DoraStatus.CONTINUE
 
-        if input_id == "bbox" and len(self.depth_frame) != 0:
+        if input_id == "bbox" and len(self.point_cloud) != 0:
             if len(value) == 0:
+                send_output("obstacles", np.array([]).tobytes())
                 return DoraStatus.CONTINUE
             obstacles = np.frombuffer(value, dtype="int32").reshape((-1, 6))
             self.obstacles = np.array(obstacles, dtype=np.float32)
             obstacles_with_location = get_obstacle_locations(
-                obstacles, self.depth_frame, self.depth_frame_position
+                obstacles, self.point_cloud
+            )
+
+            projection_matrix = get_projection_matrix(self.point_cloud_position)
+            extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
+            obstacles_with_location = to_world_coordinate(
+                np.array(obstacles_with_location), extrinsic_matrix
             )
 
             predictions = get_predictions(obstacles, obstacles_with_location)
             predictions_bytes = np.array(predictions, dtype="float32").tobytes()
+
             send_output("obstacles", predictions_bytes)
         return DoraStatus.CONTINUE

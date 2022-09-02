@@ -6,10 +6,6 @@ from carla import Client, Location, Rotation, Transform, command
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
 
-sensor_transform = Transform(
-    Location(3, 0, 1), Rotation(pitch=0, yaw=0, roll=0)
-)
-
 
 def add_lidar(world, transform, callback, vehicle):
     lidar_blueprint = world.get_blueprint_library().find(

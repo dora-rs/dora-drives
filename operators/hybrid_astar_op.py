@@ -23,7 +23,7 @@ ANGLE_COMPLETION_THRESHOLD = 100
 RAD_STEP = 4.0
 RAD_UPPER_RANGE = 4.0
 RAD_LOWER_RANGE = 4.0
-OBSTACLE_CLEARANCE_HYBRID_ASTAR = 1.0
+OBSTACLE_CLEARANCE_HYBRID_ASTAR = 0.5
 LANE_WIDTH_HYBRID_ASTAR = 6.0
 RADIUS = 6.0
 CAR_LENGTH = 4.0
@@ -104,6 +104,7 @@ class HybridAStarPlanner:
         )
 
         if not success:
+            print("could not find waypoints")
             return self._world.follow_waypoints(0)
 
         speeds = np.array([TARGET_SPEED] * len(path_x))

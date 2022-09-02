@@ -12,6 +12,7 @@ from dora import Node
 from generate_world import (
     add_camera,
     add_depth_camera,
+    add_lidar,
     add_segmented_camera,
     spawn_actors,
     spawn_driving_vehicle,
@@ -73,7 +74,7 @@ def on_lidar_msg(frame):
     ).tobytes()
 
     global lidar_pc
-    lidar_pc = frame.raw_data.tobytes() + camera_data
+    lidar_pc = camera_data + zlib.compress(frame.raw_data.tobytes())
 
 
 def on_camera_msg(frame):
@@ -144,7 +145,7 @@ world = client.get_world()
 
 
 ego_vehicle, vehicle_id = spawn_driving_vehicle(client, world)
-# lidar = add_lidar(world, sensor_transform, on_lidar_msg, vehicle)
+lidar = add_lidar(world, sensor_transform, on_lidar_msg, ego_vehicle)
 depth_camera = add_depth_camera(
     world, sensor_transform, on_depth_msg, ego_vehicle
 )
@@ -163,6 +164,7 @@ def main():
     global camera_frame
     global segmented_frame
     global depth_frame
+    global lidar_pc
 
     if camera_frame is None or segmented_frame is None or depth_frame is None:
         return {}
@@ -187,10 +189,11 @@ def main():
 
     node.send_output("position", position.tobytes())
     node.send_output("image", camera_frame)
-    node.send_output("depth_frame", depth_frame)
+    #   node.send_output("depth_frame", depth_frame)
     node.send_output("segmented_frame", segmented_frame)
+    node.send_output("lidar_pc", lidar_pc)
 
 
 for _ in range(1000):
-    time.sleep(0.3)
+    time.sleep(0.5)
     main()

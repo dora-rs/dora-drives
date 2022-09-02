@@ -7,7 +7,8 @@ nodes:
     custom:
       outputs:
         - position
-        - depth_frame
+        #- depth_frame
+        - lidar_pc
         - segmented_frame
         - vehicle_id
         - image
@@ -18,7 +19,8 @@ nodes:
       outputs:
         - obstacles
       inputs:
-        depth_frame: carla_source_node/depth_frame
+        # depth_frame: carla_source_node/depth_frame
+        lidar_pc: carla_source_node/lidar_pc
         bbox: yolov5/bbox
       python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
  
