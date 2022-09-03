@@ -7,6 +7,7 @@ maturin build --release
 cd ../../../
 
 cd ../dora-drives
+mkdir -p bin
 cp ../dora/target/release/dora-coordinator bin/dora-coordinator
 cp ../dora/target/release/dora-runtime bin/dora-runtime
 
