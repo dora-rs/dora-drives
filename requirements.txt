@@ -9,7 +9,6 @@ Pillow>=7.1.2
 PyYAML>=5.3.1
 requests>=2.23.0
 scipy>=1.4.1
-torchvision>=0.8.1
 tqdm>=4.64.0
 protobuf<=3.20.1  # https://github.com/ultralytics/yolov5/issues/8012
 
@@ -64,5 +63,6 @@ imageio
 torchreid @ https://github.com/KaiyangZhou/deep-person-reid/archive/master.zip
 git+https://github.com/haixuanTao/yolov5_strongsort_package.git#b9f257872ea632a20a9faabebc3463793c53cdb2
 https://download.pytorch.org/whl/cu116/torch-1.12.1%2Bcu116-cp38-cp38-linux_x86_64.whl
+https://download.pytorch.org/whl/cu116/torchvision-0.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl
 
 # ---
