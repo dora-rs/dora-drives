@@ -82,7 +82,7 @@ cd dora-drives
 
 ```bash
 docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
-# TODO: Add Maturin build script
+# Make sure to use Python 3.8 when running and having maturin 0.13
 ./scripts/launch.sh
 ```
 
