@@ -9,14 +9,9 @@ import numpy as np
 from carla import Client, Location, Rotation, Transform
 from dora import Node
 
-from generate_world import (
-    add_camera,
-    add_depth_camera,
-    add_lidar,
-    add_segmented_camera,
-    spawn_actors,
-    spawn_driving_vehicle,
-)
+from generate_world import (add_camera, add_depth_camera, add_lidar,
+                            add_segmented_camera, spawn_actors,
+                            spawn_driving_vehicle)
 
 logger = logging.Logger("")
 
@@ -195,5 +190,5 @@ def main():
 
 
 for _ in range(1000):
-    time.sleep(0.5)
+    time.sleep(0.2)
     main()
