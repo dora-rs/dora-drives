@@ -2,9 +2,9 @@ import threading
 from typing import Callable
 
 import numpy as np
-from carla import Client, VehicleControl, command
 
-from dora_utils import DoraStatus
+from _dora_utils import DoraStatus
+from carla import Client, VehicleControl, command
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"

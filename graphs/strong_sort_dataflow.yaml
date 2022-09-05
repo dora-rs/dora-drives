@@ -7,21 +7,12 @@ nodes:
     custom:
       outputs:
         - position
-        - depth_frame
+        - lidar_pc
         - segmented_frame
         - vehicle_id
         - image
-      run: /home/dora/workspace/dora-drives/nodes/carla_source_node.py
+      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
 
-  # - id: obstacle_location_op
-    # operator: 
-      # outputs:
-        # - obstacles
-      # inputs:
-        # depth_frame: carla_source_node/depth_frame
-        # bbox: yolov5/bbox
-      # python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
- 
   - id: yolov5
     operator: 
       outputs:
@@ -38,33 +29,6 @@ nodes:
         image: carla_source_node/image
         obstacles_bb: yolov5/bbox
       python: /home/dora/workspace/dora-drives/operators/strong_sort_op.py
-
-  - id: hybrid_astar_op
-    operator:
-      python: /home/dora/workspace/dora-drives/operators/hybrid_astar_op.py
-      outputs:
-        - waypoints
-      inputs:
-        position: carla_source_node/position
-        obstacles: obstacle_location_op/obstacles
-
-  - id: pid_control_op
-    operator:
-      python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
-      outputs:
-        - control
-      inputs:
-        position: carla_source_node/position
-        waypoints: hybrid_astar_op/waypoints
-
-  - id: control_op
-    operator:
-      python: /home/dora/workspace/dora-drives/operators/control_op.py
-      outputs:
-        - control_status
-      inputs:
-        control: pid_control_op/control
-        vehicle_id: carla_source_node/vehicle_id
 
   - id: plot_op
     operator:

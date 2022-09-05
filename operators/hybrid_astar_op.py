@@ -3,14 +3,11 @@ import time
 from typing import Callable
 
 import numpy as np
-from carla import Client
 from hybrid_astar_planner.HybridAStar.hybrid_astar_wrapper import (
     apply_hybrid_astar,
 )
 
-from dora_utils import DoraStatus
-from dora_world import World
-from hd_map import HDMap
+from dora_utils import DoraStatus, closest_vertex, pairwise_distances
 
 mutex = threading.Lock()
 
@@ -29,39 +26,55 @@ RADIUS = 6.0
 CAR_LENGTH = 4.0
 CAR_WIDTH = 1.8
 
+OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD = 10
+OBSTACLE_RADIUS = 1.0
 
 # Planning general
 TARGET_SPEED = 10.0
 NUM_WAYPOINTS_AHEAD = 30
 GOAL_LOCATION = [234, 59, 39]
-CARLA_SIMULATOR_HOST = "localhost"
-CARLA_SIMULATOR_PORT = "2000"
-
-world = World()
-world._goal_location = GOAL_LOCATION
-client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
-client.set_timeout(30.0)  # seconds
-carla_world = client.get_world()
-hd_map = HDMap(carla_world.get_map())
 
 
-class HybridAStarPlanner:
-    """Wrapper around the Hybrid A* planner.
+def get_obstacle_list(obstacle_predictions, waypoints):
+    if len(obstacle_predictions) == 0 or len(waypoints) == 0:
+        return np.empty((0, 4))
+    obstacle_list = []
 
-    Note:
-        Details can be found at `Hybrid A* Planner`_.
+    distances = pairwise_distances(waypoints, obstacle_predictions[:, :2]).min(
+        0
+    )
+    for distance, prediction in zip(distances, obstacle_predictions):
+        # Use all prediction times as potential obstacles.
+        if distance < OBSTACLE_DISTANCE_WAYPOINTS_THRESHOLD:
+            [x, y, _, _confidence, _label] = prediction
+            obstacle_size = np.array(
+                [
+                    x - OBSTACLE_RADIUS,
+                    y - OBSTACLE_RADIUS,
+                    x + OBSTACLE_RADIUS,
+                    y + OBSTACLE_RADIUS,
+                ]
+            )
 
-    Args:
-        world: (:py:class:`~pylot.planning.world.World`): A reference to the
-            planning world.
-        (absl.: Object to be used to access absl
+            # Remove traffic light. TODO: Take into account traffic light.
+            if _label != 9:
+                obstacle_list.append(obstacle_size)
 
-    .. _Hybrid A* Planner:
-       https://github.com/erdos-project/hybrid_astar_planner
+    if len(obstacle_list) == 0:
+        return np.empty((0, 4))
+    return np.array(obstacle_list)
+
+
+class Operator:
+    """
+    Compute a `control` based on the position and the waypoints of the car.
     """
 
-    def __init__(self, world):
-        self._world = world
+    def __init__(self):
+        self.obstacles = []
+        self.position = []
+        self.gps_waypoints = []
+        self.waypoints = []
         self._hyperparameters = {
             "step_size": STEP_SIZE_HYBRID_ASTAR,
             "max_iterations": MAX_ITERATIONS_HYBRID_ASTAR,
@@ -77,7 +90,46 @@ class HybridAStarPlanner:
             "car_width": CAR_WIDTH,
         }
 
-    def run(self, _timestamp, _ttd=None):
+    def on_input(
+        self,
+        input_id: str,
+        value: bytes,
+        send_output: Callable[[str, bytes], None],
+    ):
+
+        if input_id == "gps_waypoints":
+
+            waypoints = np.frombuffer(value)
+            waypoints = waypoints.reshape((3, -1))
+            self.gps_waypoints = waypoints[0:2].T
+            if len(self.waypoints) == 0:
+                self.waypoints = self.gps_waypoints
+            return DoraStatus.CONTINUE
+
+        if input_id == "obstacles":
+            obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
+
+            self.obstacles = obstacles
+            return DoraStatus.CONTINUE
+
+        if input_id == "position":
+            self.position = np.frombuffer(value)
+
+        if len(self.gps_waypoints) != 0:
+            (waypoints, target_speeds) = self.run(time.time())  # , open_drive)
+            self.waypoints = waypoints
+
+            waypoints_array = np.concatenate(
+                [waypoints.T, target_speeds.reshape(1, -1)]
+            )
+
+            send_output(
+                "waypoints",
+                waypoints_array.tobytes(),
+            )
+        return DoraStatus.CONTINUE
+
+    def run(self, _ttd=None):
         """Runs the planner.
 
         Note:
@@ -88,33 +140,57 @@ class HybridAStarPlanner:
             planned trajectory.
         """
 
-        obstacle_list = self._world.get_obstacle_list()
+        # Remove already past waypoints
+        (index, _) = closest_vertex(
+            self.gps_waypoints,
+            np.array([self.position[:2]]),
+        )
+
+        self.gps_waypoints = self.gps_waypoints[
+            index : index + NUM_WAYPOINTS_AHEAD
+        ]
+        obstacle_list = get_obstacle_list(self.obstacles, self.gps_waypoints)
 
         if len(obstacle_list) == 0:
             # Do not use Hybrid A* if there are no obstacles.
-            return self._world.follow_waypoints(TARGET_SPEED)
+            speeds = np.array([TARGET_SPEED] * len(self.gps_waypoints))
+            return self.gps_waypoints, speeds
 
+        # Remove already past waypoints
+        (index, _) = closest_vertex(
+            self.waypoints,
+            np.array([self.position[:2]]),
+        )
+
+        self.waypoints = self.waypoints[index : index + NUM_WAYPOINTS_AHEAD]
+        obstacle_list = get_obstacle_list(self.obstacles, self.waypoints)
+
+        if len(obstacle_list) == 0:
+            # Do not use Hybrid A* if there are no obstacles.
+            speeds = np.array([TARGET_SPEED] * len(self.gps_waypoints))
+            return self.waypoints, speeds
         # Hybrid a* does not take into account the driveable region.
         # It constructs search space as a top down, minimum bounding
         # rectangle with padding in each dimension.
 
         initial_conditions = self._compute_initial_conditions(obstacle_list)
+
         path_x, path_y, _, success = apply_hybrid_astar(
             initial_conditions, self._hyperparameters
         )
 
         if not success:
             print("could not find waypoints")
-            return self._world.follow_waypoints(0)
+            speeds = np.array([0] * len(self.waypoints))
+            return self.waypoints, speeds
+        else:
+            output_wps = np.array([path_x, path_y]).T
+            speeds = np.array([TARGET_SPEED] * len(path_x))
 
-        speeds = np.array([TARGET_SPEED] * len(path_x))
+            return output_wps, speeds
 
-        output_wps = np.array([path_x, path_y]).T
-
-        return output_wps, speeds
-
-    def _compute_initial_conditions(self, obstacles):
-        [x, y, _, _, yaw, _, _] = self._world.position
+    def _compute_initial_conditions(self, obstacle_list):
+        [x, y, _, _, yaw, _, _] = self.position
         start = np.array(
             [
                 x,
@@ -124,7 +200,7 @@ class HybridAStarPlanner:
         )
         end_index = min(
             NUM_WAYPOINTS_AHEAD,
-            len(self._world.waypoints) - 1,
+            len(self.waypoints) - 1,
         )
 
         if end_index < 0:
@@ -138,7 +214,7 @@ class HybridAStarPlanner:
             )
 
         else:
-            [end_x, end_y] = self._world.waypoints[end_index]
+            [end_x, end_y] = self.waypoints[end_index]
             end = np.array(
                 [
                     end_x,
@@ -150,52 +226,6 @@ class HybridAStarPlanner:
         initial_conditions = {
             "start": start,
             "end": end,
-            "obs": obstacles,
+            "obs": obstacle_list,
         }
         return initial_conditions
-
-
-class Operator:
-    """
-    Compute a `control` based on the position and the waypoints of the car.
-    """
-
-    def __init__(self):
-        self.obstacles = []
-        self.position = []
-        self.planner = HybridAStarPlanner(world)
-
-    def on_input(
-        self,
-        input_id: str,
-        value: bytes,
-        send_output: Callable[[str, bytes], None],
-    ):
-
-        if input_id == "position":
-            self.position = np.frombuffer(value)
-
-        if "obstacles" == input_id:
-            obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
-
-            self.obstacles = obstacles
-            return DoraStatus.CONTINUE
-
-        self.planner._world.update(
-            time.time(), self.position, self.obstacles, [], hd_map
-        )
-
-        (waypoints, target_speeds) = self.planner.run(
-            time.time()
-        )  # , open_drive)
-        self.planner._world.waypoints = waypoints
-
-        waypoints_array = np.concatenate(
-            [waypoints.T, target_speeds.reshape(1, -1)]
-        )
-
-        send_output(
-            "waypoints",
-            waypoints_array.tobytes(),
-        )
-        return DoraStatus.CONTINUE

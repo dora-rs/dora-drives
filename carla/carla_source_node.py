@@ -6,12 +6,17 @@ import zlib
 
 import cv2
 import numpy as np
-from carla import Client, Location, Rotation, Transform
 from dora import Node
 
-from generate_world import (add_camera, add_depth_camera, add_lidar,
-                            add_segmented_camera, spawn_actors,
-                            spawn_driving_vehicle)
+from _generate_world import (
+    add_camera,
+    add_depth_camera,
+    add_lidar,
+    add_segmented_camera,
+    spawn_actors,
+    spawn_driving_vehicle,
+)
+from carla import Client, Location, Rotation, Transform
 
 logger = logging.Logger("")
 
@@ -184,8 +189,8 @@ def main():
 
     node.send_output("position", position.tobytes())
     node.send_output("image", camera_frame)
-    #   node.send_output("depth_frame", depth_frame)
-    node.send_output("segmented_frame", segmented_frame)
+    # node.send_output("depth_frame", depth_frame)
+    # node.send_output("segmented_frame", segmented_frame)
     node.send_output("lidar_pc", lidar_pc)
 
 
