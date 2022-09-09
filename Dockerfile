@@ -1,5 +1,4 @@
 FROM nvidia/cudagl:11.4.2-devel-ubuntu20.04
-MAINTAINER Xavier Tao (tao.xavier@outlook.com)
 
 # Set up a dora user first.
 
@@ -37,25 +36,32 @@ ENV LC_ALL en_US.UTF-8
 # Install tzdata without prompt.
 RUN sudo apt-get -y --fix-missing update
 ENV DEBIAN_FRONTEND=noninteractive
-RUN sudo DEBIAN_FRONTEND=noninteractive sudo DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+RUN sudo DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+
+# Install conda
 
 # Get the dora package dependencies.
-RUN sudo apt-get -y install apt-utils git curl clang python-is-python3 python3-pip
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install setuptools setuptools-rust numpy==1.19.5
+RUN sudo apt-get -y install apt-utils git curl clang wget
+# Install miniconda
+RUN echo "export CONDA_DIR=/opt/conda" >> ~/.bashrc
+RUN echo "export PATH=$CONDA_DIR/bin:$PATH" >> ~/.bashrc
+RUN sudo wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    sudo /bin/bash ~/miniconda.sh -b -p /opt/conda
+ENV CONDA_DIR /opt/conda
+ENV PATH $CONDA_DIR/bin:$PATH 
+RUN sudo chown -R dora:dora /opt/conda
+RUN conda init bash
 
 # Setup Rust and install dora.
 RUN mkdir -p /home/dora/workspace
 
-RUN sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk python3-pygame libgeos-dev vim
+RUN sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk libgeos-dev vim build-essential libopenblas-dev
 
 RUN mkdir -p /home/dora/workspace/dora_dependencies
 
 WORKDIR /home/dora/workspace/dora_dependencies
 
 COPY scripts/install_requirements.txt .
-
-RUN pip install -r install_requirements.txt
 
 ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies
 # Install all the Python dependencies.
@@ -68,13 +74,13 @@ RUN DEBIAN_FRONTEND=noninteractive sudo chmod +x /home/dora/workspace/dora_depen
 RUN DEBIAN_FRONTEND=noninteractive /home/dora/workspace/dora_dependencies/install.sh
 
 ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1
-# Clone scenario_runner.
-RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/scenario_runner.git && cd scenario_runner && git checkout 0.9.10
-# Install scenario_runner's dependencies.
-RUN python3 -m pip install -r /home/dora/workspace/scenario_runner/requirements.txt
-# Clone leaderboard.
-RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/leaderboard.git && cd leaderboard && git checkout stable
-RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
+# # Clone scenario_runner.
+# RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/scenario_runner.git && cd scenario_runner && git checkout 0.9.10
+# # Install scenario_runner's dependencies.
+# RUN python3 -m pip install -r /home/dora/workspace/scenario_runner/requirements.txt
+# # Clone leaderboard.
+# RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/leaderboard.git && cd leaderboard && git checkout stable
+# RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
 
 RUN echo "export PYTHONPATH=/home/dora/workspace/dora_dependencies/dependencies/:/home/dora/workspace/dora_dependencies/dependencies/lanenet:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/:/home/dora/workspace/scenario_runner:/home/dora/workspace/leaderboard" >> ~/.bashrc
 RUN echo "export DORA_DEP_HOME=/home/dora/workspace/dora_dependencies" >> ~/.bashrc
@@ -85,26 +91,24 @@ RUN echo "export CARLA_HOME=/home/dora/workspace/dora_dependencies/dependencies/
 RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
 
 # Set up ssh access to the container.
-RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa <<<y 2>&1 >/dev/null
+RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
 RUN sudo sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
 
 WORKDIR /home/dora/workspace/dora_dependencies
 
 WORKDIR /home/dora/workspace/dora-drives
 
-RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_amd64.tar.gz
+# RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_amd64.tar.gz
 
-RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
+# RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 
 COPY requirements.txt requirements.txt 
 
-run python3 -m pip install -r requirements.txt
+RUN /opt/conda/bin/activate base && pip install --upgrade pip
+RUN /opt/conda/bin/activate base && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
+RUN /opt/conda/bin/activate base && python3 -m pip install -r requirements.txt
+RUN /opt/conda/bin/activate base && MAX_JOBS=2 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
 
 COPY . .
 
 RUN python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
-
-RUN sudo chown dora:dora /home/dora/workspace/dora-drives
-
-RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*
-

@@ -56,3 +56,6 @@ And then within the container:
 - NVIDIA GPU Card
 - x86 Intel CPU (preferable)
 - Linux
+
+
+> If you're having build difficulties with MinkowskiEngine. Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626 and make sure to have the exact same daemon.
