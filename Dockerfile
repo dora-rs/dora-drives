@@ -107,7 +107,7 @@ COPY requirements.txt requirements.txt
 RUN /opt/conda/bin/activate base && pip install --upgrade pip
 RUN /opt/conda/bin/activate base && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
 RUN /opt/conda/bin/activate base && python3 -m pip install -r requirements.txt
-RUN /opt/conda/bin/activate base && MAX_JOBS=2 python3 -m pip pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas"
+RUN /opt/conda/bin/activate base && MAX_JOBS=2 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
 
 COPY . .
 
