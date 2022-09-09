@@ -62,7 +62,7 @@ isort==4.3.21
 imageio
 torchreid @ https://github.com/KaiyangZhou/deep-person-reid/archive/master.zip
 git+https://github.com/haixuanTao/yolov5_strongsort_package.git#b9f257872ea632a20a9faabebc3463793c53cdb2
-https://download.pytorch.org/whl/cu116/torch-1.12.1%2Bcu116-cp38-cp38-linux_x86_64.whl
-https://download.pytorch.org/whl/cu116/torchvision-0.13.1%2Bcu116-cp38-cp38-linux_x86_64.whl
 
-# ---
+# MinkowskiEngine ---
+
+ninja

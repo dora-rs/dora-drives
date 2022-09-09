@@ -8,28 +8,22 @@ else
 fi
 
 sudo apt-get -y update
-sudo apt-get install -y git wget cmake python3-pip unzip clang libpng-dev libgeos-dev
+sudo apt-get install -y git wget cmake unzip clang libpng-dev libgeos-dev
+
 # Install opencv separately because pip3 install doesn't install all libraries
 # opencv requires.
+
+source activate base
+pip install -r install_requirements.txt
+
 sudo apt-get install -y python3-opencv
 python3 -m pip install user gdown
-# Install Pygame if available.
-PYGAME_PKG=`apt-cache search python3-pygame`
-if [ -n "$PYGAME_PKG" ] ; then
-    sudo apt-get install python3-pygame
-fi
 
 ###############################################################################
 # Get models & code bases we depend on
 ###############################################################################
 mkdir $DORA_DEP_HOME/dependencies
 cd $DORA_DEP_HOME/dependencies/
-
-###### Download the model weights ######
-echo "[x] Downloading all model weights..."
-cd $DORA_DEP_HOME/dependencies/
-~/.local/bin/gdown https://drive.google.com/uc?id=1rQKFDxGDFi3rBLsMrJzb7oGZvvtwgyiL
-unzip models.zip ; rm models.zip
 
 #################### Download the code bases ####################
 echo "[x] Compiling the planners..."
@@ -58,51 +52,6 @@ bash build.sh
 echo "[x] Cloning the prediction code..."
 cd $DORA_DEP_HOME/pylot/prediction/
 git clone https://github.com/erdos-project/prediction.git
-
-###### Get DeepSORT and SORT tracker code bases ######
-echo "[x] Cloning the object tracking code..."
-cd $DORA_DEP_HOME/dependencies/
-git clone https://github.com/ICGog/nanonets_object_tracking.git
-sudo apt-get install python3-tk
-git clone https://github.com/ICGog/sort.git
-###### Download the DaSiamRPN code ######
-cd $DORA_DEP_HOME/dependencies/
-git clone https://github.com/ICGog/DaSiamRPN.git
-
-###### Install CenterTrack ######
-echo "[x] Installing the CenterTrack object tracking code..."
-cd $DORA_DEP_HOME/dependencies/
-git clone https://github.com/ICGog/CenterTrack
-cd CenterTrack/src/lib/model/networks/
-git clone https://github.com/CharlesShang/DCNv2/
-cd DCNv2
-sudo apt-get install llvm-9
-export LLVM_CONFIG=/usr/bin/llvm-config-9
-python3 setup.py build develop user
-
-###### Install QDTrack ######
-cd $DORA_DEP_HOME/dependencies/
-git clone https://github.com/mageofboy/qdtrack.git
-cd $DORA_DEP_HOME/dependencies/qdtrack
-python3 -m pip install mmcv==1.3.10 mmdet==2.14.0
-python3 -m pip install -e ./
-
-##### Download the Lanenet code #####
-echo "[x] Cloning the lanenet lane detection code..."
-cd $DORA_DEP_HOME/dependencies/
-git clone https://github.com/ICGog/lanenet-lane-detection.git
-mv lanenet-lane-detection lanenet
-
-###### Download the DRN segmentation code ######
-echo "[x] Cloning the DRN segmentation code..."
-cd $DORA_DEP_HOME/dependencies/
-git clone https://github.com/ICGog/drn.git
-
-###### Download AnyNet depth estimation code #####
-echo "[x] Cloning the AnyNet depth estimation code..."
-cd $DORA_DEP_HOME/dependencies/
-git clone https://github.com/mileyan/AnyNet.git
-cd AnyNet/models/spn_t1/ ; python3 setup.py clean ; python3 setup.py build
 
 ###### Download the Carla simulator ######
 echo "[x] Downloading the CARLA 0.9.10.1 simulator..."
