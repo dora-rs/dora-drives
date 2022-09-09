@@ -16,7 +16,7 @@ cp -r ../dora/target/wheels .
 
 # Carla start
 nvidia-docker build --tag haixuantao/dora-drives .
-nvidia-docker run -itd --name dora -p 20022:22 haixuantao/dora-drives /bin/bash
+nvidia-docker run -itd --shm-size=256m --name dora -p 20022:22 haixuantao/dora-drives /bin/bash 
 nvidia-docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
 nvidia-docker cp ~/.ssh/id_rsa.pub dora:/home/dora/.ssh/authorized_keys
 nvidia-docker exec -i -t dora sudo chown dora /home/dora/.ssh/authorized_keys
