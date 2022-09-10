@@ -14,6 +14,8 @@ sudo apt-get install -y git wget cmake unzip clang libpng-dev libgeos-dev
 # opencv requires.
 
 source activate base
+conda create -n dora3.8 python=3.8
+conda activate dora3.8
 pip install -r install_requirements.txt
 
 sudo apt-get install -y python3-opencv
