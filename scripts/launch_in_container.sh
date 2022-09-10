@@ -10,5 +10,5 @@ export DORA_RUNTIME_PATH=/home/dora/workspace/dora-drives/bin/dora-runtime
 export PATH=$PATH:/home/dora/workspace/dora-drives/bin/
 export DORA_PATH=/home/dora/workspace/dora-drives
 sudo chmod +x /home/dora/workspace/dora-drives/carla/carla_source_node.py
-dora-coordinator run $DORA_PATH/graphs/yolov5_dataflow.yaml $DORA_RUNTIME_PATH
+dora-coordinator run $DORA_PATH/graphs/imfnet_dataflow.yaml $DORA_RUNTIME_PATH
 # ./dora-drives start-python sink_eval_plot plot image waypoints obstacles pose &
