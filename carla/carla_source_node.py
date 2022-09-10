@@ -195,5 +195,5 @@ def main():
 
 
 for _ in range(1000):
-    time.sleep(0.2)
+    time.sleep(0.5)
     main()

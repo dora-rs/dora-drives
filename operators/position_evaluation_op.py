@@ -36,8 +36,9 @@ class Operator:
 
             print(f"Computed Relative position: {relative_position}")
 
-            print(f"error: {relative_position - self.true_relative_position}")
-            self.previous_position = position
+            print(
+                f"error: {relative_position - self.true_relative_position[:6]}"
+            )
             return DoraStatus.CONTINUE
 
         return DoraStatus.CONTINUE
