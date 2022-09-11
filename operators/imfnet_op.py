@@ -1,8 +1,10 @@
+import math
 import zlib
 from typing import Callable
 
 import cv2
 import numpy as np
+import open3d as o3d
 import torch
 from imfnet import (
     extract_features,
@@ -28,6 +30,8 @@ class Operator:
         self.previous_pc_down = []
         self.previous_features = []
         self.previous_position = []
+        self.vis = o3d.visualization.Visualizer()
+        self.vis.create_window()
 
     def on_input(
         self,
@@ -58,9 +62,8 @@ class Operator:
                     [[0, 1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]]
                 ),
             )
-            inds0 = np.random.choice(point_cloud.shape[0], 5000, replace=False)
 
-            self.point_cloud = point_cloud[inds0, :3]
+            self.point_cloud = point_cloud[:, :3]
             return DoraStatus.CONTINUE
 
         if input_id == "image":
@@ -107,38 +110,41 @@ class Operator:
         if type(self.previous_features) == list:
             self.previous_pc_down = current_pc_down
             self.previous_features = current_features
+            self.vis.add_geometry(current_pc_down)
 
             return DoraStatus.CONTINUE
+        else:
+            self.vis.update_geometry(current_pc_down)
+            self.vis.poll_events()
+            self.vis.update_renderer()
 
         T = run_ransac(
-            current_pc_down,
             self.previous_pc_down,
-            current_features,
+            current_pc_down,
             self.previous_features,
+            current_features,
             0.025,
         )
-
+        pitch_r = math.asin(np.clip(T[2, 0], -1, 1))
+        yaw_r = math.acos(np.clip(T[0, 0] / math.cos(pitch_r), -1, 1))
+        roll_r = math.asin(np.clip(T[2, 1] / (-1 * math.cos(pitch_r)), -1, 1))
         # Calculation of the angle https://stackoverflow.com/questions/15022630/how-to-calculate-the-angle-from-rotation-matrix
-        theta0 = np.arctan2(T[2, 1], T[2, 2])
-        theta1 = np.arctan2(
-            -T[2, 0],
-            np.sqrt(T[2, 1] ** 2 + T[2, 2] ** 2),
-        )
-        theta2 = np.arctan2(T[1, 0], T[0, 0])
-        [x, y, z, _] = np.dot(T, [1.0, 1.0, 1.0, 1.0])
+
+        x, y, z = T[0, 3], T[1, 3], T[2, 3]
 
         position = np.array(
             [
                 x,
                 y,
                 z,
-                np.rad2deg(theta0),
-                np.rad2deg(theta1),
-                np.rad2deg(theta2),
+                math.degrees(pitch_r),
+                math.degrees(yaw_r),
+                math.degrees(roll_r),
             ],
             dtype=np.float32,
         )
         send_output("relative_position", position.tobytes())
+
         self.previous_position = position
         self.previous_pc_down = current_pc_down
         self.previous_features = current_features

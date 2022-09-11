@@ -108,6 +108,10 @@ RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision cudatoolk
 RUN conda activate dora3.8 && python3 -m pip install -r requirements.txt
 RUN conda activate dora3.8 && MAX_JOBS=2 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
 
+COPY requirements2.txt requirements2.txt 
+RUN conda activate dora3.8 && python3 -m pip install -r requirements2.txt
+RUN conda activate dora3.8 && pip install git+https://github.com/haixuanTao/IMFNet
+RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
 COPY . .
 
 RUN conda activate dora3.8 && python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
@@ -117,6 +121,3 @@ RUN sudo chown dora:dora /home/dora/workspace/dora-drives
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*
 RUN echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/conda/envs/dora3.8/lib/" >> ~/.bashrc
 RUN echo "conda activate dora3.8" >> ~/.bashrc
-RUN conda activate dora3.8 && python3 -m pip install -r requirements2.txt
-RUN conda activate dora3.8 && pip install git+https://github.com/haixuanTao/IMFNet
-RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
