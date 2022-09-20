@@ -1,7 +1,7 @@
 communication:
-  zenoh:
-    prefix: /foo
-
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+    
 nodes:
   - id: carla_source_node
     custom:
