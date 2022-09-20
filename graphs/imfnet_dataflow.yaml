@@ -1,6 +1,6 @@
 communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-iceoryx-example
 
 nodes:
   - id: carla_source_node
@@ -11,9 +11,11 @@ nodes:
         - vehicle_id
         - image
       run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+    env: 
+      - SET_AUTOPILOT: true 
 
   - id: imfnet
-    operator: 
+    operator:
       outputs:
         - relative_position
       inputs:
@@ -27,47 +29,47 @@ nodes:
         relative_position: imfnet/relative_position
         position: carla_source_node/position
       python: /home/dora/workspace/dora-drives/operators/position_evaluation_op.py
-      
-  - id: carla_planning_op
-    operator:
-      python: /home/dora/workspace/dora-drives/carla/carla_planning_op.py
-      outputs:
-        - gps_waypoints
-      inputs:
-        position: carla_source_node/position
 
-  - id: hybrid_astar_op
-    operator:
-      python: /home/dora/workspace/dora-drives/operators/hybrid_astar_op.py
-      outputs:
-        - waypoints
-      inputs:
-        position: carla_source_node/position
-        obstacles: obstacle_location_op/obstacles
-        gps_waypoints: carla_planning_op/gps_waypoints
+  #- id: carla_planning_op
+    #operator:
+      #python: /home/dora/workspace/dora-drives/carla/carla_planning_op.py
+      #outputs:
+        #- gps_waypoints
+      #inputs:
+        #position: carla_source_node/position
 
-  - id: pid_control_op
-    operator:
-      python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
-      outputs:
-        - control
-      inputs:
-        position: carla_source_node/position
-        waypoints: hybrid_astar_op/waypoints
+  #- id: hybrid_astar_op
+    #operator:
+      #python: /home/dora/workspace/dora-drives/operators/hybrid_astar_op.py
+      #outputs:
+        #- waypoints
+      #inputs:
+        #position: carla_source_node/position
+        #obstacles: obstacle_location_op/obstacles
+        #gps_waypoints: carla_planning_op/gps_waypoints
 
-  - id: carla_control_op
-    operator:
-      python: /home/dora/workspace/dora-drives/carla/carla_control_op.py
-      outputs:
-        - control_status
-      inputs:
-        control: pid_control_op/control
-        vehicle_id: carla_source_node/vehicle_id
+  #- id: pid_control_op
+    #operator:
+      #python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
+      #outputs:
+        #- control
+      #inputs:
+        #position: carla_source_node/position
+        #waypoints: hybrid_astar_op/waypoints
+
+  #- id: carla_control_op
+    #operator:
+      #python: /home/dora/workspace/dora-drives/carla/carla_control_op.py
+      #outputs:
+        #- control_status
+      #inputs:
+        #control: pid_control_op/control
+        #vehicle_id: carla_source_node/vehicle_id
 
   - id: plot_op
     operator:
       description: Plot operator
-      inputs: 
+      inputs:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
