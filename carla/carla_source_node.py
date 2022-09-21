@@ -60,6 +60,12 @@ def on_segmented_msg(frame):
 
 
 def on_lidar_msg(frame):
+
+    # point_cloud = np.frombuffer(frame.raw_data, dtype=np.dtype("f4"))
+    # point_cloud = np.reshape(point_cloud, (int(point_cloud.shape[0] / 4), 4))
+    # inds = np.random.choice(point_cloud.shape[0], 20000, replace=False)
+    # point_cloud = point_cloud[inds]
+
     location = frame.transform.location
     rotation = frame.transform.rotation
     x = location.x
@@ -138,8 +144,8 @@ world = client.get_world()
     "0.9.10",
     -1,
     True,
-    10,
-    10,
+    0,
+    0,
     logger,
 )
 
@@ -195,5 +201,5 @@ def main():
 
 
 for _ in range(1000):
-    time.sleep(2)
+    time.sleep(10)
     main()

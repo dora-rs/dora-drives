@@ -6,7 +6,7 @@ from carla import Client, Location, Rotation, Transform, command
 
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
-AUTOPILOT = os.environ.get("SET_AUTOPILOT")
+AUTOPILOT = os.environ.get("SET_AUTOPILOT") == "true"
 
 
 def add_lidar(world, transform, callback, vehicle):
@@ -83,8 +83,9 @@ def spawn_driving_vehicle(client, world):
         vehicle_bp = random.choice(
             world.get_blueprint_library().filter("vehicle.*")
         )
-    if AUTOPILOT == "true":
+    if AUTOPILOT:
         vehicle_bp.set_attribute("role_name", "autopilot")
+        print("setting carla autopilot")
 
     # Get the spawn point of the vehicle.
     start_pose = random.choice(world.get_map().get_spawn_points())
@@ -92,7 +93,7 @@ def spawn_driving_vehicle(client, world):
     # Spawn the vehicle.
     batch = [
         command.SpawnActor(vehicle_bp, start_pose).then(
-            command.SetAutopilot(command.FutureActor, False)
+            command.SetAutopilot(command.FutureActor, AUTOPILOT)
         )
     ]
 

@@ -1,6 +1,6 @@
 communication:
-  zenoh:
-    prefix: dora-iceoryx-example
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
 
 nodes:
   - id: carla_source_node
@@ -11,8 +11,8 @@ nodes:
         - vehicle_id
         - image
       run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
-    env: 
-      - SET_AUTOPILOT: true 
+      env: 
+        SET_AUTOPILOT: true 
 
   - id: imfnet
     operator:
@@ -22,13 +22,6 @@ nodes:
         image: carla_source_node/image
         lidar_pc: carla_source_node/lidar_pc
       python: /home/dora/workspace/dora-drives/operators/imfnet_op.py
-
-  - id: position_evaluation
-    operator:
-      inputs:
-        relative_position: imfnet/relative_position
-        position: carla_source_node/position
-      python: /home/dora/workspace/dora-drives/operators/position_evaluation_op.py
 
   #- id: carla_planning_op
     #operator:
@@ -66,12 +59,12 @@ nodes:
         #control: pid_control_op/control
         #vehicle_id: carla_source_node/vehicle_id
 
-  - id: plot_op
-    operator:
-      description: Plot operator
-      inputs:
-        waypoints: hybrid_astar_op/waypoints
-        image: carla_source_node/image
-        obstacles: obstacle_location_op/obstacles
-        obstacles_bb: yolov5/bbox
-      python: /home/dora/workspace/dora-drives/operators/plot_op.py
+  #- id: plot_op
+    #operator:
+      #description: Plot operator
+      #inputs:
+        #waypoints: hybrid_astar_op/waypoints
+        #image: carla_source_node/image
+        #obstacles: obstacle_location_op/obstacles
+        #obstacles_bb: yolov5/bbox
+      #python: /home/dora/workspace/dora-drives/operators/plot_op.py

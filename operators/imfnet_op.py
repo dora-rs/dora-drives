@@ -1,4 +1,5 @@
 import math
+import time
 import zlib
 from typing import Callable
 
@@ -12,10 +13,39 @@ from imfnet import (
     make_open3d_feature_from_numpy,
     make_open3d_point_cloud,
     process_image,
-    run_ransac,
 )
 
 from dora_utils import DoraStatus
+
+VOXEL_SIZE = 2.5
+
+
+def run_ransac(xyz0, xyz1, feat0, feat1, voxel_size, ransac_n=4):
+    distance_threshold = voxel_size * 1.5
+    result_ransac = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
+        source=xyz0,
+        target=xyz1,
+        source_feature=feat0,
+        target_feature=feat1,
+        max_correspondence_distance=distance_threshold,
+        estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPoint(
+            False
+        ),
+        ransac_n=ransac_n,
+        checkers=[
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
+                0.9
+            ),
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
+                distance_threshold
+            ),
+        ],
+        criteria=o3d.pipelines.registration.RANSACConvergenceCriteria(
+            1_000_000, 0.999
+        ),
+        mutual_filter=False,
+    )
+    return result_ransac
 
 
 class Operator:
@@ -30,8 +60,6 @@ class Operator:
         self.previous_pc_down = []
         self.previous_features = []
         self.previous_position = []
-        self.vis = o3d.visualization.Visualizer()
-        self.vis.create_window()
 
     def on_input(
         self,
@@ -53,18 +81,26 @@ class Operator:
             point_cloud = np.reshape(
                 point_cloud, (int(point_cloud.shape[0] / 4), 4)
             )
+            position = np.frombuffer(
+                value[:24],
+                dtype="float32",
+            )
 
-            # To camera coordinate
+            # Default Unreal coordinate is:
+            # +x is forward, +y to the right, and +z up
+            # To velodyne coordinate first
+            # +x into the screen, +y to the left, and +z up.
             # The latest coordinate space is the unreal space.
+
             point_cloud = np.dot(
                 point_cloud,
                 np.array(
-                    [[0, 1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]]
+                    [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
                 ),
             )
 
-            self.point_cloud = point_cloud[:, :3]
-            return DoraStatus.CONTINUE
+            point_cloud = point_cloud[:, :3]
+            self.point_cloud = point_cloud
 
         if input_id == "image":
             frame = cv2.imdecode(
@@ -74,22 +110,27 @@ class Operator:
                 ),
                 -1,
             )
-            self.frame = frame[:, :, :3]
+            # if len(self.frame) != 0:
+            # cv2.imwrite("previous_image.jpg", self.frame)
+            # cv2.imwrite("current_image.jpg", frame)
 
-        if (
-            self.frame.shape[0] != self.config.image_H
-            or self.frame.shape[1] != self.config.image_W
-        ):
-            image = process_image(
-                image=self.frame,
-                aim_H=self.config.image_H,
-                aim_W=self.config.image_W,
-            )
+            frame = frame[:, :, :3]
 
-        image = np.transpose(image, axes=(2, 0, 1))
-        current_image = np.expand_dims(image, axis=0)
+            if (
+                frame.shape[0] != self.config.image_H
+                or frame.shape[1] != self.config.image_W
+            ):
+                image = process_image(
+                    image=frame,
+                    aim_H=self.config.image_H,
+                    aim_W=self.config.image_W,
+                )
 
-        if len(self.point_cloud) == 0:
+            image = np.transpose(image, axes=(2, 0, 1))
+            self.frame = np.expand_dims(image, axis=0)
+            return DoraStatus.CONTINUE
+
+        if len(self.frame) == 0:
             return DoraStatus.CONTINUE
         # Extract features
         current_pc_down, current_features = extract_features(
@@ -97,42 +138,71 @@ class Operator:
             xyz=self.point_cloud,
             rgb=None,
             normal=None,
-            voxel_size=0.025,
+            voxel_size=VOXEL_SIZE,
             device=torch.device("cuda"),
             skip_check=True,
-            image=current_image,
+            image=self.frame,
         )
 
         current_pc_down = make_open3d_point_cloud(current_pc_down)
         current_features = current_features.cpu().detach().numpy()
         current_features = make_open3d_feature_from_numpy(current_features)
 
-        if type(self.previous_features) == list:
+        if isinstance(self.previous_features, list):
             self.previous_pc_down = current_pc_down
             self.previous_features = current_features
-            self.vis.add_geometry(current_pc_down)
-
+            self.previous_position = position
             return DoraStatus.CONTINUE
-        else:
-            self.vis.update_geometry(current_pc_down)
-            self.vis.poll_events()
-            self.vis.update_renderer()
 
-        T = run_ransac(
+        timestamp = time.time()
+        print("running ransac")
+        result = run_ransac(
             self.previous_pc_down,
             current_pc_down,
             self.previous_features,
             current_features,
-            0.025,
+            VOXEL_SIZE,
         )
-        pitch_r = math.asin(np.clip(T[2, 0], -1, 1))
-        yaw_r = math.acos(np.clip(T[0, 0] / math.cos(pitch_r), -1, 1))
-        roll_r = math.asin(np.clip(T[2, 1] / (-1 * math.cos(pitch_r)), -1, 1))
-        # Calculation of the angle https://stackoverflow.com/questions/15022630/how-to-calculate-the-angle-from-rotation-matrix
+        T = result.transformation
 
-        x, y, z = T[0, 3], T[1, 3], T[2, 3]
+        if result.fitness < 0.6:
+            print(f"fitness: {result.fitness}")
+            print("could not fit IMFnet")
+            self.previous_pc_down = current_pc_down
+            self.previous_features = current_features
+            return DoraStatus.CONTINUE
 
-        position = np.array(
+        if result.fitness == 1.0:
+            print("car did not move")
+            self.previous_pc_down = current_pc_down
+            self.previous_features = current_features
+            return DoraStatus.CONTINUE
+
+        print(f"elapsed: {time.time() - timestamp}")
+        print(f"True: {position - self.previous_position}")
+
+        self.previous_pc_down.paint_uniform_color([1, 0.706, 0])
+        current_pc_down.paint_uniform_color([0, 0.651, 0.929])
+        o3d.visualization.draw_geometries(
+            [self.previous_pc_down, current_pc_down]
+        )
+        # o3d.io.write_point_cloud("previous_pc.pcd", self.previous_pc_down)
+        # o3d.io.write_point_cloud("current_pc.pcd", current_pc_down)
+        self.previous_pc_down.transform(T)
+        o3d.visualization.draw_geometries(
+            [self.previous_pc_down, current_pc_down]
+        )
+
+        # Velodyne coordinate is
+        # +x into the screen, +y to the left, and +z up.
+        # Camera coordinate is
+        # +x to right, +y to down, +z into the screen.
+        pitch_r = math.atan2(T[2, 1], T[2, 2])
+        yaw_r = math.atan2(T[1, 0], T[0, 0])
+        roll_r = -math.atan2(-T[2, 0], math.sqrt(T[2, 1] ** 2 + T[2, 2] ** 2))
+        x, y, z = -T[0, 3], T[1, 3], T[2, 3]
+
+        relative_position = np.array(
             [
                 x,
                 y,
@@ -143,7 +213,10 @@ class Operator:
             ],
             dtype=np.float32,
         )
-        send_output("relative_position", position.tobytes())
+        print(f"Infered: {relative_position}")
+
+        print(f"fitness: {result.fitness}")
+        # send_output("relative_position", position.tobytes())
 
         self.previous_position = position
         self.previous_pc_down = current_pc_down
