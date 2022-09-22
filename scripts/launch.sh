@@ -10,6 +10,7 @@ cd ../dora-drives
 mkdir -p bin
 cp ../dora/target/release/dora-coordinator bin/dora-coordinator
 cp ../dora/target/release/dora-runtime bin/dora-runtime
+find ../dora/target/release -type f -wholename "*/iceoryx-install/bin/iox-roudi" -exec cp {} bin/dora-runtime \; &
 
 cp -r ../dora/target/wheels .
 
