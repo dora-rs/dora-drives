@@ -201,5 +201,5 @@ def main():
 
 
 for _ in range(1000):
-    time.sleep(10)
+    time.sleep(2)
     main()

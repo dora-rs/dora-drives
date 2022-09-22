@@ -3,7 +3,7 @@
 #export INFLUX_TOKEN=RmC0MizRVFt04yBDXE12nqBIwUVvBEVb1qAYBbX3OFwZYSnpiGPPc03SUGfM4MSwprlknimeXOqWGb6CXWq8ZA==
 #~/workspace/dora-drives/telegraf-1.22.4/usr/bin/telegraf --config https://eu-central-1-1.aws.cloud2.influxdata.com/api/v2/telegrafs/09671055edbf6000 &
 /home/dora/workspace/dora-drives/scripts/run_simulator.sh &
-/home/dora/workspace/dora-drives/bin/iox-roudi &
+/home/dora/workspace/dora-drives/bin/iox-roudi
 sleep 5 # Wait for the simulator to warm up
 cd /home/dora/workspace/dora-drives
 export PYTHONPATH=$PYTHONPATH:$(pwd)/carla:$(pwd)/operators
