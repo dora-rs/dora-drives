@@ -39,6 +39,7 @@ For linux, run:
 git clone git@github.com:futurewei-tech/dora.git
 git clone git@github.com:futurewei-tech/dora-drives.git
 cd dora-drives
+# Compile with Python 3.8 installed
 ./scripts/launch.sh
 ```
 

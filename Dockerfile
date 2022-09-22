@@ -89,7 +89,6 @@ RUN echo "export PYLOT_HOME=/home/dora/workspace/dora_dependencies" >> ~/.bashrc
 
 RUN echo "export CARLA_HOME=/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1" >> ~/.bashrc
 RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
-
 # Set up ssh access to the container.
 RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
 RUN sudo sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
@@ -102,13 +101,21 @@ WORKDIR /home/dora/workspace/dora-drives
 
 # RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 
-COPY requirements.txt requirements.txt 
+RUN conda activate dora3.8 && pip install --upgrade pip
+RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
+RUN conda activate dora3.8 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
 
-RUN /opt/conda/bin/activate base && pip install --upgrade pip
-RUN /opt/conda/bin/activate base && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
-RUN /opt/conda/bin/activate base && python3 -m pip install -r requirements.txt
-RUN /opt/conda/bin/activate base && MAX_JOBS=2 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
+COPY requirements.txt requirements.txt 
+RUN conda activate dora3.8 && python3 -m pip install -r requirements.txt
+
+RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
 
 COPY . .
 
-RUN python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
+RUN conda activate dora3.8 && python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
+
+RUN sudo chown dora:dora /home/dora/workspace/dora-drives
+
+RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*
+RUN echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/conda/envs/dora3.8/lib/" >> ~/.bashrc
+RUN echo "conda activate dora3.8" >> ~/.bashrc

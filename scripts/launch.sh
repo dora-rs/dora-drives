@@ -10,16 +10,16 @@ cd ../dora-drives
 mkdir -p bin
 cp ../dora/target/release/dora-coordinator bin/dora-coordinator
 cp ../dora/target/release/dora-runtime bin/dora-runtime
+find ../dora/target/release -type f -wholename "*/iceoryx-install/bin/iox-roudi" -exec cp {} bin \; 
 
 cp -r ../dora/target/wheels .
 
 
 # Carla start
 nvidia-docker build --tag haixuantao/dora-drives .
-nvidia-docker run -itd --shm-size=256m --name dora -p 20022:22 haixuantao/dora-drives /bin/bash 
-nvidia-docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
+nvidia-docker run  --net=host -e DISPLAY -itd --shm-size=256m --name dora haixuantao/dora-drives /bin/bash
 nvidia-docker cp ~/.ssh/id_rsa.pub dora:/home/dora/.ssh/authorized_keys
 nvidia-docker exec -i -t dora sudo chown dora /home/dora/.ssh/authorized_keys
 nvidia-docker exec -i -t dora sudo service ssh start
-ssh -p 20022 -X dora@localhost 
+ssh -p 22 -X dora@localhost 
 # nvidia-docker exec -it dora /home/dora/workspace/dora-drives/launch_in_container.sh

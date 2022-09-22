@@ -1,0 +1,24 @@
+communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+
+nodes:
+  - id: carla_source_node
+    custom:
+      outputs:
+        - position
+        - lidar_pc
+        - vehicle_id
+        - image
+      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+      env: 
+        SET_AUTOPILOT: true 
+
+  - id: imfnet
+    operator:
+      outputs:
+        - relative_position
+      inputs:
+        image: carla_source_node/image
+        lidar_pc: carla_source_node/lidar_pc
+      python: /home/dora/workspace/dora-drives/operators/imfnet_op.py
