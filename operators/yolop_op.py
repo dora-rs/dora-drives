@@ -277,7 +277,7 @@ class Operator:
         # inference
         frame = cv2.imdecode(
             np.frombuffer(
-                value[24:],
+                value,
                 dtype="uint8",
             ),
             -1,

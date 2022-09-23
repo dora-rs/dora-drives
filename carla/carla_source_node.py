@@ -39,24 +39,12 @@ sensor_transform = Transform(
 
 
 def on_segmented_msg(frame):
-    location = frame.transform.location
-    rotation = frame.transform.rotation
-    x = location.x
-    y = location.y
-    z = location.z
-    pitch = rotation.pitch
-    yaw = rotation.yaw
-    roll = rotation.roll
-
-    camera_data = np.array(
-        [x, y, z, pitch, yaw, roll], dtype="float32"
-    ).tobytes()
 
     frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
     frame = frame[:, :, 2]
     global segmented_frame
-    segmented_frame = camera_data + cv2.imencode(".jpg", frame)[1].tobytes()
+    segmented_frame = cv2.imencode(".jpg", frame)[1].tobytes()
 
 
 def on_lidar_msg(frame):
@@ -84,23 +72,11 @@ def on_lidar_msg(frame):
 
 
 def on_camera_msg(frame):
-    location = frame.transform.location
-    rotation = frame.transform.rotation
-    x = location.x
-    y = location.y
-    z = location.z
-    pitch = rotation.pitch
-    yaw = rotation.yaw
-    roll = rotation.roll
-
-    camera_data = np.array(
-        [x, y, z, pitch, yaw, roll], dtype="float32"
-    ).tobytes()
     frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
     global camera_frame
-    camera_frame = camera_data + cv2.imencode(".jpg", frame)[1].tobytes()
+    camera_frame = cv2.imencode(".jpg", frame)[1].tobytes()
 
 
 def on_depth_msg(frame):
@@ -201,5 +177,5 @@ def main():
 
 
 for _ in range(1000):
-    time.sleep(2)
+    time.sleep(0.3)
     main()

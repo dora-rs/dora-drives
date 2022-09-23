@@ -38,5 +38,6 @@ nodes:
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
         obstacles_bb: yolov5/bbox
+        position: carla_source_node/position
         obstacles_id: strong_sort/obstacles_id
       python: /home/dora/workspace/dora-drives/operators/plot_op.py

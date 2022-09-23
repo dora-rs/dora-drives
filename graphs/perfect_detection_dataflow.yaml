@@ -41,4 +41,5 @@ nodes:
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
         obstacles_bb: perfect_detection_op/bbox
+        position: carla_source_node/position
       python: /home/dora/workspace/dora-drives/operators/plot_op.py
