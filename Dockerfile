@@ -82,12 +82,6 @@ ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.
 # RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/leaderboard.git && cd leaderboard && git checkout stable
 # RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
 
-RUN echo "export PYTHONPATH=/home/dora/workspace/dora_dependencies/dependencies/:/home/dora/workspace/dora_dependencies/dependencies/lanenet:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1/PythonAPI/:/home/dora/workspace/scenario_runner:/home/dora/workspace/leaderboard" >> ~/.bashrc
-RUN echo "export DORA_DEP_HOME=/home/dora/workspace/dora_dependencies" >> ~/.bashrc
-# TODO: Remove $PYLOT_HOME Dependencies in Dora Dependencies
-RUN echo "export PYLOT_HOME=/home/dora/workspace/dora_dependencies" >> ~/.bashrc
-
-RUN echo "export CARLA_HOME=/home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1" >> ~/.bashrc
 RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
 # Set up ssh access to the container.
 RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
@@ -112,10 +106,12 @@ RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_mode
 
 COPY . .
 
+COPY .bashrc  /home/dora/.bashrc
+
 RUN conda activate dora3.8 && python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
 
 RUN sudo chown dora:dora /home/dora/workspace/dora-drives
+RUN sudo chmod +x /home/dora/workspace/dora-drives/carla/carla_source_node.py
+
 
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*
-RUN echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/conda/envs/dora3.8/lib/" >> ~/.bashrc
-RUN echo "conda activate dora3.8" >> ~/.bashrc

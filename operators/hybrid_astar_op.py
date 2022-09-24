@@ -140,7 +140,7 @@ class Operator:
             planned trajectory.
         """
 
-        # Remove already past waypoints
+        # Remove already past waypoints for gps
         (index, _) = closest_vertex(
             self.gps_waypoints,
             np.array([self.position[:2]]),
@@ -167,7 +167,7 @@ class Operator:
 
         if len(obstacle_list) == 0:
             # Do not use Hybrid A* if there are no obstacles.
-            speeds = np.array([TARGET_SPEED] * len(self.gps_waypoints))
+            speeds = np.array([TARGET_SPEED] * len(self.waypoints))
             return self.waypoints, speeds
         # Hybrid a* does not take into account the driveable region.
         # It constructs search space as a top down, minimum bounding

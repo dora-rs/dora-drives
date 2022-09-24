@@ -59,7 +59,6 @@ class Operator:
         self.point_cloud = []
         self.previous_pc_down = []
         self.previous_features = []
-        self.previous_position = []
 
     def on_input(
         self,
@@ -76,14 +75,10 @@ class Operator:
 
         if input_id == "lidar_pc":
             point_cloud = np.frombuffer(
-                zlib.decompress(value[24:]), dtype=np.dtype("f4")
+                zlib.decompress(value), dtype=np.dtype("f4")
             )
             point_cloud = np.reshape(
                 point_cloud, (int(point_cloud.shape[0] / 4), 4)
-            )
-            position = np.frombuffer(
-                value[:24],
-                dtype="float32",
             )
 
             # Default Unreal coordinate is:
@@ -151,7 +146,6 @@ class Operator:
         if isinstance(self.previous_features, list):
             self.previous_pc_down = current_pc_down
             self.previous_features = current_features
-            self.previous_position = position
             return DoraStatus.CONTINUE
 
         timestamp = time.time()
@@ -179,7 +173,6 @@ class Operator:
             return DoraStatus.CONTINUE
 
         print(f"elapsed: {time.time() - timestamp}")
-        print(f"True: {position - self.previous_position}")
 
         self.previous_pc_down.paint_uniform_color([1, 0.706, 0])
         current_pc_down.paint_uniform_color([0, 0.651, 0.929])
@@ -218,7 +211,6 @@ class Operator:
         print(f"fitness: {result.fitness}")
         # send_output("relative_position", position.tobytes())
 
-        self.previous_position = position
         self.previous_pc_down = current_pc_down
         self.previous_features = current_features
 

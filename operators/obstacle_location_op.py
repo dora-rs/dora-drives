@@ -135,8 +135,8 @@ class Operator:
 
     def __init__(self):
         self.point_cloud = []
-        self.point_cloud_position = []
         self.obstacles = []
+        self.position = []
 
     def on_input(
         self,
@@ -145,17 +145,20 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
 
-        if input_id == "lidar_pc":
+        if input_id == "position":
+            # Add sensor transform
+            self.position = np.frombuffer(value)[:6] + np.array(
+                [3.0, 0, 1, 0, 0, 0]
+            )
+
+        elif input_id == "lidar_pc":
             point_cloud = np.frombuffer(
-                zlib.decompress(value[24:]), dtype=np.dtype("f4")
+                zlib.decompress(value), dtype=np.dtype("f4")
             )
             point_cloud = np.reshape(
                 point_cloud, (int(point_cloud.shape[0] / 4), 4)
             )
-            self.point_cloud_position = np.frombuffer(
-                value[:24],
-                dtype="float32",
-            )
+
             # To camera coordinate
             # The latest coordinate space is the unreal space.
             point_cloud = np.dot(
@@ -165,28 +168,19 @@ class Operator:
                 ),
             )
             self.point_cloud = point_cloud[:, :3]
-            return DoraStatus.CONTINUE
 
-        if input_id == "depth_frame":
+        elif input_id == "depth_frame":
             depth_frame = np.frombuffer(
-                zlib.decompress(value[24:]),
+                zlib.decompress(value),
                 dtype="float32",
             )
             depth_frame = np.reshape(
                 depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
             )
 
-            depth_frame_position = np.frombuffer(
-                value[:24],
-                dtype="float32",
-            )
-
-            self.point_cloud_position = depth_frame_position
             self.point_cloud = get_point_cloud(depth_frame)
 
-            return DoraStatus.CONTINUE
-
-        if input_id == "bbox" and len(self.point_cloud) != 0:
+        elif input_id == "bbox" and len(self.point_cloud) != 0:
             if len(value) == 0:
                 send_output("obstacles", np.array([]).tobytes())
                 return DoraStatus.CONTINUE
@@ -196,14 +190,19 @@ class Operator:
                 obstacles, self.point_cloud
             )
 
-            projection_matrix = get_projection_matrix(self.point_cloud_position)
-            extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
-            obstacles_with_location = to_world_coordinate(
-                np.array(obstacles_with_location), extrinsic_matrix
-            )
+            if not isinstance(self.position, list):
+                projection_matrix = get_projection_matrix(self.position)
+                extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
+                obstacles_with_location = to_world_coordinate(
+                    np.array(obstacles_with_location), extrinsic_matrix
+                )
 
-            predictions = get_predictions(obstacles, obstacles_with_location)
-            predictions_bytes = np.array(predictions, dtype="float32").tobytes()
+                predictions = get_predictions(
+                    obstacles, obstacles_with_location
+                )
+                predictions_bytes = np.array(
+                    predictions, dtype="float32"
+                ).tobytes()
 
-            send_output("obstacles", predictions_bytes)
+                send_output("obstacles", predictions_bytes)
         return DoraStatus.CONTINUE

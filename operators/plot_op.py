@@ -18,6 +18,7 @@ CAMERA_HEIGHT = 600
 DEPTH_IMAGE_WIDTH = 800
 DEPTH_IMAGE_HEIGHT = 600
 DEPTH_FOV = 90
+SENSOR_POSITION = np.array([3, 0, 1, 0, 0, 0])
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
@@ -65,37 +66,35 @@ class Operator:
             waypoints = waypoints[0:2].T
             self.waypoints = waypoints
 
-        if "obstacles_bb" == input_id:
+        elif "obstacles_bb" == input_id:
             self.obstacles_bb = np.frombuffer(value, dtype="int32").reshape(
                 (-1, 6)
             )
 
-        if "obstacles_id" == input_id:
+        elif "obstacles_id" == input_id:
             self.obstacles_id = np.frombuffer(value, dtype="int32").reshape(
                 (-1, 7)
             )
 
-        if "obstacles" == input_id:
+        elif "obstacles" == input_id:
             obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
             self.obstacles = obstacles
 
-        if "lanes" == input_id:
+        elif "lanes" == input_id:
             lanes = np.frombuffer(value, dtype="int32").reshape((-1, 10, 2))
             self.lanes = lanes
 
-        if "drivable_area" == input_id:
+        elif "drivable_area" == input_id:
             drivable_area = np.frombuffer(value, dtype="int32").reshape(
                 (1, -1, 2)
             )
             self.drivable_area = drivable_area
 
-        if "position" == input_id:
+        elif "position" == input_id:
             # Add sensor transform
-            self.position = np.frombuffer(value)[:6] + np.array(
-                [3.0, 0, 1, 0, 0, 0]
-            )
+            self.position = np.frombuffer(value)[:6] + SENSOR_POSITION
 
-        if "image" == input_id:
+        elif "image" == input_id:
             self.camera_frame = cv2.imdecode(
                 np.frombuffer(
                     value,

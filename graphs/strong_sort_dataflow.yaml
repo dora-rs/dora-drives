@@ -7,10 +7,11 @@ nodes:
     custom:
       outputs:
         - position
-        - lidar_pc
+        - depth_frame
         - segmented_frame
         - vehicle_id
         - image
+        - lidar_pc
       run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
 
   - id: yolov5

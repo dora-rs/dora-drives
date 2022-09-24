@@ -50,9 +50,8 @@ class Operator:
             )
 
             self.frame = frame[:, :, :3]
-            return DoraStatus.CONTINUE
 
-        if input_id == "obstacles_bb" and len(self.frame) != 0:
+        elif input_id == "obstacles_bb" and len(self.frame) != 0:
             obstacles = np.frombuffer(value, dtype="int32").reshape((-1, 6))
             if obstacles.shape[0] == 1:
                 self.model.increment_ages()

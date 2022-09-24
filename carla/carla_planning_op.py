@@ -71,6 +71,6 @@ class Operator:
         send_output(
             "gps_waypoints",
             waypoints_array.tobytes(),
-        )
+        ) # World coordinate
 
         return DoraStatus.CONTINUE

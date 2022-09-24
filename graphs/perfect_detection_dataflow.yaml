@@ -11,6 +11,7 @@ nodes:
         - segmented_frame
         - vehicle_id
         - image
+        - lidar_pc
         # Change carla source node if outputs are missing
       run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
 
@@ -22,7 +23,7 @@ nodes:
         position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
         segmented_frame: carla_source_node/segmented_frame
-      python: /home/dora/workspace/dora-drives/operators/perfect_detection_op.py
+      python: /home/dora/workspace/dora-drives/carla/perfect_detection_op.py
 
   - id: obstacle_location_op
     operator: 
