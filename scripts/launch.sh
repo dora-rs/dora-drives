@@ -20,10 +20,10 @@
 # nvidia-docker exec -i -t dora sudo service ssh start
 
 # Carla start
-nvidia-docker build --tag haixuantao/dora-drives .
+docker build --tag haixuantao/dora-drives .
 # Replace existing dora container if it exist
-docker stop dora || true && docker rm dora || true
-nvidia-docker run --env-file variables.env --net=host -e DISPLAY -itd --shm-size=256m --name dora haixuantao/dora-drives /home/dora/workspace/dora-drives/scripts/run_simulator.sh
-nvidia-docker exec -itd dora /home/dora/workspace/dora-drives/bin/iox-roudi 
+[ "$(docker ps -a | grep dora)" ] && docker stop dora && docker rm dora 
+docker run --gpus all --env-file variables.env --net=host -e DISPLAY -itd --shm-size=256m --name dora haixuantao/dora-drives /home/dora/workspace/dora-drives/scripts/run_simulator.sh
+docker exec -itd dora /home/dora/workspace/dora-drives/bin/iox-roudi 
 sleep 5
-docker exec -it dora /home/dora/workspace/dora-drives/bin/dora-coordinator run /home/dora/workspace/dora-drives/graphs/perfect_detection_dataflow.yaml
+docker  exec -it dora /home/dora/workspace/dora-drives/bin/dora-coordinator run /home/dora/workspace/dora-drives/graphs/yolov5_dataflow.yaml

@@ -169,40 +169,31 @@ class Operator:
             )
             self.point_cloud = point_cloud[:, :3]
 
-        elif input_id == "depth_frame":
-            depth_frame = np.frombuffer(
-                zlib.decompress(value),
-                dtype="float32",
-            )
-            depth_frame = np.reshape(
-                depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
-            )
-
-            self.point_cloud = get_point_cloud(depth_frame)
-
-        elif input_id == "bbox" and len(self.point_cloud) != 0:
+        elif (
+            input_id == "bbox"
+            and len(self.point_cloud) != 0
+            and len(self.position) != 0
+        ):
             if len(value) == 0:
                 send_output("obstacles", np.array([]).tobytes())
                 return DoraStatus.CONTINUE
-            obstacles = np.frombuffer(value, dtype="int32").reshape((-1, 6))
-            self.obstacles = np.array(obstacles, dtype=np.float32)
+            obstacles = (
+                np.frombuffer(value, dtype="int32")
+                .reshape((-1, 6))
+                .astype(np.float32)
+            )
             obstacles_with_location = get_obstacle_locations(
                 obstacles, self.point_cloud
             )
 
-            if not isinstance(self.position, list):
-                projection_matrix = get_projection_matrix(self.position)
-                extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
-                obstacles_with_location = to_world_coordinate(
-                    np.array(obstacles_with_location), extrinsic_matrix
-                )
+            projection_matrix = get_projection_matrix(self.position)
+            extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
+            obstacles_with_location = to_world_coordinate(
+                np.array(obstacles_with_location), extrinsic_matrix
+            )
 
-                predictions = get_predictions(
-                    obstacles, obstacles_with_location
-                )
-                predictions_bytes = np.array(
-                    predictions, dtype="float32"
-                ).tobytes()
+            predictions = get_predictions(obstacles, obstacles_with_location)
+            predictions_bytes = np.array(predictions, dtype="float32").tobytes()
 
-                send_output("obstacles", predictions_bytes)
+            send_output("obstacles", predictions_bytes)
         return DoraStatus.CONTINUE

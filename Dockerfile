@@ -102,7 +102,13 @@ RUN conda activate dora3.8 && MAX_JOBS=4 python3 -m pip install -U git+https://g
 COPY requirements.txt requirements.txt 
 RUN conda activate dora3.8 && python3 -m pip install -r requirements.txt
 
+RUN sudo chown -R dora:dora /home/dora
+
+# Cache model weight
 RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
+RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
+RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
+RUN conda activate dora3.8 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
 
 COPY . .
 
@@ -110,8 +116,5 @@ COPY .bashrc  /home/dora/.bashrc
 
 RUN conda activate dora3.8 && python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora-0.1.0-cp38-abi3-manylinux_2_31_x86_64.whl
 
-RUN sudo chown dora:dora /home/dora/workspace/dora-drives
 RUN sudo chmod +x /home/dora/workspace/dora-drives/carla/carla_source_node.py
-
-
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*

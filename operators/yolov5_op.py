@@ -14,6 +14,8 @@ class Operator:
 
     def __init__(self):
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5n")
+        self.model.to(torch.device("cuda"))
+        self.model.eval()
 
     def on_input(
         self,

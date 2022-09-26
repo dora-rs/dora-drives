@@ -22,6 +22,7 @@ nodes:
         # depth_frame: carla_source_node/depth_frame
         lidar_pc: carla_source_node/lidar_pc
         bbox: yolov5/bbox
+        position: carla_source_node/position
       python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
  
   - id: yolov5
