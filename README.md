@@ -22,12 +22,17 @@ You will be able to get started using the [installation section](https://dora-rs
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/imfnet-interpretable-multimodal-fusion-for/point-cloud-registration-on-3dmatch-benchmark)](https://paperswithcode.com/sota/point-cloud-registration-on-3dmatch-benchmark?p=imfnet-interpretable-multimodal-fusion-for)
 
+<img src=https://user-images.githubusercontent.com/22787340/192553644-1d8466be-c1e1-492d-9bc2-3546a1a3ea55.png width="300"><img src=https://user-images.githubusercontent.com/22787340/192553631-d6379df5-a1a8-49b9-a5c1-7bc7b9f1ed52.png width="300">
+
+
+
 ### [Object dectection](https://paperswithcode.com/task/object-detection)
 
 - [yolov5](https://github.com/ultralytics/yolov5) 
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
-![yolov5](https://user-images.githubusercontent.com/22787340/187723794-3623bee2-91d6-436a-a5d7-d2e363483c76.gif)
+
+<img src=https://user-images.githubusercontent.com/22787340/187723794-3623bee2-91d6-436a-a5d7-d2e363483c76.gif width="600">
 
 - Perfect detection on Carla Simulator
 
@@ -41,7 +46,7 @@ You will be able to get started using the [installation section](https://dora-rs
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/lane-detection-on-bdd100k)](https://paperswithcode.com/sota/lane-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
 
-![drivable_area](https://user-images.githubusercontent.com/22787340/187723841-7f3ba560-dbbe-4d43-886a-fb3b0be9247a.gif)
+<img src=https://user-images.githubusercontent.com/22787340/187723841-7f3ba560-dbbe-4d43-886a-fb3b0be9247a.gif width="600">
 
 ### [Drivable Area detection](https://paperswithcode.com/task/drivable-area-detection)
 
@@ -54,16 +59,17 @@ You will be able to get started using the [installation section](https://dora-rs
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
 
-![strong_sort](https://user-images.githubusercontent.com/22787340/187723873-473cda4f-573d-4663-a5b9-a4df2611c482.gif)
+<img src=https://user-images.githubusercontent.com/22787340/187723873-473cda4f-573d-4663-a5b9-a4df2611c482.gif width="600">
 
 ### [Motion Planning](https://paperswithcode.com/task/motion-planning)
 
-- Hybrid A-star.
+- [Hybrid A-star](https://github.com/erdos-project/hybrid_astar_planner)
+
+<img src=https://user-images.githubusercontent.com/22787340/192555777-1d5e4c5f-d654-4ef3-a019-387e56e46970.gif width="600">
 
 ### Path Tracking
 
 - Proportional Integral Derivative controller (PID)
-
     
 ## Future operators:
 
