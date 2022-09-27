@@ -153,9 +153,7 @@
 position = np.array([x, y, z, pitch, yaw, roll, forward_speed])
 
 ## frames 
-raw_data # image in bytes of uint8 encoded in jpeg.
-camera_transform = np.array([x, y, z, pitch, yaw, roll]).tobytes() # Camera settings  24 Bytes
-frame = camera_transform + raw_data
+frame = raw_data # image in bytes of uint8 encoded in jpeg.
 
 ## Obstacles without location (-1, 6)
 bounding_box_2d = np.array([[min_x, max_x, min_y, max_y, confidence, label], ...])
