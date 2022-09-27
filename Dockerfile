@@ -109,6 +109,7 @@ RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_mode
 RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
 RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
 RUN conda activate dora3.8 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
+RUN conda activate dora3.8 && python3 -c "import yolov7_tt100k"
 
 COPY . .
 
