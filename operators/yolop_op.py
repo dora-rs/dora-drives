@@ -266,6 +266,8 @@ class Operator:
 
     def __init__(self):
         self.model = torch.hub.load("hustvl/yolop", "yolop", pretrained=True)
+        self.model.to(torch.device("cuda"))
+        self.model.eval()
 
     def on_input(
         self,
@@ -277,7 +279,7 @@ class Operator:
         # inference
         frame = cv2.imdecode(
             np.frombuffer(
-                value[24:],
+                value,
                 dtype="uint8",
             ),
             -1,
@@ -293,6 +295,7 @@ class Operator:
         img = torch.unsqueeze(transform(frame), dim=0)
         half = False  # half precision only supported on CUDA
         img = img.half() if half else img.float()  # uint8 to fp16/32
+        img = img.to(torch.device("cuda"))
         det_out, da_seg_out, ll_seg_out = self.model(img)
 
         # det_out = [pred.reshape((1, -1, 6)) for pred in det_out]

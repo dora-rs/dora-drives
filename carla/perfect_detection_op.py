@@ -36,6 +36,7 @@ DEPTH_FOV = 90
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
+SENSOR_POSITION = [3, 0, 1, 0, 0, 0]
 
 LEFT = LineString(((0, 0), (0, IMAGE_HEIGHT)))
 BOTTOM = LineString(((0, IMAGE_HEIGHT), (IMAGE_WIDTH, IMAGE_HEIGHT)))
@@ -221,7 +222,7 @@ def get_bounding_box_in_camera_view(bb_coordinates) -> np.array:
 
 
 def populate_bounding_box_2D(
-    obstacle, depth_frame, segmented_frame, depth_frame_position
+    obstacle, depth_frame, segmented_frame, position
 ) -> np.array:
     """Populates the 2D bounding box for the obstacle.
     Heuristically uses the depth frame and segmentation frame to figure out
@@ -246,7 +247,7 @@ def populate_bounding_box_2D(
     bb_coordinates = to_camera_view(
         obstacle.bounding_box,
         get_projection_matrix(obs_position),
-        get_extrinsic_matrix(get_projection_matrix(depth_frame_position)),
+        get_extrinsic_matrix(get_projection_matrix(position + SENSOR_POSITION)),
     )
 
     # Threshold the bounding box to be within the camera view.
@@ -282,7 +283,7 @@ def populate_bounding_box_2D(
             mean_depth = np.mean(masked_depth) * DEPTH_IMAGE_MAX_DEPTH
             depth = distance_vertex(
                 obs_position,
-                depth_frame_position,
+                position,
             )
             if abs(depth - mean_depth) <= DEPTH_THRESHOLD:
                 return bbox_2d
@@ -297,7 +298,6 @@ class Operator:
     def __init__(self):
         self.position = []
         self.depth_frame = []
-        self.depth_frame_position = []
         self.segmented_frame = []
 
     def on_input(
@@ -308,7 +308,7 @@ class Operator:
     ):
         if input_id == "depth_frame":
             depth_frame = np.frombuffer(
-                zlib.decompress(value[24:]),
+                zlib.decompress(value),
                 dtype="float32",
             )
             depth_frame = np.reshape(
@@ -316,16 +316,12 @@ class Operator:
             )
 
             self.depth_frame = depth_frame
-            self.depth_frame_position = np.frombuffer(
-                value[:24],
-                dtype="float32",
-            )
             return DoraStatus.CONTINUE
 
-        if input_id == "segmented_frame":
+        elif input_id == "segmented_frame":
             segmented_frame = cv2.imdecode(
                 np.frombuffer(
-                    value[24:],
+                    value,
                     dtype="uint8",
                 ),
                 -1,
@@ -333,11 +329,12 @@ class Operator:
             self.segmented_frame = segmented_frame
             return DoraStatus.CONTINUE
 
-        if len(self.depth_frame) == 0 or len(self.segmented_frame) == 0:
+        elif input_id == "position":
+            self.position = np.frombuffer(value)[:6]
+        
+        if len(self.position) == 0 or len(self.depth_frame) == 0 or len(self.segmented_frame) == 0:
             return DoraStatus.CONTINUE
 
-        if input_id == "position":
-            self.position = np.frombuffer(value)
         actor_list = world.get_actors()
         vehicles = actor_list.filter("vehicle.*")
         pedestrians = actor_list.filter("walker.pedestrian.")
@@ -365,7 +362,7 @@ class Operator:
                     obstacle,
                     self.depth_frame,
                     self.segmented_frame,
-                    self.depth_frame_position,
+                    self.position,
                 )
                 if len(bbox) != 0:
 

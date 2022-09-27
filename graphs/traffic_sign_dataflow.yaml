@@ -21,18 +21,18 @@ nodes:
       inputs:
         # depth_frame: carla_source_node/depth_frame
         lidar_pc: carla_source_node/lidar_pc
-        bbox: yolov5/bbox
+        bbox: traffic_sign/bbox
         position: carla_source_node/position
       python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
  
-  - id: yolov5
+  - id: traffic_sign
     operator: 
       outputs:
         - bbox
       inputs:
         image: carla_source_node/image
-      python: /home/dora/workspace/dora-drives/operators/yolov5_op.py
-
+      python: /home/dora/workspace/dora-drives/operators/traffic_sign_op.py
+      
   - id: carla_planning_op
     operator:
       python: /home/dora/workspace/dora-drives/carla/carla_planning_op.py
@@ -76,6 +76,6 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: yolov5/bbox
+        obstacles_bb: traffic_sign/bbox
         position: carla_source_node/position
       python: /home/dora/workspace/dora-drives/operators/plot_op.py

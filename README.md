@@ -12,6 +12,8 @@ This project is in early development, and many features have yet to be implement
 
 ### Operator category already implemented
 
+- [Point cloud registration](https://paperswithcode.com/task/point-cloud-registration/latest)
+  - [IMFNet](https://github.com/XiaoshuiHuang/IMFNet)[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/imfnet-interpretable-multimodal-fusion-for/point-cloud-registration-on-3dmatch-benchmark)](https://paperswithcode.com/sota/point-cloud-registration-on-3dmatch-benchmark?p=imfnet-interpretable-multimodal-fusion-for)
 - [Object dectection](https://paperswithcode.com/task/object-detection)
     - Perfect detection
     - [yolov5](https://github.com/ultralytics/yolov5) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
@@ -26,7 +28,7 @@ This project is in early development, and many features have yet to be implement
 - Path Tracking
     - PID
 
-### Future operator categories with high priority:
+### Future operator categories:
 
 - [Traffic sign recognition](https://paperswithcode.com/task/traffic-sign-recognition)
     - Currently falling back to yolov5. 
@@ -35,7 +37,7 @@ This project is in early development, and many features have yet to be implement
 - [Trajectory Prediction (pedestrian and vehicles)](https://paperswithcode.com/task/trajectory-prediction)
     - Currently unimplemented. 
     
-### Future operator categories with less priority:
+### Hoped operator categories:
 - [Pedestrian detection](https://paperswithcode.com/task/pedestrian-detection)
     - Fall back to yolov5 currently
 - [Semantic segmentation](https://paperswithcode.com/task/semantic-segmentation)
@@ -101,6 +103,10 @@ And then within the container:
 - Current configurations are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
 
 ### Demos 
+
+- IMFNet
+
+
 
 - yolov5
 

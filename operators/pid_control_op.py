@@ -1,4 +1,3 @@
-import logging
 import math
 import threading
 import time
@@ -21,9 +20,6 @@ pid_i = 0.05
 dt = 1.0 / 5
 pid_use_real_time = True
 
-logger = logging.Logger("")
-
-
 BRAKE_MAX = 1.0
 THROTTLE_MAX = 0.5
 
@@ -42,9 +38,7 @@ def radians_to_steer(rad: float, steer_gain: float):
     return steer
 
 
-def compute_throttle_and_brake(
-    pid, current_speed: float, target_speed: float, logger
-):
+def compute_throttle_and_brake(pid, current_speed: float, target_speed: float):
     """Computes the throttle/brake required to reach the target speed.
 
     It uses the longitudinal controller to derive the required information.
@@ -59,7 +53,7 @@ def compute_throttle_and_brake(
         Throttle and brake values.
     """
     if current_speed < 0:
-        logger.warning("Current speed is negative: {}".format(current_speed))
+        print("Current speed is negative: {}".format(current_speed))
         non_negative_speed = 0
     else:
         non_negative_speed = current_speed
@@ -165,7 +159,7 @@ class Operator:
             position = np.frombuffer(value)
             [x, y, _, _, yaw, _, current_speed] = position
             # Vehicle speed in m/s.
-        if "waypoints" == input_id:
+        elif "waypoints" == input_id:
             waypoints = np.frombuffer(value)
             waypoints = waypoints.reshape((3, -1))
 
@@ -204,7 +198,7 @@ class Operator:
             target_angle = get_angle(target_vector, forward_vector)
 
         throttle, brake = compute_throttle_and_brake(
-            pid, current_speed, target_speed, logger
+            pid, current_speed, target_speed
         )
 
         steer = radians_to_steer(target_angle, STEER_GAIN)

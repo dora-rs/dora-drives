@@ -39,86 +39,29 @@ sensor_transform = Transform(
 
 
 def on_segmented_msg(frame):
-    location = frame.transform.location
-    rotation = frame.transform.rotation
-    x = location.x
-    y = location.y
-    z = location.z
-    pitch = rotation.pitch
-    yaw = rotation.yaw
-    roll = rotation.roll
-
-    camera_data = np.array(
-        [x, y, z, pitch, yaw, roll], dtype="float32"
-    ).tobytes()
 
     frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
     frame = frame[:, :, 2]
     global segmented_frame
-    segmented_frame = camera_data + cv2.imencode(".jpg", frame)[1].tobytes()
+    segmented_frame = cv2.imencode(".jpg", frame)[1].tobytes()
 
 
 def on_lidar_msg(frame):
 
-    # point_cloud = np.frombuffer(frame.raw_data, dtype=np.dtype("f4"))
-    # point_cloud = np.reshape(point_cloud, (int(point_cloud.shape[0] / 4), 4))
-    # inds = np.random.choice(point_cloud.shape[0], 20000, replace=False)
-    # point_cloud = point_cloud[inds]
-
-    location = frame.transform.location
-    rotation = frame.transform.rotation
-    x = location.x
-    y = location.y
-    z = location.z
-    pitch = rotation.pitch
-    yaw = rotation.yaw
-    roll = rotation.roll
-
-    camera_data = np.array(
-        [x, y, z, pitch, yaw, roll], dtype="float32"
-    ).tobytes()
-
     global lidar_pc
-    lidar_pc = camera_data + zlib.compress(frame.raw_data.tobytes())
+    lidar_pc = zlib.compress(frame.raw_data.tobytes())
 
 
 def on_camera_msg(frame):
-    location = frame.transform.location
-    rotation = frame.transform.rotation
-    x = location.x
-    y = location.y
-    z = location.z
-    pitch = rotation.pitch
-    yaw = rotation.yaw
-    roll = rotation.roll
-
-    camera_data = np.array(
-        [x, y, z, pitch, yaw, roll], dtype="float32"
-    ).tobytes()
     frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
     global camera_frame
-    camera_frame = camera_data + cv2.imencode(".jpg", frame)[1].tobytes()
+    camera_frame = cv2.imencode(".jpg", frame)[1].tobytes()
 
 
 def on_depth_msg(frame):
-    # _frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
-    # _frame = np.reshape(_frame, (frame.height, frame.width, 4))
-
-    location = frame.transform.location
-    rotation = frame.transform.rotation
-    x = location.x
-    y = location.y
-    z = location.z
-    pitch = rotation.pitch
-    yaw = rotation.yaw
-    roll = rotation.roll
-
-    camera_data = np.array(
-        [x, y, z, pitch, yaw, roll], dtype="float32"
-    ).tobytes()
 
     frame = np.frombuffer(
         frame.raw_data,
@@ -130,7 +73,7 @@ def on_depth_msg(frame):
     frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
     frame = frame.astype(np.float32)
     global depth_frame
-    depth_frame = camera_data + zlib.compress(frame.tobytes())
+    depth_frame = zlib.compress(frame.tobytes())
 
 
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
@@ -144,8 +87,8 @@ world = client.get_world()
     "0.9.10",
     -1,
     True,
-    0,
-    0,
+    10,
+    10,
     logger,
 )
 
@@ -190,16 +133,15 @@ def main():
 
     forward_speed = np.linalg.norm([vx, vy, vz])
 
-    # position = [x, y, z, pitch, yaw, roll, forward_speed]
     position = np.array([x, y, z, pitch, yaw, roll, forward_speed])
 
     node.send_output("position", position.tobytes())
     node.send_output("image", camera_frame)
-    # node.send_output("depth_frame", depth_frame)
-    # node.send_output("segmented_frame", segmented_frame)
+    node.send_output("depth_frame", depth_frame)
+    node.send_output("segmented_frame", segmented_frame)
     node.send_output("lidar_pc", lidar_pc)
 
 
 for _ in range(1000):
-    time.sleep(2)
+    time.sleep(0.3)
     main()

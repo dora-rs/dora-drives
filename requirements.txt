@@ -79,3 +79,7 @@ pyflann==1.6.14
 pyflann_py3==0.1.0
 tensorboardX==2.5.1
 git+https://github.com/haixuanTao/IMFNet
+
+# Traffic sign
+
+git+https://github.com/haixuanTao/yolov7.git
