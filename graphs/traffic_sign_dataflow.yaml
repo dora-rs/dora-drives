@@ -12,7 +12,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+      run: carla/carla_source_node.py
 
   - id: obstacle_location_op
     operator: 
@@ -23,7 +23,7 @@ nodes:
         lidar_pc: carla_source_node/lidar_pc
         bbox: traffic_sign/bbox
         position: carla_source_node/position
-      python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
+      python: operators/obstacle_location_op.py
  
   - id: traffic_sign
     operator: 
@@ -31,11 +31,11 @@ nodes:
         - bbox
       inputs:
         image: carla_source_node/image
-      python: /home/dora/workspace/dora-drives/operators/traffic_sign_op.py
+      python: operators/traffic_sign_op.py
       
   - id: carla_planning_op
     operator:
-      python: /home/dora/workspace/dora-drives/carla/carla_planning_op.py
+      python: carla/carla_planning_op.py
       outputs:
         - gps_waypoints
       inputs:
@@ -43,7 +43,7 @@ nodes:
 
   - id: hybrid_astar_op
     operator:
-      python: /home/dora/workspace/dora-drives/operators/hybrid_astar_op.py
+      python: operators/hybrid_astar_op.py
       outputs:
         - waypoints
       inputs:
@@ -53,7 +53,7 @@ nodes:
 
   - id: pid_control_op
     operator:
-      python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
+      python: operators/pid_control_op.py
       outputs:
         - control
       inputs:
@@ -62,7 +62,7 @@ nodes:
 
   - id: carla_control_op
     operator:
-      python: /home/dora/workspace/dora-drives/carla/carla_control_op.py
+      python: carla/carla_control_op.py
       outputs:
         - control_status
       inputs:
@@ -78,4 +78,4 @@ nodes:
         obstacles: obstacle_location_op/obstacles
         obstacles_bb: traffic_sign/bbox
         position: carla_source_node/position
-      python: /home/dora/workspace/dora-drives/operators/plot_op.py
+      python: operators/plot_op.py

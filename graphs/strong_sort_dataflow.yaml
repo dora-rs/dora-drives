@@ -12,7 +12,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+      run: carla/carla_source_node.py
 
   - id: yolov5
     operator: 
@@ -20,7 +20,7 @@ nodes:
         - bbox
       inputs:
         image: carla_source_node/image
-      python: /home/dora/workspace/dora-drives/operators/yolov5_op.py
+      python: operators/yolov5_op.py
 
   - id: strong_sort
     operator: 
@@ -29,7 +29,7 @@ nodes:
       inputs:
         image: carla_source_node/image
         obstacles_bb: yolov5/bbox
-      python: /home/dora/workspace/dora-drives/operators/strong_sort_op.py
+      python: operators/strong_sort_op.py
 
   - id: plot_op
     operator:
@@ -41,4 +41,4 @@ nodes:
         obstacles_bb: yolov5/bbox
         position: carla_source_node/position
         obstacles_id: strong_sort/obstacles_id
-      python: /home/dora/workspace/dora-drives/operators/plot_op.py
+      python: operators/plot_op.py

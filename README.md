@@ -14,7 +14,7 @@ The documentation can be found here: [dora-rs.github.io/dora-drives](https://dor
 
 You will be able to get started using the [installation section](https://dora-rs.github.io/dora-drives/installation.html).
 
-## Operators already implemented
+## Demos:
 
 ### [Point cloud registration](https://paperswithcode.com/task/point-cloud-registration/latest)
 
