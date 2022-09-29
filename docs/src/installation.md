@@ -40,3 +40,24 @@ cd dora-drives
 
 
 > This script has been built with my setup and you might need to install further dependencies that I have not listed, and additional configuration for cross-compiling on other OS.
+> 
+> If you're having build difficulties with CUDA. Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626 and make sure to have the exact same daemon.
+You will need to have `/etc/docker/daemon.json` to be exactly:
+
+>```json
+>{
+>    "runtimes": {
+>        "nvidia": {
+>            "path": "nvidia-container-runtime",
+>            "runtimeArgs": []
+>        }
+>    },
+>    "default-runtime": "nvidia"
+>}
+>```
+>
+>And restart:
+>
+>```bash
+>sudo systemctl restart docker
+>```
