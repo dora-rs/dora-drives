@@ -52,16 +52,19 @@ class Operator:
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
         img = np.ascontiguousarray(img)
         img = torch.from_numpy(img).to(torch.device("cuda"))
-        half = True
+        half = False
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
 
-        pred = self.model(img)[0]
-        pred = non_max_suppression(pred, 0.15, 0.15, None, False)[0]
-        pred[:, :4] = scale_coords(img.shape[2:], pred[:, :4], shape).round()
-        results = pred.detach().cpu().numpy()
+        with torch.no_grad():
+            pred = self.model(img)[0]
+            pred = non_max_suppression(pred, 0.15, 0.15, None, False)[0]
+            pred[:, :4] = scale_coords(
+                img.shape[2:], pred[:, :4], shape
+            ).round()
+            results = pred.detach().cpu().numpy()
 
         arrays = np.array(results)[:, [0, 2, 1, 3, 4, 5]]  # xyxy -> xxyy
         arrays[:, 4] *= 100

@@ -30,7 +30,7 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: yolov5/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area

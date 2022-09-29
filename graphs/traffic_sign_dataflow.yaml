@@ -33,9 +33,9 @@ nodes:
         image: carla_source_node/image
       python: operators/traffic_sign_op.py
       
-  - id: carla_planning_op
+  - id: carla_gps_op
     operator:
-      python: carla/carla_planning_op.py
+      python: carla/carla_gps_op.py
       outputs:
         - gps_waypoints
       inputs:
@@ -49,7 +49,7 @@ nodes:
       inputs:
         position: carla_source_node/position
         obstacles: obstacle_location_op/obstacles
-        gps_waypoints: carla_planning_op/gps_waypoints
+        gps_waypoints: carla_gps_op/gps_waypoints
 
   - id: pid_control_op
     operator:
@@ -76,6 +76,6 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: traffic_sign/bbox
+        traffic_sign_bbox: traffic_sign/bbox
         position: carla_source_node/position
       python: operators/plot_op.py

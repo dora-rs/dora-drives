@@ -12,7 +12,7 @@ It sends the bounding box as a numpy bytes array with type `int32`.
 To use it, just add it to the graph:
 
 ```yaml
-{{#include ../../graphs/tutorials/webcam_yolov5_dataflow.yaml }}
+{{#include ../../graphs/tutorials/webcam_yolov5.yaml }}
 ```
 
 Inputs are prefixed by the node name to be able to separate name conflicts.
@@ -22,6 +22,6 @@ I've added capabilities for the plot to show the bounding box found by the `yolo
 - To run it:
 
 ```bash
-./scripts/launch.sh -b -g tutorials/webcam_yolov5_dataflow.yaml
+./scripts/launch.sh -b -g tutorials/webcam_yolov5.yaml
 ```
 

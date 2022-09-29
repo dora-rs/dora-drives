@@ -42,6 +42,6 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: perfect_detection_op/bbox
+        obstacles_bbox: perfect_detection_op/bbox
         position: carla_source_node/position
       python: operators/plot_op.py

@@ -24,4 +24,4 @@ nodes:
       python: physicals/plot.py
       inputs:
         image: webcam/image
-        bbox: yolov5/bbox
+        obstacles_bbox: yolov5/bbox

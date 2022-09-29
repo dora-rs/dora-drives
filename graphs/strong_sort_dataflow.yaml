@@ -28,7 +28,7 @@ nodes:
         - obstacles_id
       inputs:
         image: carla_source_node/image
-        obstacles_bb: yolov5/bbox
+        obstacles_bbox: yolov5/bbox
       python: operators/strong_sort_op.py
 
   - id: plot_op
@@ -38,7 +38,7 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: yolov5/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
         obstacles_id: strong_sort/obstacles_id
       python: operators/plot_op.py

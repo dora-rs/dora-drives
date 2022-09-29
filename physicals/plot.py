@@ -12,6 +12,89 @@ fontColor = (255, 255, 255)
 thickness = 1
 lineType = 2
 
+LABELS = [
+    "person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "backpack",
+    "umbrella",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "dining table",
+    "toilet",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush",
+]
+
 
 class DoraStatus(Enum):
     CONTINUE = 0
@@ -24,12 +107,13 @@ class Operator:
     """
 
     def __init__(self):
-        self.obstacles_bb = []
+        self.obstacles_bbox = []
         self.obstacles_id = []
         self.lanes = []
         self.drivable_area = []
         self.last_timestamp = time.time()
         self.camera_frame = []
+        self.traffic_sign_bbox = []
 
     def on_input(
         self,
@@ -38,10 +122,15 @@ class Operator:
         _send_output: Callable[[str, bytes], None],
     ):
 
-        if "obstacles_bb" == input_id:
-            self.obstacles_bb = np.frombuffer(value, dtype="int32").reshape(
+        if "obstacles_bbox" == input_id:
+            self.obstacles_bbox = np.frombuffer(value, dtype="int32").reshape(
                 (-1, 6)
             )
+
+        if "traffic_sign_bbox" == input_id:
+            self.traffic_sign_bbox = np.frombuffer(
+                value, dtype="int32"
+            ).reshape((-1, 6))
 
         elif "obstacles_id" == input_id:
             self.obstacles_id = np.frombuffer(value, dtype="int32").reshape(
@@ -49,7 +138,7 @@ class Operator:
             )
 
         elif "lanes" == input_id:
-            lanes = np.frombuffer(value, dtype="int32").reshape((-1, 10, 2))
+            lanes = np.frombuffer(value, dtype="int32").reshape((-1, 30, 2))
             self.lanes = lanes
 
         elif "drivable_area" == input_id:
@@ -73,8 +162,8 @@ class Operator:
         resized_image = self.camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
 
-        for obstacle_bb in self.obstacles_bb:
-            [min_x, max_x, min_y, max_y, confidence, label] = obstacle_bb
+        for obstacles_bbox in self.obstacles_bbox:
+            [min_x, max_x, min_y, max_y, confidence, label] = obstacles_bbox
 
             start = (int(min_x), int(min_y))
             end = (int(max_x), int(max_y))
@@ -87,6 +176,24 @@ class Operator:
                 font,
                 0.75,
                 (0, 255, 0),
+                2,
+                1,
+            )
+
+        for traffic_sign_bbox in self.traffic_sign_bbox:
+            [min_x, max_x, min_y, max_y, confidence, label] = traffic_sign_bbox
+
+            start = (int(min_x), int(min_y))
+            end = (int(max_x), int(max_y))
+            cv2.rectangle(resized_image, start, end, (122, 0, 122), 2)
+
+            cv2.putText(
+                resized_image,
+                LABELS[label] + f", {confidence}%",
+                (int(max_x), int(max_y)),
+                font,
+                0.75,
+                (122, 0, 122),
                 2,
                 1,
             )
@@ -132,6 +239,5 @@ class Operator:
 
         cv2.imshow("image", resized_image)
         cv2.waitKey(1)
-
 
         return DoraStatus.CONTINUE

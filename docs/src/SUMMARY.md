@@ -12,9 +12,11 @@
 
 - [Streaming a video](./webcam_plot.md)
 - [Yolov5](./yolov5.md)
-- [Driving assistance](./webam_full_nodes.md)
+- [Driving assistance](./webcam_full_nodes.md)
 - [Carla simulator](./carla.md)
-
+- [Planning](./planning.md)
+- [Obstacles position](./control.md)
+- [Control](./control.md)
 
 ---
 

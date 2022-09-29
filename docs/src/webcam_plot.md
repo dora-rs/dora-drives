@@ -25,7 +25,7 @@ Let's write a small webcam streaming application.
 - To finish, we're going to declare the graph for `dora-coordinator` to know how to link those nodes together. In this exemple we're going to use `Iceoryx` as the pubsub provider:
 
 ```yaml
-{{#include ../../graphs/tutorials/webcam_dataflow.yaml }}
+{{#include ../../graphs/tutorials/webcam.yaml }}
 ```
 
 > dora timer input is a standard input that tick at the configured frequency.
@@ -33,7 +33,7 @@ Let's write a small webcam streaming application.
 - We can now run this pipeline using a `launch` script that I wrote, that compile `dora` and its API, put them in a docker and run the dataflow. 
 
 ```bash
-./scripts/launch.sh -b -g tutorials/webcam_dataflow.yaml
+./scripts/launch.sh -b -g tutorials/webcam.yaml
 ```
 
 > You will need a webcam to run this tutorial.

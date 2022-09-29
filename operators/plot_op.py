@@ -45,13 +45,14 @@ class Operator:
     def __init__(self):
         self.waypoints = []
         self.obstacles = []
-        self.obstacles_bb = []
+        self.obstacles_bbox = []
         self.obstacles_id = []
         self.lanes = []
         self.drivable_area = []
         self.last_timestamp = time.time()
         self.position = []
         self.camera_frame = []
+        self.traffic_sign_bbox = []
 
     def on_input(
         self,
@@ -66,10 +67,13 @@ class Operator:
             waypoints = waypoints[0:2].T
             self.waypoints = waypoints
 
-        elif "obstacles_bb" == input_id:
-            self.obstacles_bb = np.frombuffer(value, dtype="int32").reshape(
-                (-1, 6)
-            )
+        elif "bbox" == input_id:
+            self.obstacles_bbox = np.frombuffer(value, dtype="int32").reshape((-1, 6))
+
+        elif "traffic_sign_bbox" == input_id:
+            self.traffic_sign_bbox = np.frombuffer(
+                value, dtype="int32"
+            ).reshape((-1, 6))
 
         elif "obstacles_id" == input_id:
             self.obstacles_id = np.frombuffer(value, dtype="int32").reshape(
@@ -81,7 +85,7 @@ class Operator:
             self.obstacles = obstacles
 
         elif "lanes" == input_id:
-            lanes = np.frombuffer(value, dtype="int32").reshape((-1, 10, 2))
+            lanes = np.frombuffer(value, dtype="int32").reshape((-1, 30, 2))
             self.lanes = lanes
 
         elif "drivable_area" == input_id:
@@ -144,7 +148,7 @@ class Operator:
                 -1,
             )
 
-        for obstacle_bb in self.obstacles_bb:
+        for obstacle_bb in self.obstacles_bbox:
             [min_x, max_x, min_y, max_y, confidence, label] = obstacle_bb
 
             start = (int(min_x), int(min_y))

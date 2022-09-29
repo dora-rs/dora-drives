@@ -1,22 +1,27 @@
 communication:
   iceoryx:
     app_name_prefix: dora-iceoryx-example
-
+    
 nodes:
-  - id: webcam
+  - id: carla_source_node
     custom:
-      run: physicals/webcam.py
-      inputs:
-        timer: dora/timer/millis/100
       outputs:
+        - position
+        - depth_frame
+        - segmented_frame
+        - vehicle_id
         - image
+        - lidar_pc
+      run: carla/carla_source_node.py
+      env: 
+        SET_AUTOPILOT: true 
 
   - id: yolov5
     operator: 
       outputs:
         - bbox
       inputs:
-        image: webcam/image
+        image: carla_source_node/image
       python: operators/yolov5_op.py
 
   - id: yolop
@@ -25,14 +30,15 @@ nodes:
         - lanes
         - drivable_area
       inputs:
-        image: webcam/image
+        image: carla_source_node/image
       python: operators/yolop_op.py
 
   - id: plot
     operator:
       python: physicals/plot.py
       inputs:
-        image: webcam/image
-        bbox: yolov5/bbox
+        image: carla_source_node/image
+        obstacles_bbox: yolov5/bbox
+        traffic_sign_bbox: traffic_sign/bbox
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
