@@ -71,7 +71,7 @@ ninja
 
 easydict==1.9
 einops==0.3.2
-joblib==1.0.1
+joblib==1.2.0
 nibabel==3.2.1
 open3d
 opencv_contrib_python==4.5.2.52
