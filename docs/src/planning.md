@@ -41,3 +41,10 @@ We're going to reuse a model called `hybrid_astar` as a black box, that take as 
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
 ```
+
+To test waypoints algorithms, launch:
+
+```bash
+./scripts/launch.sh -b -s -g tutorials/carla_waypoints.yaml
+```
+

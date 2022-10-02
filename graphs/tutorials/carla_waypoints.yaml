@@ -1,0 +1,65 @@
+communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+    
+nodes:
+  - id: carla_source_node
+    custom:
+      outputs:
+        - position
+        - depth_frame
+        - segmented_frame
+        - vehicle_id
+        - image
+        - lidar_pc
+      run: carla/carla_source_node.py
+      env: 
+        SET_AUTOPILOT: true 
+
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: carla_source_node/image
+      python: operators/yolov5_op.py
+
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+      inputs:
+        # depth_frame: carla_source_node/depth_frame
+        lidar_pc: carla_source_node/lidar_pc
+        obstacles_bbox: yolov5/bbox
+        position: carla_source_node/position
+      python: operators/obstacle_location_op.py
+      
+  - id: carla_gps_op
+    operator:
+      python: carla/carla_gps_op.py
+      outputs:
+        - gps_waypoints
+      inputs:
+        position: carla_source_node/position
+
+  - id: hybrid_astar_op
+    operator:
+      python: operators/hybrid_astar_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: carla_source_node/position
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+        
+  - id: plot_op
+    operator:
+      description: Plot operator
+      inputs: 
+        waypoints: hybrid_astar_op/waypoints
+        image: carla_source_node/image
+        obstacles: obstacle_location_op/obstacles
+        obstacles_bbox: yolov5/bbox
+        position: carla_source_node/position
+      python: operators/plot_op.py

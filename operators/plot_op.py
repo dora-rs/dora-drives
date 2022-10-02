@@ -67,8 +67,10 @@ class Operator:
             waypoints = waypoints[0:2].T
             self.waypoints = waypoints
 
-        elif "bbox" == input_id:
-            self.obstacles_bbox = np.frombuffer(value, dtype="int32").reshape((-1, 6))
+        elif "obstacles_bbox" == input_id:
+            self.obstacles_bbox = np.frombuffer(value, dtype="int32").reshape(
+                (-1, 6)
+            )
 
         elif "traffic_sign_bbox" == input_id:
             self.traffic_sign_bbox = np.frombuffer(
