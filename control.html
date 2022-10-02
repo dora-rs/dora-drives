@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Yolov5 operator - dora-drives</title>
+        <title>Control - dora-drives</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">9.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">10.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html" class="active"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">13.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">15.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">16.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">17.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html" class="active"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">9.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">10.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">13.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">15.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">16.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">17.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,27 +143,148 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="yolov5-operator"><a class="header" href="#yolov5-operator">Yolov5 operator</a></h1>
-<p><code>Yolov5</code> object detection operator generates bounding boxes on images where it detects object. </p>
-<p><code>Yolov5</code> has not been finetuned on the simulation and is directly importing weight from Pytorch Hub.</p>
-<h2 id="inputs"><a class="header" href="#inputs">Inputs</a></h2>
-<ul>
-<li>jpeg encoded image as input.</li>
-</ul>
-<h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
-<ul>
-<li>Bounding box coordinates as well as the confidence and class label as output.</li>
-</ul>
+                        <h1 id="control"><a class="header" href="#control">Control</a></h1>
+<p>Car can simplistically be controlled in general using 3 variables: <code>throttle, steering, brake</code>. We're going to focus on those 3 for the moment.</p>
+<p>To send a control to a Carla car, we can use <code>carla_control_op.py</code> that takes an array of 3 variables: <code>throttle, steering, brake</code> and apply it to our car.</p>
+<p>To translate out waypoints to those control, we're using a PID controller that is able to adjust the steering according to the response of the steering, and we're going to pipe this response to the CARLA API so that the car can move. The PID controller code is in <code>pid_control_op.py</code>.</p>
+<p>The full graph look as follows</p>
+<pre><code class="language-yaml">communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+    
+nodes:
+  - id: carla_source_node
+    custom:
+      outputs:
+        - position
+        - depth_frame
+        - segmented_frame
+        - vehicle_id
+        - image
+        - lidar_pc
+      run: carla/carla_source_node.py
+
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: carla_source_node/image
+      python: operators/yolov5_op.py
+  
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+      inputs:
+        # depth_frame: carla_source_node/depth_frame
+        lidar_pc: carla_source_node/lidar_pc
+        obstacles_bbox: yolov5/bbox
+        position: carla_source_node/position
+      python: operators/obstacle_location_op.py
+      
+  - id: carla_gps_op
+    operator:
+      python: carla/carla_gps_op.py
+      outputs:
+        - gps_waypoints
+      inputs:
+        position: carla_source_node/position
+
+  - id: hybrid_astar_op
+    operator:
+      python: operators/hybrid_astar_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: carla_source_node/position
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+
+  - id: pid_control_op
+    operator:
+      python: operators/pid_control_op.py
+      outputs:
+        - control
+      inputs:
+        position: carla_source_node/position
+        waypoints: hybrid_astar_op/waypoints
+
+  - id: carla_control_op
+    operator:
+      python: carla/carla_control_op.py
+      outputs:
+        - control_status
+      inputs:
+        control: pid_control_op/control
+        vehicle_id: carla_source_node/vehicle_id
+
+  - id: plot_op
+    operator:
+      description: Plot operator
+      inputs: 
+        waypoints: hybrid_astar_op/waypoints
+        image: carla_source_node/image
+        obstacles: obstacle_location_op/obstacles
+        obstacles_bbox: yolov5/bbox
+        position: carla_source_node/position
+      python: operators/plot_op.py
+</code></pre>
+<pre><code class="language-mermaid">flowchart TB
+  carla_source_node[\carla_source_node/]
+subgraph yolov5
+  yolov5/op[op]
+end
+subgraph obstacle_location_op
+  obstacle_location_op/op[op]
+end
+subgraph carla_gps_op
+  carla_gps_op/op[op]
+end
+subgraph hybrid_astar_op
+  hybrid_astar_op/op[op]
+end
+subgraph pid_control_op
+  pid_control_op/op[op]
+end
+subgraph carla_control_op
+  carla_control_op/op[op]
+end
+subgraph plot_op
+  plot_op/op[/op\]
+end
+  carla_source_node -- image --&gt; yolov5/op
+  carla_source_node -- lidar_pc --&gt; obstacle_location_op/op
+  yolov5/op -- bbox as obstacles_bbox --&gt; obstacle_location_op/op
+  carla_source_node -- position --&gt; obstacle_location_op/op
+  carla_source_node -- position --&gt; carla_gps_op/op
+  carla_gps_op/op -- gps_waypoints --&gt; hybrid_astar_op/op
+  obstacle_location_op/op -- obstacles --&gt; hybrid_astar_op/op
+  carla_source_node -- position --&gt; hybrid_astar_op/op
+  carla_source_node -- position --&gt; pid_control_op/op
+  hybrid_astar_op/op -- waypoints --&gt; pid_control_op/op
+  pid_control_op/op -- control --&gt; carla_control_op/op
+  carla_source_node -- vehicle_id --&gt; carla_control_op/op
+  carla_source_node -- image --&gt; plot_op/op
+  obstacle_location_op/op -- obstacles --&gt; plot_op/op
+  yolov5/op -- bbox as obstacles_bbox --&gt; plot_op/op
+  carla_source_node -- position --&gt; plot_op/op
+  hybrid_astar_op/op -- waypoints --&gt; plot_op/op
+</code></pre>
+<p>To test it out:</p>
+<pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
+</code></pre>
+<p>😎 We now have a working autonomous car!</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="perfect_detection_operator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="planning.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="obstacle_location_operator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="carla_source_node.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -173,11 +294,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="perfect_detection_operator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="planning.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="obstacle_location_operator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="carla_source_node.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>

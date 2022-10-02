@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Yolov5 operator - dora-drives</title>
+        <title>Streaming a video - dora-drives</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">9.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">10.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html" class="active"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">13.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">15.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">16.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">17.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html" class="active"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">9.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">10.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">13.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">15.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">16.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">17.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,27 +143,135 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="yolov5-operator"><a class="header" href="#yolov5-operator">Yolov5 operator</a></h1>
-<p><code>Yolov5</code> object detection operator generates bounding boxes on images where it detects object. </p>
-<p><code>Yolov5</code> has not been finetuned on the simulation and is directly importing weight from Pytorch Hub.</p>
-<h2 id="inputs"><a class="header" href="#inputs">Inputs</a></h2>
+                        <h1 id="streaming-live-video-on-your-monitor"><a class="header" href="#streaming-live-video-on-your-monitor">Streaming live video on your monitor</a></h1>
+<p>The principle of <code>dora</code> is to declare a dataflow of nodes that are linked with a publish-subscribe service. </p>
+<p>The nodes can be either:</p>
 <ul>
-<li>jpeg encoded image as input.</li>
+<li>Custom nodes: Nodes that uses <code>dora</code> node API which gives you a way to receive and send messages through the dataflow.</li>
+<li>Runtime nodes: Nodes that are managed by a <code>dora-runtime</code>. They requires that applications are written as <code>operators</code> following a specific framework. This operators will have more features than the <code>dora</code> node API.</li>
 </ul>
-<h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
+<h2 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h2>
+<p>Let's write a small webcam streaming application.</p>
 <ul>
-<li>Bounding box coordinates as well as the confidence and class label as output.</li>
+<li>First, we're going to write a webcam node, that is going to capture the webcam image each time it receive an input and send it as a jpeg into the <code>image</code> pubsub service.</li>
 </ul>
+<pre><code class="language-python">#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import time
+
+import cv2
+from dora import Node
+
+node = Node()
+
+video_capture = cv2.VideoCapture(0)
+
+start = time.time()
+
+# Run for 20 seconds
+while time.time() - start &lt; 60:
+    # Wait next input
+    node.next()
+    ret, frame = video_capture.read()
+    if ret:
+        node.send_output(&quot;image&quot;, cv2.imencode(&quot;.jpg&quot;, frame)[1].tobytes())
+
+video_capture.release()
+</code></pre>
+<ul>
+<li>Then, we're going to write a plot operator that is going to be managed by <code>dora-runtime</code>. It's going to decode the jpeg and plot it as a window.</li>
+</ul>
+<pre><code class="language-python">import os
+from enum import Enum
+from typing import Callable
+
+import cv2
+import numpy as np
+
+
+class DoraStatus(Enum):
+    CONTINUE = 0
+    STOP = 1
+
+
+class Operator:
+    &quot;&quot;&quot;
+    Plot image and bounding box
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        self.image = []
+
+    def on_input(
+        self,
+        input_id: str,
+        value: bytes,
+        send_output: Callable[[str, bytes], None],
+    ) -&gt; DoraStatus:
+        &quot;&quot;&quot;
+        Put image on a cv2 window.
+        Args:
+            input_id (str): Id of the input declared in the yaml configuration
+            value (bytes): Bytes message of the input
+            send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
+        &quot;&quot;&quot;
+        if input_id == &quot;image&quot;:
+            frame = np.frombuffer(value, dtype=&quot;uint8&quot;)
+            frame = cv2.imdecode(frame, -1)
+            self.image = frame
+            cv2.imshow(&quot;frame&quot;, self.image)
+            if cv2.waitKey(1) &amp; 0xFF == ord(&quot;q&quot;):
+                return DoraStatus.STOP
+
+        return DoraStatus.CONTINUE
+
+    def drop_operator(self):
+        cv2.destroyAllWindows()
+</code></pre>
+<ul>
+<li>To finish, we're going to declare the graph for <code>dora-coordinator</code> to know how to link those nodes together. In this exemple we're going to use <code>Iceoryx</code> as the pubsub provider:</li>
+</ul>
+<pre><code class="language-yaml">communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+
+nodes:
+  - id: webcam
+    custom:
+      run: physicals/webcam.py
+      inputs:
+        timer: dora/timer/millis/100
+      outputs:
+        - image
+
+  - id: plot
+    operator:
+      python: physicals/simple_plot.py
+      inputs:
+        image: webcam/image
+</code></pre>
+<blockquote>
+<p>dora timer input is a standard input that tick at the configured frequency.</p>
+</blockquote>
+<ul>
+<li>We can now run this pipeline using a <code>launch</code> script that I wrote, that compile <code>dora</code> and its API, put them in a docker and run the dataflow. </li>
+</ul>
+<pre><code class="language-bash">./scripts/launch.sh -b -g tutorials/webcam.yaml
+</code></pre>
+<blockquote>
+<p>You will need a webcam to run this tutorial.</p>
+</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="perfect_detection_operator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="installation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="obstacle_location_operator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="yolov5.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -173,11 +281,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="perfect_detection_operator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="installation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="obstacle_location_operator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="yolov5.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>

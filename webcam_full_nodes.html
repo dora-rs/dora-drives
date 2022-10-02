@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Yolov5 operator - dora-drives</title>
+        <title>Full perception - dora-drives</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">9.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">10.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html" class="active"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">13.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">15.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">16.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">17.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html" class="active"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">9.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">10.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">13.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">15.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">16.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">17.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,27 +143,88 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="yolov5-operator"><a class="header" href="#yolov5-operator">Yolov5 operator</a></h1>
-<p><code>Yolov5</code> object detection operator generates bounding boxes on images where it detects object. </p>
-<p><code>Yolov5</code> has not been finetuned on the simulation and is directly importing weight from Pytorch Hub.</p>
-<h2 id="inputs"><a class="header" href="#inputs">Inputs</a></h2>
+                        <h1 id="full-perception"><a class="header" href="#full-perception">Full perception</a></h1>
+<p>Let's add all the operators currently provided by <code>dora-drives</code> that works on image frame. We currently have implemented:</p>
 <ul>
-<li>jpeg encoded image as input.</li>
+<li><code>yolov5</code> an object detector.</li>
+<li><code>strong_sort</code> a multi-object tracker.</li>
+<li><code>yolop</code> a lane and drivable area detector.</li>
+<li><code>traffic_sign</code> a traffic sign detector.</li>
 </ul>
-<h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
-<ul>
-<li>Bounding box coordinates as well as the confidence and class label as output.</li>
-</ul>
+<p>the graph will look as follows:</p>
+<pre><code class="language-yaml">communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+
+nodes:
+  - id: webcam
+    custom:
+      run: physicals/webcam.py
+      inputs:
+        timer: dora/timer/millis/100
+      outputs:
+        - image
+
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: webcam/image
+      python: operators/yolov5_op.py
+
+  - id: yolop
+    operator: 
+      outputs:
+        - lanes
+        - drivable_area
+      inputs:
+        image: webcam/image
+      python: operators/yolop_op.py
+
+  ## Commented out as it takes a lot of GPU memory.
+  #- id: traffic_sign
+    #operator: 
+      #outputs:
+        #- bbox
+      #inputs:
+        #image: webcam/image
+      #python: operators/traffic_sign_op.py
+
+  - id: strong_sort
+    operator: 
+      outputs:
+        - obstacles_id
+      inputs:
+        image: webcam/image
+        obstacles_bbox: yolov5/bbox
+      python: operators/strong_sort_op.py
+
+  - id: plot
+    operator:
+      python: physicals/plot.py
+      inputs:
+        image: webcam/image
+        obstacles_bbox: yolov5/bbox
+        traffic_sign_bbox: traffic_sign/bbox
+        lanes: yolop/lanes
+        drivable_area: yolop/drivable_area
+        obstacles_id: strong_sort/obstacles_id
+</code></pre>
+<p>Run it with</p>
+<pre><code class="language-bash">./scripts/launch.sh -g tutorials/webcam_full.yaml
+</code></pre>
+<p>Nice 🥳 As you can see, the value of <code>dora</code> comes from the idea that you can compose different algorithm really quickly.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="perfect_detection_operator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="yolov5.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="obstacle_location_operator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="carla.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -173,11 +234,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="perfect_detection_operator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="yolov5.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="obstacle_location_operator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="carla.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>

@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html" class="active"><strong aria-hidden="true">1.</strong> installation</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">2.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">3.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">4.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">5.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">6.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">7.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">8.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">9.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">10.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html" class="active"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">9.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">10.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">13.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">15.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">16.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">17.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -144,57 +144,57 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<h3 id="hardware-requirements"><a class="header" href="#hardware-requirements">Hardware requirements</a></h3>
+<ul>
+<li>NVIDIA GPU with CUDA</li>
+</ul>
 <h2 id="from-docker-hub"><a class="header" href="#from-docker-hub">From Docker Hub</a></h2>
-<h3 id="requirements"><a class="header" href="#requirements">Requirements</a></h3>
 <p>You will only need <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></p>
 <p>To start with docker which is the easiest:</p>
 <pre><code class="language-bash">docker pull haixuantao/dora-drives
-nvidia-docker run -itd --name dora -p 20022:22 haixuantao/dora-drives /bin/bash
-nvidia-docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
-nvidia-docker cp ~/.ssh/id_rsa.pub dora:/home/dora/.ssh/authorized_keys
-nvidia-docker exec -i -t dora sudo chown dora /home/dora/.ssh/authorized_keys
-nvidia-docker exec -i -t dora sudo service ssh start
-ssh -p 20022 -X dora@localhost 
-</code></pre>
-<p>And then within the container:</p>
-<pre><code class="language-bash">./workspace/dora-drives/scripts/launch_in_container.sh
+docker run --gpus all --env-file variables.env --net=host -e DISPLAY -itd --shm-size=256m --name dora haixuantao/dora-drives /home/dora/workspace/dora-drives/scripts/run_simulator.sh
+docker exec -itd dora /home/dora/workspace/dora-drives/bin/iox-roudi 
+sleep 5
+docker  exec -it dora /home/dora/workspace/dora-drives/bin/dora-coordinator run /home/dora/workspace/dora-drives/graphs/yolov5_dataflow.yaml
 </code></pre>
 <blockquote>
 <p>This docker image has been built with my setup and it might not work on all machines. In case it doesn't work. Please check the following <code>From Source</code>.</p>
 </blockquote>
 <h2 id="from-source"><a class="header" href="#from-source">From Source</a></h2>
-<h3 id="requirements-1"><a class="header" href="#requirements-1">Requirements</a></h3>
 <p>You will need:</p>
 <ul>
 <li><a href="https://rustup.rs/">Rust</a></li>
 <li><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></li>
 <li>Python v3.8.10</li>
 <li>maturin <code>pip install maturin</code></li>
+<li>Linux</li>
 </ul>
 <p>For linux, run:</p>
 <pre><code class="language-bash">git clone git@github.com:futurewei-tech/dora.git
 git clone git@github.com:futurewei-tech/dora-drives.git
 cd dora-drives
-# Compile with Python 3.8 installed
-./scripts/launch.sh
+# Compile with Python 3.8 as default interpreter
+./scripts/launch.sh -b 
 </code></pre>
 <blockquote>
-<p>For other OS, you will need to adapt the launch.sh script.</p>
+<p>This script has been built with my setup and you might need to install further dependencies that I have not listed, and additional configuration for cross-compiling on other OS.</p>
+<p>If you're having build difficulties with CUDA. Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626 and make sure to have the exact same daemon.
+You will need to have <code>/etc/docker/daemon.json</code> to be exactly:</p>
 </blockquote>
-<p>And then within the container:</p>
-<pre><code class="language-bash">./workspace/dora-drives/scripts/launch_in_container.sh
+<blockquote>
+<pre><code class="language-json">{
+   &quot;runtimes&quot;: {
+       &quot;nvidia&quot;: {
+           &quot;path&quot;: &quot;nvidia-container-runtime&quot;,
+           &quot;runtimeArgs&quot;: []
+       }
+   },
+   &quot;default-runtime&quot;: &quot;nvidia&quot;
+}
 </code></pre>
-<blockquote>
-<p>This script has been built with my setup and you might need to install further dependencies that I have not listed, and additional configration for cross-compiling.</p>
-</blockquote>
-<h3 id="hardware-requirements"><a class="header" href="#hardware-requirements">Hardware requirements</a></h3>
-<ul>
-<li>NVIDIA GPU Card</li>
-<li>x86 Intel CPU (preferable)</li>
-<li>Linux</li>
-</ul>
-<blockquote>
-<p>If you're having build difficulties with MinkowskiEngine. Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626 and make sure to have the exact same daemon.</p>
+<p>And restart:</p>
+<pre><code class="language-bash">sudo systemctl restart docker
+</code></pre>
 </blockquote>
 
                     </main>
@@ -205,7 +205,7 @@ cd dora-drives
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="carla_source_node.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="webcam_plot.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -219,7 +219,7 @@ cd dora-drives
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="carla_source_node.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="webcam_plot.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
