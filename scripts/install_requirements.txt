@@ -33,3 +33,4 @@ progress
 pyquaternion
 ##### CARLA dependencies #####
 networkx==2.2
+ninja

@@ -14,6 +14,14 @@ nodes:
         - lidar_pc
       run: carla/carla_source_node.py
 
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: carla_source_node/image
+      python: operators/yolov5_op.py
+  
   - id: obstacle_location_op
     operator: 
       outputs:
@@ -21,17 +29,9 @@ nodes:
       inputs:
         # depth_frame: carla_source_node/depth_frame
         lidar_pc: carla_source_node/lidar_pc
-        obstacles_bbox: traffic_sign/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
       python: operators/obstacle_location_op.py
- 
-  - id: traffic_sign
-    operator: 
-      outputs:
-        - bbox
-      inputs:
-        image: carla_source_node/image
-      python: operators/traffic_sign_op.py
       
   - id: carla_gps_op
     operator:
@@ -76,6 +76,6 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        traffic_sign_bbox: traffic_sign/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
       python: operators/plot_op.py

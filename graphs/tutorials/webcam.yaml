@@ -1,0 +1,18 @@
+communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+
+nodes:
+  - id: webcam
+    custom:
+      run: physicals/webcam.py
+      inputs:
+        timer: dora/timer/millis/100
+      outputs:
+        - image
+
+  - id: plot
+    operator:
+      python: physicals/simple_plot.py
+      inputs:
+        image: webcam/image

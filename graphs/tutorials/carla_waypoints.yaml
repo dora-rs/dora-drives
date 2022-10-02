@@ -13,6 +13,16 @@ nodes:
         - image
         - lidar_pc
       run: carla/carla_source_node.py
+      env: 
+        SET_AUTOPILOT: true 
+
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: carla_source_node/image
+      python: operators/yolov5_op.py
 
   - id: obstacle_location_op
     operator: 
@@ -21,17 +31,9 @@ nodes:
       inputs:
         # depth_frame: carla_source_node/depth_frame
         lidar_pc: carla_source_node/lidar_pc
-        obstacles_bbox: traffic_sign/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
       python: operators/obstacle_location_op.py
- 
-  - id: traffic_sign
-    operator: 
-      outputs:
-        - bbox
-      inputs:
-        image: carla_source_node/image
-      python: operators/traffic_sign_op.py
       
   - id: carla_gps_op
     operator:
@@ -50,25 +52,7 @@ nodes:
         position: carla_source_node/position
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
-
-  - id: pid_control_op
-    operator:
-      python: operators/pid_control_op.py
-      outputs:
-        - control
-      inputs:
-        position: carla_source_node/position
-        waypoints: hybrid_astar_op/waypoints
-
-  - id: carla_control_op
-    operator:
-      python: carla/carla_control_op.py
-      outputs:
-        - control_status
-      inputs:
-        control: pid_control_op/control
-        vehicle_id: carla_source_node/vehicle_id
-
+        
   - id: plot_op
     operator:
       description: Plot operator
@@ -76,6 +60,6 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        traffic_sign_bbox: traffic_sign/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
       python: operators/plot_op.py

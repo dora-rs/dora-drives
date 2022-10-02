@@ -12,7 +12,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+      run: carla/carla_source_node.py
       env: 
         SET_AUTOPILOT: true 
 
@@ -23,4 +23,4 @@ nodes:
       inputs:
         image: carla_source_node/image
         lidar_pc: carla_source_node/lidar_pc
-      python: /home/dora/workspace/dora-drives/operators/imfnet_op.py
+      python: operators/imfnet_op.py

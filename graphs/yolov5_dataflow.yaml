@@ -12,7 +12,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+      run: carla/carla_source_node.py
 
   - id: obstacle_location_op
     operator: 
@@ -21,9 +21,9 @@ nodes:
       inputs:
         # depth_frame: carla_source_node/depth_frame
         lidar_pc: carla_source_node/lidar_pc
-        bbox: yolov5/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
-      python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
+      python: operators/obstacle_location_op.py
  
   - id: yolov5
     operator: 
@@ -31,11 +31,11 @@ nodes:
         - bbox
       inputs:
         image: carla_source_node/image
-      python: /home/dora/workspace/dora-drives/operators/yolov5_op.py
+      python: operators/yolov5_op.py
 
-  - id: carla_planning_op
+  - id: carla_gps_op
     operator:
-      python: /home/dora/workspace/dora-drives/carla/carla_planning_op.py
+      python: carla/carla_gps_op.py
       outputs:
         - gps_waypoints
       inputs:
@@ -43,17 +43,17 @@ nodes:
 
   - id: hybrid_astar_op
     operator:
-      python: /home/dora/workspace/dora-drives/operators/hybrid_astar_op.py
+      python: operators/hybrid_astar_op.py
       outputs:
         - waypoints
       inputs:
         position: carla_source_node/position
         obstacles: obstacle_location_op/obstacles
-        gps_waypoints: carla_planning_op/gps_waypoints
+        gps_waypoints: carla_gps_op/gps_waypoints
 
   - id: pid_control_op
     operator:
-      python: /home/dora/workspace/dora-drives/operators/pid_control_op.py
+      python: operators/pid_control_op.py
       outputs:
         - control
       inputs:
@@ -62,7 +62,7 @@ nodes:
 
   - id: carla_control_op
     operator:
-      python: /home/dora/workspace/dora-drives/carla/carla_control_op.py
+      python: carla/carla_control_op.py
       outputs:
         - control_status
       inputs:
@@ -76,6 +76,6 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: yolov5/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
-      python: /home/dora/workspace/dora-drives/operators/plot_op.py
+      python: operators/plot_op.py

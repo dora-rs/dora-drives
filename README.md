@@ -4,118 +4,87 @@
 
 ---
 
-`dora-drives` is the starter kit for `dora`. `dora-drives` is an autonomous vehicle that runs within the [Carla simulator](https://carla.org/).
+`dora-drives` is a set of operators you can use with `dora` to create an autonomous driving vehicle.
+
+You can test the operators on real webcam or within [Carla](https://carla.org/).
 
 This project is in early development, and many features have yet to be implemented with breaking changes. Please don't take for granted the current design.
 
----
-
-### Operator category already implemented
-
-- [Point cloud registration](https://paperswithcode.com/task/point-cloud-registration/latest)
-  - [IMFNet](https://github.com/XiaoshuiHuang/IMFNet)[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/imfnet-interpretable-multimodal-fusion-for/point-cloud-registration-on-3dmatch-benchmark)](https://paperswithcode.com/sota/point-cloud-registration-on-3dmatch-benchmark?p=imfnet-interpretable-multimodal-fusion-for)
-- [Object dectection](https://paperswithcode.com/task/object-detection)
-    - Perfect detection
-    - [yolov5](https://github.com/ultralytics/yolov5) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
-- [Lane detection](https://paperswithcode.com/task/lane-detection)
-    - [yolop](https://github.com/hustvl/YOLOP) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/lane-detection-on-bdd100k)](https://paperswithcode.com/sota/lane-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
-- [Drivable Area detection](https://paperswithcode.com/task/drivable-area-detection)
-    - [yolop](https://github.com/hustvl/YOLOP) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/drivable-area-detection-on-bdd100k)](https://paperswithcode.com/sota/drivable-area-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
-- [Multiple Object tracking(MOT)](https://paperswithcode.com/task/multi-object-tracking)
-    - [strong sort](https://github.com/haixuanTao/yolov5_strongsort_package) [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
-- [Motion Planning](https://paperswithcode.com/task/motion-planning)
-    - Hybrid A-star.
-- Path Tracking
-    - PID
-
-### Future operator categories:
-
-- [Traffic sign recognition](https://paperswithcode.com/task/traffic-sign-recognition)
-    - Currently falling back to yolov5. 
-- [Motion Planning](https://paperswithcode.com/task/motion-planning)
-    - Better motion planning. 
-- [Trajectory Prediction (pedestrian and vehicles)](https://paperswithcode.com/task/trajectory-prediction)
-    - Currently unimplemented. 
-    
-### Hoped operator categories:
-- [Pedestrian detection](https://paperswithcode.com/task/pedestrian-detection)
-    - Fall back to yolov5 currently
-- [Semantic segmentation](https://paperswithcode.com/task/semantic-segmentation)
-    - Current: fall back to drivable area only. 
-- [Depth estimation](https://paperswithcode.com/task/depth-estimation)
-    - Current: fall back to depth frame and lidar sensor. 
-- [Multiple object tracking and segmentation(MOTS)](https://paperswithcode.com/task/multi-object-tracking)
-    - Current: Fall back to object detection + Object tracking. 
-
----
 ## Documentation
 
-The documentation can be found here: https://dora-rs.github.io/dora-drives
+The documentation can be found here: [dora-rs.github.io/dora-drives](https://dora-rs.github.io/dora-drives)
 
-## Docker started
+You will be able to get started using the [installation section](https://dora-rs.github.io/dora-drives/installation.html).
 
-To start with docker which is the easiest:
-```bash
-docker pull haixuantao/dora-drives
-nvidia-docker run -itd --name dora -p 20022:22 haixuantao/dora-drives /bin/bash
-nvidia-docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
-nvidia-docker cp ~/.ssh/id_rsa.pub dora:/home/dora/.ssh/authorized_keys
-nvidia-docker exec -i -t dora sudo chown dora /home/dora/.ssh/authorized_keys
-nvidia-docker exec -i -t dora sudo service ssh start
-ssh -p 20022 -X dora@localhost 
-```
+## Operators:
 
-And then within the container:
-```bash
-./workspace/dora-drives/scripts/launch_in_container.sh
-```
+### [Point cloud registration](https://paperswithcode.com/task/point-cloud-registration/latest)
 
-> This docker image has been built with my setup and it might not work on all machines. In case it doesn't work. Please check the following `Getting Started`.
+- [IMFNet](https://github.com/XiaoshuiHuang/IMFNet) 
 
-## Getting started
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/imfnet-interpretable-multimodal-fusion-for/point-cloud-registration-on-3dmatch-benchmark)](https://paperswithcode.com/sota/point-cloud-registration-on-3dmatch-benchmark?p=imfnet-interpretable-multimodal-fusion-for)
 
-```bash
-git clone git@github.com:futurewei-tech/dora.git
-git clone git@github.com:futurewei-tech/dora-drives.git
-cd dora-drives
-```
-
-- Run with:
-
-```bash
-docker run -d -p6831:6831/udp -p6832:6832/udp -p16686:16686 jaegertracing/all-in-one:latest
-# Make sure to use Python 3.8 when running and having maturin 0.13
-./scripts/launch.sh
-```
-
-> Make sure to kill running dora containers if you are trying to build a new image via
-> ```bash
-> docker stop dora && docker rm dora
-> ```
-
-And then within the container:
-```bash
-./workspace/dora-drives/scripts/launch_in_container.sh
-```
-
-### Configuration
-
-- Current configurations are made as top-file constant variables. Later on, they will be integrated into the graph declaration.
-
-### Demos 
-
-- IMFNet
+<img src=https://user-images.githubusercontent.com/22787340/192553644-1d8466be-c1e1-492d-9bc2-3546a1a3ea55.png width="300"><img src=https://user-images.githubusercontent.com/22787340/192553631-d6379df5-a1a8-49b9-a5c1-7bc7b9f1ed52.png width="300">
 
 
 
-- yolov5
+### [Object dectection](https://paperswithcode.com/task/object-detection)
 
-![yolov5](https://user-images.githubusercontent.com/22787340/187723794-3623bee2-91d6-436a-a5d7-d2e363483c76.gif)
+- [yolov5](https://github.com/ultralytics/yolov5) 
 
-- yolop
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
 
-![drivable_area](https://user-images.githubusercontent.com/22787340/187723841-7f3ba560-dbbe-4d43-886a-fb3b0be9247a.gif)
+<img src=https://user-images.githubusercontent.com/22787340/187723794-3623bee2-91d6-436a-a5d7-d2e363483c76.gif width="600">
 
-- strong_sort
+- Perfect detection on Carla Simulator
 
-![strong_sort](https://user-images.githubusercontent.com/22787340/187723873-473cda4f-573d-4663-a5b9-a4df2611c482.gif)
+### [Traffic sign recognition](https://paperswithcode.com/task/traffic-sign-recognition)
+    
+- [Custom trained yolov7 on tt100k](https://github.com/haixuanTao/yolov7)
+
+### [Lane detection](https://paperswithcode.com/task/lane-detection)
+
+- [yolop](https://github.com/hustvl/YOLOP) 
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/lane-detection-on-bdd100k)](https://paperswithcode.com/sota/lane-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
+
+<img src=https://user-images.githubusercontent.com/22787340/187723841-7f3ba560-dbbe-4d43-886a-fb3b0be9247a.gif width="600">
+
+### [Drivable Area detection](https://paperswithcode.com/task/drivable-area-detection)
+
+- [yolop](https://github.com/hustvl/YOLOP) 
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/drivable-area-detection-on-bdd100k)](https://paperswithcode.com/sota/drivable-area-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
+
+### [Multiple Object tracking(MOT)](https://paperswithcode.com/task/multi-object-tracking)
+#### [strong sort](https://github.com/haixuanTao/yolov5_strongsort_package) 
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
+
+<img src=https://user-images.githubusercontent.com/22787340/187723873-473cda4f-573d-4663-a5b9-a4df2611c482.gif width="600">
+
+### [Motion Planning](https://paperswithcode.com/task/motion-planning)
+
+- [Hybrid A-star](https://github.com/erdos-project/hybrid_astar_planner)
+
+<img src=https://user-images.githubusercontent.com/22787340/192555777-1d5e4c5f-d654-4ef3-a019-387e56e46970.gif width="600">
+
+### Path Tracking
+
+- Proportional Integral Derivative controller (PID)
+    
+## Future operators:
+
+- [Trajectory Prediction (pedestrian and vehicles)](https://paperswithcode.com/task/trajectory-prediction)
+
+- [Pedestrian detection](https://paperswithcode.com/task/pedestrian-detection)
+
+- [Semantic segmentation](https://paperswithcode.com/task/semantic-segmentation)
+
+- [Depth estimation](https://paperswithcode.com/task/depth-estimation)
+
+- [Multiple object tracking and segmentation(MOTS)](https://paperswithcode.com/task/multi-object-tracking)
+
+## ⚖️ LICENSE 
+
+This project is licensed under Apache-2.0. Check out [NOTICE.md](NOTICE.md) for more information.

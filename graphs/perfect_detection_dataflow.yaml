@@ -13,7 +13,7 @@ nodes:
         - image
         - lidar_pc
         # Change carla source node if outputs are missing
-      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+      run: carla/carla_source_node.py
 
   - id: perfect_detection_op
     operator:
@@ -23,7 +23,7 @@ nodes:
         position: carla_source_node/position
         depth_frame: carla_source_node/depth_frame
         segmented_frame: carla_source_node/segmented_frame
-      python: /home/dora/workspace/dora-drives/carla/perfect_detection_op.py
+      python: carla/perfect_detection_op.py
 
   - id: obstacle_location_op
     operator: 
@@ -33,7 +33,7 @@ nodes:
         lidar_pc: carla_source_node/lidar_pc
         bbox: perfect_detection_op/bbox
         position: carla_source_node/position
-      python: /home/dora/workspace/dora-drives/operators/obstacle_location_op.py
+      python: operators/obstacle_location_op.py
 
   - id: plot_op
     operator:
@@ -42,6 +42,6 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: perfect_detection_op/bbox
+        obstacles_bbox: perfect_detection_op/bbox
         position: carla_source_node/position
-      python: /home/dora/workspace/dora-drives/operators/plot_op.py
+      python: operators/plot_op.py

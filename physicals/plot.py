@@ -1,33 +1,9 @@
 import time
 from typing import Callable
+from enum import Enum
 
 import cv2
 import numpy as np
-
-from dora_utils import (
-    LABELS,
-    DoraStatus,
-    get_extrinsic_matrix,
-    get_intrinsic_matrix,
-    get_projection_matrix,
-    location_to_camera_view,
-)
-
-CAMERA_WIDTH = 800
-CAMERA_HEIGHT = 600
-DEPTH_IMAGE_WIDTH = 800
-DEPTH_IMAGE_HEIGHT = 600
-DEPTH_FOV = 90
-SENSOR_POSITION = np.array([3, 0, 1, 0, 0, 0])
-INTRINSIC_MATRIX = get_intrinsic_matrix(
-    DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
-)
-writer = cv2.VideoWriter(
-    "output.avi",
-    cv2.VideoWriter_fourcc(*"MJPG"),
-    30,
-    (CAMERA_WIDTH, CAMERA_HEIGHT),
-)
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 bottomLeftCornerOfText = (10, 500)
@@ -36,6 +12,94 @@ fontColor = (255, 255, 255)
 thickness = 1
 lineType = 2
 
+LABELS = [
+    "person",
+    "bicycle",
+    "car",
+    "motorcycle",
+    "airplane",
+    "bus",
+    "train",
+    "truck",
+    "boat",
+    "traffic light",
+    "fire hydrant",
+    "stop sign",
+    "parking meter",
+    "bench",
+    "bird",
+    "cat",
+    "dog",
+    "horse",
+    "sheep",
+    "cow",
+    "elephant",
+    "bear",
+    "zebra",
+    "giraffe",
+    "backpack",
+    "umbrella",
+    "handbag",
+    "tie",
+    "suitcase",
+    "frisbee",
+    "skis",
+    "snowboard",
+    "sports ball",
+    "kite",
+    "baseball bat",
+    "baseball glove",
+    "skateboard",
+    "surfboard",
+    "tennis racket",
+    "bottle",
+    "wine glass",
+    "cup",
+    "fork",
+    "knife",
+    "spoon",
+    "bowl",
+    "banana",
+    "apple",
+    "sandwich",
+    "orange",
+    "broccoli",
+    "carrot",
+    "hot dog",
+    "pizza",
+    "donut",
+    "cake",
+    "chair",
+    "couch",
+    "potted plant",
+    "bed",
+    "dining table",
+    "toilet",
+    "tv",
+    "laptop",
+    "mouse",
+    "remote",
+    "keyboard",
+    "cell phone",
+    "microwave",
+    "oven",
+    "toaster",
+    "sink",
+    "refrigerator",
+    "book",
+    "clock",
+    "vase",
+    "scissors",
+    "teddy bear",
+    "hair drier",
+    "toothbrush",
+]
+
+
+class DoraStatus(Enum):
+    CONTINUE = 0
+    STOP = 1
+
 
 class Operator:
     """
@@ -43,14 +107,11 @@ class Operator:
     """
 
     def __init__(self):
-        self.waypoints = []
-        self.obstacles = []
         self.obstacles_bbox = []
         self.obstacles_id = []
         self.lanes = []
         self.drivable_area = []
         self.last_timestamp = time.time()
-        self.position = []
         self.camera_frame = []
         self.traffic_sign_bbox = []
 
@@ -61,18 +122,12 @@ class Operator:
         _send_output: Callable[[str, bytes], None],
     ):
 
-        if "waypoints" == input_id:
-            waypoints = np.frombuffer(value)
-            waypoints = waypoints.reshape((3, -1))
-            waypoints = waypoints[0:2].T
-            self.waypoints = waypoints
-
-        elif "obstacles_bbox" == input_id:
+        if "obstacles_bbox" == input_id:
             self.obstacles_bbox = np.frombuffer(value, dtype="int32").reshape(
                 (-1, 6)
             )
 
-        elif "traffic_sign_bbox" == input_id:
+        if "traffic_sign_bbox" == input_id:
             self.traffic_sign_bbox = np.frombuffer(
                 value, dtype="int32"
             ).reshape((-1, 6))
@@ -81,10 +136,6 @@ class Operator:
             self.obstacles_id = np.frombuffer(value, dtype="int32").reshape(
                 (-1, 7)
             )
-
-        elif "obstacles" == input_id:
-            obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
-            self.obstacles = obstacles
 
         elif "lanes" == input_id:
             lanes = np.frombuffer(value, dtype="int32").reshape((-1, 30, 2))
@@ -96,10 +147,6 @@ class Operator:
             )
             self.drivable_area = drivable_area
 
-        elif "position" == input_id:
-            # Add sensor transform
-            self.position = np.frombuffer(value)[:6] + SENSOR_POSITION
-
         elif "image" == input_id:
             self.camera_frame = cv2.imdecode(
                 np.frombuffer(
@@ -109,49 +156,14 @@ class Operator:
                 -1,
             )
 
-        if "image" != input_id or isinstance(self.position, list):
+        if "image" != input_id:
             return DoraStatus.CONTINUE
 
-        extrinsic_matrix = get_extrinsic_matrix(
-            get_projection_matrix(self.position)
-        )
         resized_image = self.camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
 
-        ## Drawing on frame
-
-        for waypoint in self.waypoints:
-            location = location_to_camera_view(
-                np.append(waypoint.reshape((1, -1)), [[0]]),
-                INTRINSIC_MATRIX,
-                extrinsic_matrix,
-            )
-            if location[0] > 0 and location[1] > 0:
-                cv2.circle(
-                    resized_image,
-                    (int(location[0]), int(location[1])),
-                    3,
-                    (255, 255, 255),
-                    -1,
-                )
-
-        for obstacle in self.obstacles:
-            [x, y, z, _confidence, _label] = obstacle
-            location = location_to_camera_view(
-                np.array([[x, y, z]]),
-                INTRINSIC_MATRIX,
-                extrinsic_matrix,
-            )
-            cv2.circle(
-                resized_image,
-                (int(location[0]), int(location[1])),
-                3,
-                (255, 255, 0),
-                -1,
-            )
-
-        for obstacle_bb in self.obstacles_bbox:
-            [min_x, max_x, min_y, max_y, confidence, label] = obstacle_bb
+        for obstacles_bbox in self.obstacles_bbox:
+            [min_x, max_x, min_y, max_y, confidence, label] = obstacles_bbox
 
             start = (int(min_x), int(min_y))
             end = (int(max_x), int(max_y))
@@ -164,6 +176,24 @@ class Operator:
                 font,
                 0.75,
                 (0, 255, 0),
+                2,
+                1,
+            )
+
+        for traffic_sign_bbox in self.traffic_sign_bbox:
+            [min_x, max_x, min_y, max_y, confidence, label] = traffic_sign_bbox
+
+            start = (int(min_x), int(min_y))
+            end = (int(max_x), int(max_y))
+            cv2.rectangle(resized_image, start, end, (122, 0, 122), 2)
+
+            cv2.putText(
+                resized_image,
+                LABELS[label] + f", {confidence}%",
+                (int(max_x), int(max_y)),
+                font,
+                0.75,
+                (122, 0, 122),
                 2,
                 1,
             )
@@ -198,28 +228,15 @@ class Operator:
 
         for contour in self.drivable_area:
             back = resized_image.copy()
-            cv2.drawContours(back, [contour], 0, (0, 255, 0), -1)
+            if len(contour) != 0:
+                cv2.drawContours(back, [contour], 0, (0, 255, 0), -1)
 
-            # blend with original image
-            alpha = 0.25
-            resized_image = cv2.addWeighted(
-                resized_image, 1 - alpha, back, alpha, 0
-            )
+                # blend with original image
+                alpha = 0.25
+                resized_image = cv2.addWeighted(
+                    resized_image, 1 - alpha, back, alpha, 0
+                )
 
-        now = time.time()
-        # cv2.putText(
-        # resized_image,
-        # f"Hertz {1 / (now - self.last_timestamp):.2f}",
-        # bottomLeftCornerOfText,
-        # font,
-        # fontScale,
-        # fontColor,
-        # thickness,
-        # lineType,
-        # )
-
-        self.last_timestamp = now
-        writer.write(resized_image)
         cv2.imshow("image", resized_image)
         cv2.waitKey(1)
 

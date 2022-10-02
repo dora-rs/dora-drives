@@ -1,7 +1,7 @@
 communication:
   iceoryx:
     app_name_prefix: dora-iceoryx-example
-
+    
 nodes:
   - id: carla_source_node
     custom:
@@ -13,6 +13,8 @@ nodes:
         - image
         - lidar_pc
       run: carla/carla_source_node.py
+      env: 
+        SET_AUTOPILOT: true 
 
   - id: yolov5
     operator: 
@@ -21,6 +23,15 @@ nodes:
       inputs:
         image: carla_source_node/image
       python: operators/yolov5_op.py
+
+  - id: yolop
+    operator: 
+      outputs:
+        - lanes
+        - drivable_area
+      inputs:
+        image: carla_source_node/image
+      python: operators/yolop_op.py
 
   - id: strong_sort
     operator: 
@@ -31,14 +42,13 @@ nodes:
         obstacles_bbox: yolov5/bbox
       python: operators/strong_sort_op.py
 
-  - id: plot_op
+  - id: plot
     operator:
-      description: Plot operator
-      inputs: 
-        waypoints: hybrid_astar_op/waypoints
+      python: physicals/plot.py
+      inputs:
         image: carla_source_node/image
-        obstacles: obstacle_location_op/obstacles
         obstacles_bbox: yolov5/bbox
-        position: carla_source_node/position
         obstacles_id: strong_sort/obstacles_id
-      python: operators/plot_op.py
+        traffic_sign_bbox: traffic_sign/bbox
+        lanes: yolop/lanes
+        drivable_area: yolop/drivable_area

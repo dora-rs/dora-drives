@@ -48,33 +48,6 @@ def get_closest_point_in_point_cloud(
     return point_cloud[closest_point]
 
 
-def get_point_cloud(depth_frame):
-    """Converts the depth frame to a 1D array containing the 3D
-    position of each pixel in world coordinates.
-    """
-
-    # 2d pixel coordinates
-    u_coord = np.matlib.repmat(
-        np.r_[0:DEPTH_IMAGE_WIDTH:1], DEPTH_IMAGE_HEIGHT, 1
-    ).reshape(PIXEL_LENGTH)
-    v_coord = np.matlib.repmat(
-        np.c_[0:DEPTH_IMAGE_HEIGHT:1], 1, DEPTH_IMAGE_WIDTH
-    ).reshape(PIXEL_LENGTH)
-    normalized_depth = np.reshape(depth_frame, PIXEL_LENGTH)
-
-    # p2d = [u,v,1]
-    p2d = np.array([u_coord, v_coord, np.ones_like(u_coord)])
-
-    # P = [X,Y,Z]
-    p3d = np.dot(INV_INTRINSIC_MATRIX, p2d)
-    p3d *= normalized_depth * DEPTH_CAMERA_MAX_DEPTH
-
-    # [[X1,Y1,Z1],[X2,Y2,Z2], ... [Xn,Yn,Zn]]
-    locations = np.asarray(np.transpose(p3d))
-    # Transform the points in 3D world coordinates.
-    return locations
-
-
 def get_predictions(obstacles, obstacle_with_locations):
     """Extracts obstacle predictions out of the message.
     This method is useful to build obstacle predictions when
@@ -170,7 +143,7 @@ class Operator:
             self.point_cloud = point_cloud[:, :3]
 
         elif (
-            input_id == "bbox"
+            input_id == "obstacles_bbox"
             and len(self.point_cloud) != 0
             and len(self.position) != 0
         ):

@@ -1,0 +1,27 @@
+communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+
+nodes:
+  - id: webcam
+    custom:
+      run: physicals/webcam.py
+      inputs:
+        timer: dora/timer/millis/100
+      outputs:
+        - image
+
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: webcam/image
+      python: operators/yolov5_op.py
+
+  - id: plot
+    operator:
+      python: physicals/plot.py
+      inputs:
+        image: webcam/image
+        obstacles_bbox: yolov5/bbox

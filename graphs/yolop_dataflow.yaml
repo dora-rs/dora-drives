@@ -12,7 +12,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: /home/dora/workspace/dora-drives/carla/carla_source_node.py
+      run: carla/carla_source_node.py
 
   - id: yolop
     operator: 
@@ -21,7 +21,7 @@ nodes:
         - drivable_area
       inputs:
         image: carla_source_node/image
-      python: /home/dora/workspace/dora-drives/operators/yolop_op.py
+      python: operators/yolop_op.py
 
   - id: plot_op
     operator:
@@ -30,8 +30,8 @@ nodes:
         waypoints: hybrid_astar_op/waypoints
         image: carla_source_node/image
         obstacles: obstacle_location_op/obstacles
-        obstacles_bb: yolov5/bbox
+        obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
-      python: /home/dora/workspace/dora-drives/operators/plot_op.py
+      python: operators/plot_op.py

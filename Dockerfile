@@ -97,6 +97,8 @@ WORKDIR /home/dora/workspace/dora-drives
 
 RUN conda activate dora3.8 && pip install --upgrade pip
 RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
+RUN conda activate dora3.8 && python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA seems to not be available on build, Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626'" 
+
 RUN conda activate dora3.8 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
 
 COPY requirements.txt requirements.txt 

@@ -131,7 +131,7 @@ def fitlane(mask, sel_labels, labels, stats):
             x_limits = np.polyval(func, H - 1)
             # if (y_max + h - 1) >= 720:
 
-            draw_y = np.linspace(y, y + h - 1, 10)
+            draw_y = np.linspace(y, y + h - 1, 30)
             draw_x = np.polyval(func, draw_y)
             # draw_y = draw_y[draw_x < W]
             # draw_x = draw_x[draw_x < W]
@@ -162,7 +162,7 @@ def fitlane(mask, sel_labels, labels, stats):
             # if (x + w - 1) >= 1280:
             #     draw_x = np.linspace(x, 1280-1, 1280-x)
             # else:
-            draw_x = np.linspace(x, x + w - 1, 10)
+            draw_x = np.linspace(x, x + w - 1, 30)
             draw_y = np.polyval(func, draw_x)
             lanes.append((np.asarray([draw_x, draw_y]).T).astype(np.int32))
             # cv2.polylines(mask, [draw_points], False, 1, thickness=3)
@@ -319,9 +319,12 @@ class Operator:
         contours, _ = cv2.findContours(
             da_seg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
-        contour = max(contours, key=cv2.contourArea)
-        contour = contour.astype(np.int32)
-        send_output("drivable_area", contour.tobytes())  # TODO: Contour
+        if len(contours) != 0:
+            contour = max(contours, key=cv2.contourArea)
+            contour = contour.astype(np.int32)
+            send_output("drivable_area", contour.tobytes())
+        else:
+            send_output("drivable_area", np.array([]).tobytes())
 
         ll_predict = ll_seg_out[
             :, :, pad_h : (h0 - pad_h), pad_w : (w0 - pad_w)
