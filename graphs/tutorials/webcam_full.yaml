@@ -28,13 +28,23 @@ nodes:
         image: webcam/image
       python: operators/yolop_op.py
 
-  - id: traffic_sign
+  ## Commented out as it takes a lot of GPU memory.
+  #- id: traffic_sign
+    #operator: 
+      #outputs:
+        #- bbox
+      #inputs:
+        #image: webcam/image
+      #python: operators/traffic_sign_op.py
+
+  - id: strong_sort
     operator: 
       outputs:
-        - bbox
+        - obstacles_id
       inputs:
         image: webcam/image
-      python: operators/traffic_sign_op.py
+        obstacles_bbox: yolov5/bbox
+      python: operators/strong_sort_op.py
 
   - id: plot
     operator:
@@ -45,3 +55,4 @@ nodes:
         traffic_sign_bbox: traffic_sign/bbox
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
+        obstacles_id: strong_sort/obstacles_id

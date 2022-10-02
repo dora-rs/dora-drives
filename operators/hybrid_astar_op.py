@@ -98,35 +98,33 @@ class Operator:
     ):
 
         if input_id == "gps_waypoints":
-
             waypoints = np.frombuffer(value)
             waypoints = waypoints.reshape((3, -1))
             self.gps_waypoints = waypoints[0:2].T
             if len(self.waypoints) == 0:
                 self.waypoints = self.gps_waypoints
-            return DoraStatus.CONTINUE
 
-        if input_id == "obstacles":
+        elif input_id == "obstacles":
             obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
-
             self.obstacles = obstacles
-            return DoraStatus.CONTINUE
 
-        if input_id == "position":
+        elif input_id == "position":
             self.position = np.frombuffer(value)
 
-        if len(self.gps_waypoints) != 0:
-            (waypoints, target_speeds) = self.run(time.time())  # , open_drive)
-            self.waypoints = waypoints
+            if len(self.gps_waypoints) != 0:
+                (waypoints, target_speeds) = self.run(
+                    time.time()
+                )  # , open_drive)
+                self.waypoints = waypoints
 
-            waypoints_array = np.concatenate(
-                [waypoints.T, target_speeds.reshape(1, -1)]
-            )
+                waypoints_array = np.concatenate(
+                    [waypoints.T, target_speeds.reshape(1, -1)]
+                )
 
-            send_output(
-                "waypoints",
-                waypoints_array.tobytes(),
-            )
+                send_output(
+                    "waypoints",
+                    waypoints_array.tobytes(),
+                )
         return DoraStatus.CONTINUE
 
     def run(self, _ttd=None):
@@ -149,6 +147,8 @@ class Operator:
         self.gps_waypoints = self.gps_waypoints[
             index : index + NUM_WAYPOINTS_AHEAD
         ]
+
+        # Check if the obstacles are still on gps waypoint trajectory
         obstacle_list = get_obstacle_list(self.obstacles, self.gps_waypoints)
 
         if len(obstacle_list) == 0:
@@ -163,6 +163,8 @@ class Operator:
         )
 
         self.waypoints = self.waypoints[index : index + NUM_WAYPOINTS_AHEAD]
+
+        # Check if obstacles are on solved waypoints trajectory
         obstacle_list = get_obstacle_list(self.obstacles, self.waypoints)
 
         if len(obstacle_list) == 0:

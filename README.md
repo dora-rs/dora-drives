@@ -4,7 +4,9 @@
 
 ---
 
-`dora-drives` is the starter kit for `dora`. `dora-drives` is an autonomous vehicle that runs within the [Carla simulator](https://carla.org/).
+`dora-drives` is a set of operators you can use with `dora` to create an autonomous driving vehicle.
+
+You can test the operators on real webcam or within [Carla](https://carla.org/).
 
 This project is in early development, and many features have yet to be implemented with breaking changes. Please don't take for granted the current design.
 
@@ -14,7 +16,7 @@ The documentation can be found here: [dora-rs.github.io/dora-drives](https://dor
 
 You will be able to get started using the [installation section](https://dora-rs.github.io/dora-drives/installation.html).
 
-## Demos:
+## Operators:
 
 ### [Point cloud registration](https://paperswithcode.com/task/point-cloud-registration/latest)
 

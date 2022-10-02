@@ -1,7 +1,8 @@
-# Driving assistance
+# Full perception
 
 Let's add all the operators currently provided by `dora-drives` that works on image frame. We currently have implemented:
 - `yolov5` an object detector.
+- `strong_sort` a multi-object tracker.
 - `yolop` a lane and drivable area detector.
 - `traffic_sign` a traffic sign detector.
 

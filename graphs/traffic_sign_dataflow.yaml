@@ -21,7 +21,7 @@ nodes:
       inputs:
         # depth_frame: carla_source_node/depth_frame
         lidar_pc: carla_source_node/lidar_pc
-        bbox: traffic_sign/bbox
+        obstacles_bbox: traffic_sign/bbox
         position: carla_source_node/position
       python: operators/obstacle_location_op.py
  
