@@ -75,6 +75,7 @@ class Operator:
         self.position = []
         self.gps_waypoints = []
         self.waypoints = []
+        self.metadata = []
         self._hyperparameters = {
             "step_size": STEP_SIZE_HYBRID_ASTAR,
             "max_iterations": MAX_ITERATIONS_HYBRID_ASTAR,
@@ -92,24 +93,26 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ):
 
-        if input_id == "gps_waypoints":
-            waypoints = np.frombuffer(value)
+        if input["id"] == "gps_waypoints":
+            waypoints = np.frombuffer(input["data"])
             waypoints = waypoints.reshape((3, -1))
             self.gps_waypoints = waypoints[0:2].T
             if len(self.waypoints) == 0:
                 self.waypoints = self.gps_waypoints
 
-        elif input_id == "obstacles":
-            obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
+        elif input["id"] == "obstacles":
+            obstacles = np.frombuffer(input["data"], dtype="float32").reshape(
+                (-1, 5)
+            )
             self.obstacles = obstacles
+            self.metadata = input["metadata"]
 
-        elif input_id == "position":
-            self.position = np.frombuffer(value)
+        elif input["id"] == "position":
+            self.position = np.frombuffer(input["data"])
 
             if len(self.gps_waypoints) != 0:
                 (waypoints, target_speeds) = self.run(
@@ -122,8 +125,7 @@ class Operator:
                 )
 
                 send_output(
-                    "waypoints",
-                    waypoints_array.tobytes(),
+                    "waypoints", waypoints_array.tobytes(), self.metadata
                 )
         return DoraStatus.CONTINUE
 

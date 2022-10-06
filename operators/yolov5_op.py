@@ -19,20 +19,19 @@ class Operator:
 
     def on_input(
         self,
-        _input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
         """Handle image
         Args:
-            input_id (str): Id of the input declared in the yaml configuration
-            value (bytes): Bytes message of the input
+            input["id"](str): Id of the input declared in the yaml configuration
+            input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
         frame = cv2.imdecode(
             np.frombuffer(
-                value,
+                input["data"],
                 dtype="uint8",
             ),
             -1,
@@ -46,5 +45,5 @@ class Operator:
         arrays[:, 4] *= 100
         arrays = arrays.astype(np.int32)
         arrays = arrays.tobytes()
-        send_output("bbox", arrays)
+        send_output("bbox", arrays, input["metadata"])
         return DoraStatus.CONTINUE

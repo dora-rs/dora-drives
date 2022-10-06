@@ -24,28 +24,27 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ):
         """Handle input.
         Args:
-            input_id (str): Id of the input declared in the yaml configuration
-            value (bytes): Bytes message of the input
+            input["id"](str): Id of the input declared in the yaml configuration
+            input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
-        if self.vehicle_id is None and "vehicle_id" != input_id:
+        if self.vehicle_id is None and "vehicle_id" != input["id"]:
             return DoraStatus.CONTINUE
-        elif self.vehicle_id is None and "vehicle_id" == input_id:
-            self.vehicle_id = int.from_bytes(value, "big")
-        elif self.vehicle_id is not None and "vehicle_id" == input_id:
-            return DoraStatus.CONTINUE
-
-        if "control" != input_id:
+        elif self.vehicle_id is None and "vehicle_id" == input["id"]:
+            self.vehicle_id = int.from_bytes(input["data"], "big")
+        elif self.vehicle_id is not None and "vehicle_id" == input["id"]:
             return DoraStatus.CONTINUE
 
-        control = np.frombuffer(value)
+        if "control" != input["id"]:
+            return DoraStatus.CONTINUE
+
+        control = np.frombuffer(input["data"])
 
         vec_control = VehicleControl(
             throttle=control[0],

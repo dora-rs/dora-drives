@@ -254,7 +254,7 @@ def letterbox_for_img(
     top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
     left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
     img = cv2.copyMakeBorder(
-        img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color
+        img, top, bottom, left, right, cv2.BORDER_CONSTANT, input["data"]=color
     )  # add border
     return img, ratio, (dw, dh)
 
@@ -271,15 +271,14 @@ class Operator:
 
     def on_input(
         self,
-        _input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
 
         # inference
         frame = cv2.imdecode(
             np.frombuffer(
-                value,
+                input["data"],
                 dtype="uint8",
             ),
             -1,
@@ -322,9 +321,9 @@ class Operator:
         if len(contours) != 0:
             contour = max(contours, key=cv2.contourArea)
             contour = contour.astype(np.int32)
-            send_output("drivable_area", contour.tobytes())
+            send_output("drivable_area", contour.tobytes(), input["metadata"])
         else:
-            send_output("drivable_area", np.array([]).tobytes())
+            send_output("drivable_area", np.array([]).tobytes(), input["metadata"])
 
         ll_predict = ll_seg_out[
             :, :, pad_h : (h0 - pad_h), pad_w : (w0 - pad_w)
@@ -341,5 +340,5 @@ class Operator:
             ll_seg_mask, kernel_size=7, func_type=cv2.MORPH_OPEN
         )
         ll_seg_points = np.array(connect_lane(ll_seg_mask), dtype=np.int32)
-        send_output("lanes", ll_seg_points.tobytes())
+        send_output("lanes", ll_seg_points.tobytes(), input["metadata"])
         return DoraStatus.CONTINUE

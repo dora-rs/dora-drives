@@ -35,15 +35,14 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
 
-        if input_id == "image":
+        if input["id"] == "image":
             frame = cv2.imdecode(
                 np.frombuffer(
-                    value,
+                    input["data"],
                     dtype="uint8",
                 ),
                 -1,
@@ -51,11 +50,15 @@ class Operator:
 
             self.frame = frame[:, :, :3]
 
-        elif input_id == "obstacles_bbox" and len(self.frame) != 0:
-            obstacles = np.frombuffer(value, dtype="int32").reshape((-1, 6))
+        elif input["id"] == "obstacles_bbox" and len(self.frame) != 0:
+            obstacles = np.frombuffer(input["data"], dtype="int32").reshape(
+                (-1, 6)
+            )
             if obstacles.shape[0] == 0:
                 # self.model.increment_ages()
-                send_output("obstacles_id", np.array([]).tobytes())
+                send_output(
+                    "obstacles_id", np.array([]).tobytes(), input["metadata"]
+                )
                 return DoraStatus.CONTINUE
 
             # Post Processing yolov5
@@ -71,6 +74,8 @@ class Operator:
                         :, [0, 2, 1, 3, 4, 5, 6]
                     ]  # xyxy -> x1, x2, y1, y2 track_id, class_id, conf
 
-                    send_output("obstacles_id", outputs.tobytes())
+                    send_output(
+                        "obstacles_id", outputs.tobytes(), input["metadata"]
+                    )
 
         return DoraStatus.CONTINUE

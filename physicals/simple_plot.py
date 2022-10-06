@@ -21,19 +21,18 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
         """
         Put image on a cv2 window.
         Args:
-            input_id (str): Id of the input declared in the yaml configuration
-            value (bytes): Bytes message of the input
+            input["id"](str): Id of the input declared in the yaml configuration
+            input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
-        if input_id == "image":
-            frame = np.frombuffer(value, dtype="uint8")
+        if input["id"] == "image":
+            frame = np.frombuffer(input["data"], dtype="uint8")
             frame = cv2.imdecode(frame, -1)
             self.image = frame
             cv2.imshow("frame", self.image)

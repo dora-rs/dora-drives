@@ -9,7 +9,6 @@ from sklearn.metrics import pairwise_distances
 
 from dora_utils import DoraStatus, get_angle
 
-mutex = threading.Lock()
 
 MIN_PID_WAYPOINT_DISTANCE = 5
 STEER_GAIN = 0.7
@@ -50,7 +49,7 @@ def compute_throttle_and_brake(pid, current_speed: float, target_speed: float):
         target_speed (:obj:`float`): The target speed to reach (in m/s).
 
     Returns:
-        Throttle and brake values.
+        Throttle and brake input["data"]s.
     """
     if current_speed < 0:
         print("Current speed is negative: {}".format(current_speed))
@@ -104,7 +103,7 @@ class PIDLongitudinalController(object):
             current_speed (:obj:`float`): Current speed in m/s.
 
         Returns:
-            Throttle and brake values.
+            Throttle and brake input["data"]s.
         """
         # Transform to km/h
         error = (target_speed - current_speed) * 3.6
@@ -141,36 +140,36 @@ class Operator:
     def __init__(self):
         self.waypoints = []
         self.target_speeds = []
+        self.metadata = []
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ):
         """Handle input.
         Args:
-            input_id (str): Id of the input declared in the yaml configuration
-            value (bytes): Bytes message of the input
+            input["id"](str): Id of the input declared in the yaml configuration
+            input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
-        if "position" == input_id:
-            position = np.frombuffer(value)
+        if "position" == input["id"]:
+            position = np.frombuffer(input["data"])
             [x, y, _, _, yaw, _, current_speed] = position
             # Vehicle speed in m/s.
-        elif "waypoints" == input_id:
-            waypoints = np.frombuffer(value)
+        elif "waypoints" == input["id"]:
+            waypoints = np.frombuffer(input["data"])
             waypoints = waypoints.reshape((3, -1))
 
             self.target_speeds = waypoints[2, :]
             self.waypoints = np.ascontiguousarray(waypoints[:2, :].T)
+            self.metadata = input["metadata"]
             return DoraStatus.CONTINUE
 
         if len(self.waypoints) == 0:
             return DoraStatus.CONTINUE
 
-        mutex.acquire()
         distances = pairwise_distances(self.waypoints, np.array([[x, y]])).T[0]
 
         index = distances > MIN_PID_WAYPOINT_DISTANCE
@@ -202,7 +201,10 @@ class Operator:
         )
 
         steer = radians_to_steer(target_angle, STEER_GAIN)
-        mutex.release()
 
-        send_output("control", np.array([throttle, steer, brake]).tobytes())
+        send_output(
+            "control",
+            np.array([throttle, steer, brake]).tobytes(),
+            self.metadata,
+        )
         return DoraStatus.CONTINUE

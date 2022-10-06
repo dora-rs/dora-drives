@@ -62,20 +62,19 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
         """Handle image
         Args:
-            input_id (str): Id of the input declared in the yaml configuration
-            value (bytes): Bytes message of the input
+            input["id"](str): Id of the input declared in the yaml configuration
+            input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
-        if input_id == "lidar_pc":
+        if input["id"] == "lidar_pc":
             point_cloud = np.frombuffer(
-                zlib.decompress(value), dtype=np.dtype("f4")
+                zlib.decompress(input["data"]), dtype=np.dtype("f4")
             )
             point_cloud = np.reshape(
                 point_cloud, (int(point_cloud.shape[0] / 4), 4)
@@ -97,10 +96,10 @@ class Operator:
             point_cloud = point_cloud[:, :3]
             self.point_cloud = point_cloud
 
-        if input_id == "image":
+        if input["id"] == "image":
             frame = cv2.imdecode(
                 np.frombuffer(
-                    value,
+                    input["data"],
                     dtype="uint8",
                 ),
                 -1,

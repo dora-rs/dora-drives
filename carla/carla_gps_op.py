@@ -37,13 +37,11 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ):
-
-        if input_id == "position":
-            self.position = np.frombuffer(value)
+        
+        self.position = np.frombuffer(input["data"])
 
         if len(self.waypoints) != 0:
             (index, _) = closest_vertex(
@@ -70,7 +68,8 @@ class Operator:
 
         send_output(
             "gps_waypoints",
-            waypoints_array.tobytes(),
+            waypoints_array.tobytes()
+            , input["metadata"]
         )  # World coordinate
 
         return DoraStatus.CONTINUE

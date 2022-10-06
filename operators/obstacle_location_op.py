@@ -113,20 +113,19 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        input: dict,
         send_output: Callable[[str, bytes], None],
     ):
 
-        if input_id == "position":
+        if input["id"] == "position":
             # Add sensor transform
-            self.position = np.frombuffer(value)[:6] + np.array(
+            self.position = np.frombuffer(input["data"])[:6] + np.array(
                 [3.0, 0, 1, 0, 0, 0]
             )
 
-        elif input_id == "lidar_pc":
+        elif input["id"] == "lidar_pc":
             point_cloud = np.frombuffer(
-                zlib.decompress(value), dtype=np.dtype("f4")
+                zlib.decompress(input["data"]), dtype=np.dtype("f4")
             )
             point_cloud = np.reshape(
                 point_cloud, (int(point_cloud.shape[0] / 4), 4)
@@ -143,15 +142,15 @@ class Operator:
             self.point_cloud = point_cloud[:, :3]
 
         elif (
-            input_id == "obstacles_bbox"
+            input["id"] == "obstacles_bbox"
             and len(self.point_cloud) != 0
             and len(self.position) != 0
         ):
-            if len(value) == 0:
+            if len(input["data"]) == 0:
                 send_output("obstacles", np.array([]).tobytes())
                 return DoraStatus.CONTINUE
             obstacles = (
-                np.frombuffer(value, dtype="int32")
+                np.frombuffer(input["data"], dtype="int32")
                 .reshape((-1, 6))
                 .astype(np.float32)
             )
@@ -168,5 +167,5 @@ class Operator:
             predictions = get_predictions(obstacles, obstacles_with_location)
             predictions_bytes = np.array(predictions, dtype="float32").tobytes()
 
-            send_output("obstacles", predictions_bytes)
+            send_output("obstacles", predictions_bytes, input["metadata"])
         return DoraStatus.CONTINUE
