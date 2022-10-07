@@ -141,7 +141,8 @@ class Operator:
         self.waypoints = []
         self.target_speeds = []
         self.metadata = []
-
+        self.position = []
+        
     def on_input(
         self,
         input: dict,
@@ -156,7 +157,8 @@ class Operator:
 
         if "position" == input["id"]:
             position = np.frombuffer(input["data"])
-            [x, y, _, _, yaw, _, current_speed] = position
+            self.position = position
+            return DoraStatus.CONTINUE
             # Vehicle speed in m/s.
         elif "waypoints" == input["id"]:
             waypoints = np.frombuffer(input["data"])
@@ -165,11 +167,11 @@ class Operator:
             self.target_speeds = waypoints[2, :]
             self.waypoints = np.ascontiguousarray(waypoints[:2, :].T)
             self.metadata = input["metadata"]
+
+        if len(self.position) == 0:
             return DoraStatus.CONTINUE
 
-        if len(self.waypoints) == 0:
-            return DoraStatus.CONTINUE
-
+        [x, y, _, _, yaw, _, current_speed] = self.position
         distances = pairwise_distances(self.waypoints, np.array([[x, y]])).T[0]
 
         index = distances > MIN_PID_WAYPOINT_DISTANCE
