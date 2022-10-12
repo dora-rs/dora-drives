@@ -166,20 +166,19 @@ class Operator:
 
     def on_input(
         self,
-        _input_id: str,
-        value: bytes,
+        dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ) -&gt; DoraStatus:
         &quot;&quot;&quot;Handle image
         Args:
-            input_id (str): Id of the input declared in the yaml configuration
-            value (bytes): Bytes message of the input
+            dora_input[&quot;id&quot;](str): Id of the input declared in the yaml configuration
+            dora_input[&quot;data&quot;] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         &quot;&quot;&quot;
 
         frame = cv2.imdecode(
             np.frombuffer(
-                value,
+                dora_input[&quot;data&quot;],
                 dtype=&quot;uint8&quot;,
             ),
             -1,
@@ -193,7 +192,7 @@ class Operator:
         arrays[:, 4] *= 100
         arrays = arrays.astype(np.int32)
         arrays = arrays.tobytes()
-        send_output(&quot;bbox&quot;, arrays)
+        send_output(&quot;bbox&quot;, arrays, dora_input[&quot;metadata&quot;])
         return DoraStatus.CONTINUE
 </code></pre>
 <p>The operator basically load a pytorch model and run it on <code>jpeg</code> encoded images. 
