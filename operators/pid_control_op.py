@@ -49,7 +49,7 @@ def compute_throttle_and_brake(pid, current_speed: float, target_speed: float):
         target_speed (:obj:`float`): The target speed to reach (in m/s).
 
     Returns:
-        Throttle and brake input["data"]s.
+        Throttle and brake dora_input["data"]s.
     """
     if current_speed < 0:
         print("Current speed is negative: {}".format(current_speed))
@@ -103,7 +103,7 @@ class PIDLongitudinalController(object):
             current_speed (:obj:`float`): Current speed in m/s.
 
         Returns:
-            Throttle and brake input["data"]s.
+            Throttle and brake dora_input["data"]s.
         """
         # Transform to km/h
         error = (target_speed - current_speed) * 3.6
@@ -140,33 +140,33 @@ class Operator:
     def __init__(self):
         self.waypoints = []
         self.target_speeds = []
-        self.metadata = []
+        self.metadata = {}
         self.position = []
-        
+
     def on_input(
         self,
-        input: dict,
+        dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
         """Handle input.
         Args:
-            input["id"](str): Id of the input declared in the yaml configuration
-            input["data"] (bytes): Bytes message of the input
+            dora_input["id"](str): Id of the input declared in the yaml configuration
+            dora_input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
-        if "position" == input["id"]:
-            position = np.frombuffer(input["data"])
+        if "position" == dora_input["id"]:
+            position = np.frombuffer(dora_input["data"])
             self.position = position
             return DoraStatus.CONTINUE
             # Vehicle speed in m/s.
-        elif "waypoints" == input["id"]:
-            waypoints = np.frombuffer(input["data"])
+        elif "waypoints" == dora_input["id"]:
+            waypoints = np.frombuffer(dora_input["data"])
             waypoints = waypoints.reshape((3, -1))
 
             self.target_speeds = waypoints[2, :]
             self.waypoints = np.ascontiguousarray(waypoints[:2, :].T)
-            self.metadata = input["metadata"]
+            self.metadata = dora_input["metadata"]
 
         if len(self.position) == 0:
             return DoraStatus.CONTINUE

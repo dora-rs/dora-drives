@@ -78,8 +78,8 @@ def get_obstacle_locations(
         obstacle_center = np.array(
             [
                 [
-                    (obstacle[1] + obstacle[0]) / 2,
-                    (obstacle[3] + obstacle[2]) / 2,
+                    (obstacle[1] + obstacle[0]) / 2.0,
+                    (obstacle[3] + obstacle[2]) / 2.0,
                     1.0,
                 ]
             ]
@@ -96,7 +96,7 @@ def get_obstacle_locations(
         )
         p3d *= min_location[2]
 
-        obstacle_with_locations.append(min_location)
+        obstacle_with_locations.append(p3d[0])
 
     return obstacle_with_locations
 
@@ -113,19 +113,22 @@ class Operator:
 
     def on_input(
         self,
-        input: dict,
+        dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
 
-        if input["id"] == "position":
+        if dora_input["id"] == "position":
             # Add sensor transform
-            self.position = np.frombuffer(input["data"])[:6] + np.array(
-                [3.0, 0, 1, 0, 0, 0]
-            )
-
-        elif input["id"] == "lidar_pc":
+            position = np.frombuffer(dora_input["data"])[:6]
+            projection_matrix = get_projection_matrix(position)
+            extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
+            sensor_transform = to_world_coordinate(
+                np.array([[3.0, 0, 1]]), extrinsic_matrix
+            )[0]
+            self.position = np.concatenate([sensor_transform, position[3:]])
+        elif dora_input["id"] == "lidar_pc":
             point_cloud = np.frombuffer(
-                zlib.decompress(input["data"]), dtype=np.dtype("f4")
+                zlib.decompress(dora_input["data"]), dtype=np.dtype("f4")
             )
             point_cloud = np.reshape(
                 point_cloud, (int(point_cloud.shape[0] / 4), 4)
@@ -142,15 +145,15 @@ class Operator:
             self.point_cloud = point_cloud[:, :3]
 
         elif (
-            input["id"] == "obstacles_bbox"
+            dora_input["id"] == "obstacles_bbox"
             and len(self.point_cloud) != 0
             and len(self.position) != 0
         ):
-            if len(input["data"]) == 0:
+            if len(dora_input["data"]) == 0:
                 send_output("obstacles", np.array([]).tobytes())
                 return DoraStatus.CONTINUE
             obstacles = (
-                np.frombuffer(input["data"], dtype="int32")
+                np.frombuffer(dora_input["data"], dtype="int32")
                 .reshape((-1, 6))
                 .astype(np.float32)
             )
@@ -165,7 +168,8 @@ class Operator:
             )
 
             predictions = get_predictions(obstacles, obstacles_with_location)
+            print(f"predictions: {predictions}")
             predictions_bytes = np.array(predictions, dtype="float32").tobytes()
 
-            send_output("obstacles", predictions_bytes, input["metadata"])
+            send_output("obstacles", predictions_bytes, dora_input["metadata"])
         return DoraStatus.CONTINUE

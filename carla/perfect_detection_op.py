@@ -90,7 +90,7 @@ def to_camera_view(
     to coordinates relative to the bounding box origin, then converts those
     to coordinates relative to the obstacle.
     These coordinates are then considered to be in the world coordinate
-    system, which is mapped into the camera view. A negative z-input["data"]
+    system, which is mapped into the camera view. A negative z-dora_input["data"]
     signifies that the bounding box is behind the camera plane.
     Note that this function does not cap the coordinates to be within the
     size of the camera image.
@@ -302,12 +302,12 @@ class Operator:
 
     def on_input(
         self,
-        input: dict,
+        dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
-        if input["id"] == "depth_frame":
+        if dora_input["id"] == "depth_frame":
             depth_frame = np.frombuffer(
-                zlib.decompress(input["data"]),
+                zlib.decompress(dora_input["data"]),
                 dtype="float32",
             )
             depth_frame = np.reshape(
@@ -317,10 +317,10 @@ class Operator:
             self.depth_frame = depth_frame
             return DoraStatus.CONTINUE
 
-        elif input["id"] == "segmented_frame":
+        elif dora_input["id"] == "segmented_frame":
             segmented_frame = cv2.imdecode(
                 np.frombuffer(
-                    input["data"],
+                    dora_input["data"],
                     dtype="uint8",
                 ),
                 -1,
@@ -328,8 +328,8 @@ class Operator:
             self.segmented_frame = segmented_frame
             return DoraStatus.CONTINUE
 
-        elif input["id"] == "position":
-            self.position = np.frombuffer(input["data"])[:6]
+        elif dora_input["id"] == "position":
+            self.position = np.frombuffer(dora_input["data"])[:6]
 
         if (
             len(self.position) == 0
@@ -385,7 +385,7 @@ class Operator:
         send_output(
             "bbox",
             byte_array,
-            input["metadata"]
+            dora_input["metadata"]
             #   "traffic_lights": dump(visible_tls),
         )
         return DoraStatus.CONTINUE

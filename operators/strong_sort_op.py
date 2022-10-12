@@ -35,14 +35,14 @@ class Operator:
 
     def on_input(
         self,
-        input: dict,
+        dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
 
-        if input["id"] == "image":
+        if dora_input["id"] == "image":
             frame = cv2.imdecode(
                 np.frombuffer(
-                    input["data"],
+                    dora_input["data"],
                     dtype="uint8",
                 ),
                 -1,
@@ -50,14 +50,16 @@ class Operator:
 
             self.frame = frame[:, :, :3]
 
-        elif input["id"] == "obstacles_bbox" and len(self.frame) != 0:
-            obstacles = np.frombuffer(input["data"], dtype="int32").reshape(
-                (-1, 6)
-            )
+        elif dora_input["id"] == "obstacles_bbox" and len(self.frame) != 0:
+            obstacles = np.frombuffer(
+                dora_input["data"], dtype="int32"
+            ).reshape((-1, 6))
             if obstacles.shape[0] == 0:
                 # self.model.increment_ages()
                 send_output(
-                    "obstacles_id", np.array([]).tobytes(), input["metadata"]
+                    "obstacles_id",
+                    np.array([]).tobytes(),
+                    dora_input["metadata"],
                 )
                 return DoraStatus.CONTINUE
 
@@ -75,7 +77,9 @@ class Operator:
                     ]  # xyxy -> x1, x2, y1, y2 track_id, class_id, conf
 
                     send_output(
-                        "obstacles_id", outputs.tobytes(), input["metadata"]
+                        "obstacles_id",
+                        outputs.tobytes(),
+                        dora_input["metadata"],
                     )
 
         return DoraStatus.CONTINUE

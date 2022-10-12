@@ -117,47 +117,47 @@ class Operator:
 
     def on_input(
         self,
-        input: dict,
+        dora_input: dict,
         _send_output: Callable[[str, bytes], None],
     ):
 
-        if "obstacles_bbox" == input["id"]:
+        if "obstacles_bbox" == dora_input["id"]:
             self.obstacles_bbox = np.frombuffer(
-                input["data"], dtype="int32"
+                dora_input["data"], dtype="int32"
             ).reshape((-1, 6))
 
-        if "traffic_sign_bbox" == input["id"]:
+        if "traffic_sign_bbox" == dora_input["id"]:
             self.traffic_sign_bbox = np.frombuffer(
-                input["data"], dtype="int32"
+                dora_input["data"], dtype="int32"
             ).reshape((-1, 6))
 
-        elif "obstacles_id" == input["id"]:
+        elif "obstacles_id" == dora_input["id"]:
             self.obstacles_id = np.frombuffer(
-                input["data"], dtype="int32"
+                dora_input["data"], dtype="int32"
             ).reshape((-1, 7))
 
-        elif "lanes" == input["id"]:
-            lanes = np.frombuffer(input["data"], dtype="int32").reshape(
+        elif "lanes" == dora_input["id"]:
+            lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
                 (-1, 30, 2)
             )
             self.lanes = lanes
 
-        elif "drivable_area" == input["id"]:
-            drivable_area = np.frombuffer(input["data"], dtype="int32").reshape(
-                (1, -1, 2)
-            )
+        elif "drivable_area" == dora_input["id"]:
+            drivable_area = np.frombuffer(
+                dora_input["data"], dtype="int32"
+            ).reshape((1, -1, 2))
             self.drivable_area = drivable_area
 
-        elif "image" == input["id"]:
+        elif "image" == dora_input["id"]:
             self.camera_frame = cv2.imdecode(
                 np.frombuffer(
-                    input["data"],
+                    dora_input["data"],
                     dtype="uint8",
                 ),
                 -1,
             )
 
-        if "image" != input["id"]:
+        if "image" != dora_input["id"]:
             return DoraStatus.CONTINUE
 
         resized_image = self.camera_frame[:, :, :3]

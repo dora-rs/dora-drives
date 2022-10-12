@@ -75,7 +75,9 @@ class Operator:
         self.position = []
         self.gps_waypoints = []
         self.waypoints = []
-        self.metadata = []
+        self.obstacle_metadata = {}
+        self.gps_metadata = {}
+        self.metadata = {}
         self._hyperparameters = {
             "step_size": STEP_SIZE_HYBRID_ASTAR,
             "max_iterations": MAX_ITERATIONS_HYBRID_ASTAR,
@@ -93,26 +95,27 @@ class Operator:
 
     def on_input(
         self,
-        input: dict,
+        dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
 
-        if input["id"] == "gps_waypoints":
-            waypoints = np.frombuffer(input["data"])
+        if dora_input["id"] == "gps_waypoints":
+            waypoints = np.frombuffer(dora_input["data"])
             waypoints = waypoints.reshape((3, -1))
             self.gps_waypoints = waypoints[0:2].T
+            self.gps_metadata = dora_input["metadata"]
             if len(self.waypoints) == 0:
                 self.waypoints = self.gps_waypoints
 
-        elif input["id"] == "obstacles":
-            obstacles = np.frombuffer(input["data"], dtype="float32").reshape(
-                (-1, 5)
-            )
-            self.obstacles = obstacles
-            self.metadata = input["metadata"]
+        elif dora_input["id"] == "position":
+            self.position = np.frombuffer(dora_input["data"])
 
-        elif input["id"] == "position":
-            self.position = np.frombuffer(input["data"])
+        elif dora_input["id"] == "obstacles":
+            obstacles = np.frombuffer(
+                dora_input["data"], dtype="float32"
+            ).reshape((-1, 5))
+            self.obstacles = obstacles
+            self.obstacle_metadata = dora_input["metadata"]
 
             if len(self.gps_waypoints) != 0:
                 (waypoints, target_speeds) = self.run(
@@ -156,6 +159,7 @@ class Operator:
         if len(obstacle_list) == 0:
             # Do not use Hybrid A* if there are no obstacles.
             speeds = np.array([TARGET_SPEED] * len(self.gps_waypoints))
+            self.metadata = self.gps_metadata
             return self.gps_waypoints, speeds
 
         # Remove already past waypoints
@@ -168,6 +172,7 @@ class Operator:
 
         # Check if obstacles are on solved waypoints trajectory
         obstacle_list = get_obstacle_list(self.obstacles, self.waypoints)
+        self.metadata = self.obstacle_metadata
 
         if len(obstacle_list) == 0:
             # Do not use Hybrid A* if there are no obstacles.
