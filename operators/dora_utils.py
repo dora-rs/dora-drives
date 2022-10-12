@@ -1,5 +1,6 @@
 import math
 from enum import Enum
+from typing import Tuple
 
 import numpy as np
 from sklearn.metrics import pairwise_distances
@@ -13,7 +14,7 @@ def distance_points(left_point: np.array, right_point: np.array) -> np.array:
     return np.linalg.norm(left_point - right_point)
 
 
-def closest_vertex(vertices: np.array, point: np.array) -> (int, np.array):
+def closest_vertex(vertices: np.array, point: np.array) -> Tuple[int, np.array]:
     assert (
         vertices.shape[1] == point.shape[1]
     ), "vertice has more coordinate than point"
@@ -146,7 +147,7 @@ def get_angle(left, right) -> float:
 
 
 def location_to_camera_view(
-    location: np.array, intrinsic_matrix, extrinsic_matrix
+    location: np.array, intrinsic_matrix, inv_extrinsic_matrix
 ):
     """Converts the given 3D vector to the view of the camera using
     the extrinsic and the intrinsic matrix.
@@ -161,9 +162,7 @@ def location_to_camera_view(
     position_vector = np.append(position_vector, [[1.0]])
 
     # Transform the points to the camera in 3D.
-    transformed_3D_pos = np.dot(
-        np.linalg.inv(extrinsic_matrix), position_vector
-    )
+    transformed_3D_pos = np.dot(inv_extrinsic_matrix, position_vector)
 
     # Transform the points to 2D.
     position_2D = np.dot(intrinsic_matrix, transformed_3D_pos[:3])
@@ -177,43 +176,6 @@ def location_to_camera_view(
         ]
     )
     return location_2D
-
-
-def waypoints_to_camera_view(
-    waypoints: np.array, intrinsic_matrix, extrinsic_matrix
-):
-    """Converts the given 3D vector to the view of the camera using
-    the extrinsic and the intrinsic matrix.
-    Args:
-        waypoints = [X, Y, Z]
-        extrinsic_matrix: The extrinsic matrix of the camera.
-    Returns:
-        :py:class:`.Vector3D`: An instance with the coordinates converted
-        to the camera view.
-    """
-    position_vector = waypoints
-    position_vector = np.concatenate(
-        position_vector, np.ones((1, waypoints.shape[1]))
-    )
-
-    # Transform the points to the camera in 3D.
-    transformed_3D_pos = np.dot(
-        np.linalg.inv(extrinsic_matrix), position_vector
-    )
-
-    # Transform the points to 2D.
-    position_2D = np.dot(intrinsic_matrix, transformed_3D_pos[:3])
-
-    # Normalize the 2D points.
-    location_2D = np.array(
-        [
-            float(position_2D[0] / position_2D[2]),
-            float(position_2D[1] / position_2D[2]),
-            float(position_2D[2]),
-        ]
-    )
-    return location_2D
-
 
 class DoraStatus(Enum):
     CONTINUE = 0

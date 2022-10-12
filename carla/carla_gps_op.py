@@ -1,5 +1,4 @@
 import threading
-import time
 from typing import Callable
 
 import numpy as np
@@ -37,13 +36,11 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
 
-        if input_id == "position":
-            self.position = np.frombuffer(value)
+        self.position = np.frombuffer(dora_input["data"])
 
         if len(self.waypoints) != 0:
             (index, _) = closest_vertex(
@@ -69,8 +66,7 @@ class Operator:
         )
 
         send_output(
-            "gps_waypoints",
-            waypoints_array.tobytes(),
+            "gps_waypoints", waypoints_array.tobytes(), dora_input["metadata"]
         )  # World coordinate
 
         return DoraStatus.CONTINUE

@@ -1,11 +1,12 @@
 GRAPH=yolov5_dataflow.yaml
 
-while getopts bsg: flag
+while getopts tbsg: flag
 do
     case "${flag}" in
         b) build=1;;
         s) sim=1;;
         g) GRAPH="${OPTARG}";;
+        t) tracing=1;;
     esac
 done
 
@@ -16,8 +17,13 @@ if [ ! -z ${build+x} ]; then
 
     cd ../dora
     export RUSTFLAGS="--cfg tokio_unstable"
-    cargo build  --manifest-path binaries/coordinator/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
-    cargo build  --manifest-path binaries/runtime/Cargo.toml --release # --features metrics # opentelemetry_jaeger 
+    cargo build  -p dora-coordinator --release  
+    if [ ! -z ${tracing+x} ]; then
+        cargo build  -p dora-runtime --release  --features tracing  
+    else
+        cargo build  -p dora-runtime --release 
+
+    fi
     cd apis/python/node
     maturin build --release
     cd ../../../

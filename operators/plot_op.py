@@ -11,6 +11,7 @@ from dora_utils import (
     get_intrinsic_matrix,
     get_projection_matrix,
     location_to_camera_view,
+    to_world_coordinate,
 )
 
 CAMERA_WIDTH = 800
@@ -56,64 +57,78 @@ class Operator:
 
     def on_input(
         self,
-        input_id: str,
-        value: bytes,
+        dora_input: dict,
         _send_output: Callable[[str, bytes], None],
     ):
 
-        if "waypoints" == input_id:
-            waypoints = np.frombuffer(value)
+        if "waypoints" == dora_input["id"]:
+            waypoints = np.frombuffer(dora_input["data"])
             waypoints = waypoints.reshape((3, -1))
             waypoints = waypoints[0:2].T
             self.waypoints = waypoints
 
-        elif "obstacles_bbox" == input_id:
-            self.obstacles_bbox = np.frombuffer(value, dtype="int32").reshape(
-                (-1, 6)
-            )
-
-        elif "traffic_sign_bbox" == input_id:
-            self.traffic_sign_bbox = np.frombuffer(
-                value, dtype="int32"
+        elif "obstacles_bbox" == dora_input["id"]:
+            self.obstacles_bbox = np.frombuffer(
+                dora_input["data"], dtype="int32"
             ).reshape((-1, 6))
 
-        elif "obstacles_id" == input_id:
-            self.obstacles_id = np.frombuffer(value, dtype="int32").reshape(
-                (-1, 7)
-            )
+        elif "traffic_sign_bbox" == dora_input["id"]:
+            self.traffic_sign_bbox = np.frombuffer(
+                dora_input["data"], dtype="int32"
+            ).reshape((-1, 6))
 
-        elif "obstacles" == input_id:
-            obstacles = np.frombuffer(value, dtype="float32").reshape((-1, 5))
+        elif "obstacles_id" == dora_input["id"]:
+            self.obstacles_id = np.frombuffer(
+                dora_input["data"], dtype="int32"
+            ).reshape((-1, 7))
+
+        elif "obstacles" == dora_input["id"]:
+            obstacles = np.frombuffer(
+                dora_input["data"], dtype="float32"
+            ).reshape((-1, 5))
             self.obstacles = obstacles
 
-        elif "lanes" == input_id:
-            lanes = np.frombuffer(value, dtype="int32").reshape((-1, 30, 2))
+        elif "lanes" == dora_input["id"]:
+            lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
+                (-1, 30, 2)
+            )
             self.lanes = lanes
 
-        elif "drivable_area" == input_id:
-            drivable_area = np.frombuffer(value, dtype="int32").reshape(
-                (1, -1, 2)
-            )
+        elif "drivable_area" == dora_input["id"]:
+            drivable_area = np.frombuffer(
+                dora_input["data"], dtype="int32"
+            ).reshape((1, -1, 2))
             self.drivable_area = drivable_area
 
-        elif "position" == input_id:
+        elif "position" == dora_input["id"]:
             # Add sensor transform
-            self.position = np.frombuffer(value)[:6] + SENSOR_POSITION
+            position = np.frombuffer(dora_input["data"])[:6]
+            projection_matrix = get_projection_matrix(position)
+            extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
 
-        elif "image" == input_id:
+            sensor_transform = to_world_coordinate(
+                np.array([[3.0, 0, 1.0]]), extrinsic_matrix
+            )[0]
+            self.position = np.concatenate([sensor_transform, position[3:]])
+
+        elif "image" == dora_input["id"]:
             self.camera_frame = cv2.imdecode(
                 np.frombuffer(
-                    value,
+                    dora_input["data"],
                     dtype="uint8",
                 ),
                 -1,
             )
 
-        if "image" != input_id or isinstance(self.position, list):
+        if (
+            "waypoints" != dora_input["id"]
+            or isinstance(self.position, list)
+            or isinstance(self.camera_frame, list)
+        ):
             return DoraStatus.CONTINUE
 
-        extrinsic_matrix = get_extrinsic_matrix(
-            get_projection_matrix(self.position)
+        inv_extrinsic_matrix = np.linalg.inv(
+            get_extrinsic_matrix(get_projection_matrix(self.position))
         )
         resized_image = self.camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
@@ -122,9 +137,9 @@ class Operator:
 
         for waypoint in self.waypoints:
             location = location_to_camera_view(
-                np.append(waypoint.reshape((1, -1)), [[0]]),
+                np.append(waypoint.reshape((1, -1)), [[-1]]),
                 INTRINSIC_MATRIX,
-                extrinsic_matrix,
+                inv_extrinsic_matrix,
             )
             if location[0] > 0 and location[1] > 0:
                 cv2.circle(
@@ -140,13 +155,25 @@ class Operator:
             location = location_to_camera_view(
                 np.array([[x, y, z]]),
                 INTRINSIC_MATRIX,
-                extrinsic_matrix,
+                inv_extrinsic_matrix,
             )
             cv2.circle(
                 resized_image,
                 (int(location[0]), int(location[1])),
                 3,
                 (255, 255, 0),
+                -1,
+            )
+            location = location_to_camera_view(
+                np.array([[x, y, 0]]),
+                INTRINSIC_MATRIX,
+                inv_extrinsic_matrix,
+            )
+            cv2.circle(
+                resized_image,
+                (int(location[0]), int(location[1])),
+                3,
+                (150, 150, 0),
                 -1,
             )
 

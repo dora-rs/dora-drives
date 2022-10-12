@@ -14,7 +14,7 @@ def add_lidar(world, transform, callback, vehicle):
         "sensor.lidar.ray_cast"
     )
     lidar_blueprint.set_attribute("channels", "32")
-    lidar_blueprint.set_attribute("range", "5000")
+    lidar_blueprint.set_attribute("range", "10000")
     lidar_blueprint.set_attribute("points_per_second", "500000")
     lidar_blueprint.set_attribute("rotation_frequency", "20")
     lidar_blueprint.set_attribute("upper_fov", "15")
