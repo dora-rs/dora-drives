@@ -1,5 +1,4 @@
 import abc
-import re
 import typing
 
 from opentelemetry import trace
@@ -75,8 +74,8 @@ def parse_context(string_context: str) -> CarrierT:
     return result
 
 
-def extract_context(inputs):
-    string_context = inputs["otel_context"].decode("utf-8")
+def extract_context(dora_input):
+    string_context = dora_input["open_telemetry_context"]
 
     carrier = parse_context(string_context)
 
