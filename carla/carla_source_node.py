@@ -1,4 +1,4 @@
-#!/opt/conda/envs/dora3.8/bin/python
+#!/usr/bin/env python
 
 import logging
 import time
@@ -178,5 +178,5 @@ def main():
 
 
 for _ in range(1000):
-    time.sleep(1)
+    time.sleep(0.3)
     main()

@@ -5,7 +5,7 @@ communication:
 nodes:
   - id: webcam
     custom:
-      run: physicals/webcam.py
+      run: ../../physicals/webcam.py
       inputs:
         timer: dora/timer/millis/100
       outputs:
@@ -17,11 +17,11 @@ nodes:
         - bbox
       inputs:
         image: webcam/image
-      python: operators/yolov5_op.py
+      python: ../../operators/yolov5_op.py
 
   - id: plot
     operator:
-      python: physicals/plot.py
+      python: ../../physicals/plot.py
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox

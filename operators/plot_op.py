@@ -53,6 +53,7 @@ class Operator:
         self.drivable_area = []
         self.last_timestamp = time.time()
         self.position = []
+        self.sensor_position = []
         self.camera_frame = []
         self.traffic_sign_bbox = []
         self.point_cloud = []
@@ -111,7 +112,10 @@ class Operator:
             sensor_transform = to_world_coordinate(
                 np.array([[3.0, 0, 1.0]]), extrinsic_matrix
             )[0]
-            self.position = np.concatenate([sensor_transform, position[3:]])
+            self.position = position
+            self.sensor_position = np.concatenate(
+                [sensor_transform, position[3:]]
+            )
 
         elif "image" == dora_input["id"]:
             self.camera_frame = cv2.imdecode(
@@ -143,7 +147,7 @@ class Operator:
 
         if (
             "waypoints" != dora_input["id"]
-            or isinstance(self.position, list)
+            or isinstance(self.sensor_position, list)
             or isinstance(self.camera_frame, list)
         ):
             return DoraStatus.CONTINUE
@@ -151,6 +155,9 @@ class Operator:
         projection_matrix = get_projection_matrix(self.position)
         extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
         inv_extrinsic_matrix = np.linalg.inv(extrinsic_matrix)
+        sensor_projection_matrix = get_projection_matrix(self.sensor_position)
+        sensor_extrinsic_matrix = get_extrinsic_matrix(sensor_projection_matrix)
+        sensor_inv_extrinsic_matrix = np.linalg.inv(sensor_extrinsic_matrix)
         resized_image = self.camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
 
@@ -179,7 +186,7 @@ class Operator:
             location = location_to_camera_view(
                 point_world,
                 INTRINSIC_MATRIX,
-                inv_extrinsic_matrix,
+                sensor_inv_extrinsic_matrix,
             )
             back = resized_image.copy()
             cv2.circle(
@@ -200,7 +207,7 @@ class Operator:
             location = location_to_camera_view(
                 np.array([[x, y, z]]),
                 INTRINSIC_MATRIX,
-                inv_extrinsic_matrix,
+                sensor_inv_extrinsic_matrix,
             )
             cv2.circle(
                 resized_image,
@@ -212,7 +219,7 @@ class Operator:
             location = location_to_camera_view(
                 np.array([[x, y, -1]]),
                 INTRINSIC_MATRIX,
-                inv_extrinsic_matrix,
+                sensor_inv_extrinsic_matrix,
             )
             cv2.circle(
                 resized_image,
