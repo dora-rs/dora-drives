@@ -3,6 +3,7 @@ from typing import Callable
 
 import cv2
 import numpy as np
+import zlib
 
 from dora_utils import (
     LABELS,
@@ -54,6 +55,7 @@ class Operator:
         self.position = []
         self.camera_frame = []
         self.traffic_sign_bbox = []
+        self.point_cloud = []
 
     def on_input(
         self,
@@ -120,6 +122,25 @@ class Operator:
                 -1,
             )
 
+        elif dora_input["id"] == "lidar_pc":
+            point_cloud = np.frombuffer(
+                zlib.decompress(dora_input["data"]), dtype=np.dtype("f4")
+            )
+            point_cloud = np.reshape(
+                point_cloud, (int(point_cloud.shape[0] / 4), 4)
+            )
+
+            # To camera coordinate
+            # The latest coordinate space is the unreal space.
+            point_cloud = np.dot(
+                point_cloud,
+                np.array(
+                    [[0, 0, 1, 0], [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 0, 1]]
+                ),
+            )
+            point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
+            self.point_cloud = point_cloud[:, :3]
+
         if (
             "waypoints" != dora_input["id"]
             or isinstance(self.position, list)
@@ -127,9 +148,9 @@ class Operator:
         ):
             return DoraStatus.CONTINUE
 
-        inv_extrinsic_matrix = np.linalg.inv(
-            get_extrinsic_matrix(get_projection_matrix(self.position))
-        )
+        projection_matrix = get_projection_matrix(self.position)
+        extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
+        inv_extrinsic_matrix = np.linalg.inv(extrinsic_matrix)
         resized_image = self.camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
 
@@ -150,6 +171,30 @@ class Operator:
                     -1,
                 )
 
+        for point in self.point_cloud:
+
+            point_world = to_world_coordinate(
+                np.array([point]), extrinsic_matrix
+            )
+            location = location_to_camera_view(
+                point_world,
+                INTRINSIC_MATRIX,
+                inv_extrinsic_matrix,
+            )
+            back = resized_image.copy()
+            cv2.circle(
+                back,
+                (int(location[0]), int(location[1])),
+                3,
+                (0, 0, int(min(point[2], 255))),
+                -1,
+            )
+            # blend with original image
+            alpha = 0.25
+            resized_image = cv2.addWeighted(
+                resized_image, 1 - alpha, back, alpha, 0
+            )
+
         for obstacle in self.obstacles:
             [x, y, z, _confidence, _label] = obstacle
             location = location_to_camera_view(
@@ -165,7 +210,7 @@ class Operator:
                 -1,
             )
             location = location_to_camera_view(
-                np.array([[x, y, 0]]),
+                np.array([[x, y, -1]]),
                 INTRINSIC_MATRIX,
                 inv_extrinsic_matrix,
             )
