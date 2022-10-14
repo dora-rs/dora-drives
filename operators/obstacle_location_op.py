@@ -67,7 +67,6 @@ def get_obstacle_locations(
     obstacles,
     point_cloud: np.array,
 ):
-    point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
     obstacle_with_locations = []
     for obstacle in obstacles:
         # Sample several points around the center of the bounding box
@@ -139,9 +138,10 @@ class Operator:
             point_cloud = np.dot(
                 point_cloud,
                 np.array(
-                    [[0, 1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]]
+                    [[0, 0, 1, 0], [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 0, 1]]
                 ),
             )
+            point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
             self.point_cloud = point_cloud[:, :3]
 
         elif (
@@ -168,7 +168,6 @@ class Operator:
             )
 
             predictions = get_predictions(obstacles, obstacles_with_location)
-            print(f"predictions: {predictions}")
             predictions_bytes = np.array(predictions, dtype="float32").tobytes()
 
             send_output("obstacles", predictions_bytes, dora_input["metadata"])
