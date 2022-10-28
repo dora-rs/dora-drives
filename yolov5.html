@@ -160,7 +160,10 @@ class Operator:
     &quot;&quot;&quot;
 
     def __init__(self):
-        self.model = torch.hub.load(&quot;ultralytics/yolov5&quot;, &quot;yolov5n&quot;)
+        self.model = torch.hub.load(
+            &quot;ultralytics/yolov5&quot;,
+            &quot;yolov5n&quot;,
+        )
         self.model.to(torch.device(&quot;cuda&quot;))
         self.model.eval()
 
@@ -205,7 +208,7 @@ It sends the bounding box as a numpy bytes array with type <code>int32</code>.</
 nodes:
   - id: webcam
     custom:
-      run: physicals/webcam.py
+      run: ../../physicals/webcam.py
       inputs:
         timer: dora/timer/millis/100
       outputs:
@@ -217,11 +220,11 @@ nodes:
         - bbox
       inputs:
         image: webcam/image
-      python: operators/yolov5_op.py
+      python: ../../operators/yolov5_op.py
 
   - id: plot
     operator:
-      python: physicals/plot.py
+      python: ../../physicals/plot.py
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox

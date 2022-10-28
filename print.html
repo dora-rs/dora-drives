@@ -366,7 +366,7 @@ class Operator:
 nodes:
   - id: webcam
     custom:
-      run: physicals/webcam.py
+      run: ../../physicals/webcam.py
       inputs:
         timer: dora/timer/millis/100
       outputs:
@@ -374,7 +374,7 @@ nodes:
 
   - id: plot
     operator:
-      python: physicals/simple_plot.py
+      python: ../../physicals/simple_plot.py
       inputs:
         image: webcam/image
 </code></pre>
@@ -406,7 +406,10 @@ class Operator:
     &quot;&quot;&quot;
 
     def __init__(self):
-        self.model = torch.hub.load(&quot;ultralytics/yolov5&quot;, &quot;yolov5n&quot;)
+        self.model = torch.hub.load(
+            &quot;ultralytics/yolov5&quot;,
+            &quot;yolov5n&quot;,
+        )
         self.model.to(torch.device(&quot;cuda&quot;))
         self.model.eval()
 
@@ -451,7 +454,7 @@ It sends the bounding box as a numpy bytes array with type <code>int32</code>.</
 nodes:
   - id: webcam
     custom:
-      run: physicals/webcam.py
+      run: ../../physicals/webcam.py
       inputs:
         timer: dora/timer/millis/100
       outputs:
@@ -463,11 +466,11 @@ nodes:
         - bbox
       inputs:
         image: webcam/image
-      python: operators/yolov5_op.py
+      python: ../../operators/yolov5_op.py
 
   - id: plot
     operator:
-      python: physicals/plot.py
+      python: ../../physicals/plot.py
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
@@ -495,7 +498,7 @@ nodes:
 nodes:
   - id: webcam
     custom:
-      run: physicals/webcam.py
+      run: ../../physicals/webcam.py
       inputs:
         timer: dora/timer/millis/100
       outputs:
@@ -507,7 +510,7 @@ nodes:
         - bbox
       inputs:
         image: webcam/image
-      python: operators/yolov5_op.py
+      python: ../../operators/yolov5_op.py
 
   - id: yolop
     operator: 
@@ -516,7 +519,7 @@ nodes:
         - drivable_area
       inputs:
         image: webcam/image
-      python: operators/yolop_op.py
+      python: ../../operators/yolop_op.py
 
   ## Commented out as it takes a lot of GPU memory.
   #- id: traffic_sign
@@ -534,11 +537,11 @@ nodes:
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
-      python: operators/strong_sort_op.py
+      python: ../../operators/strong_sort_op.py
 
   - id: plot
     operator:
-      python: physicals/plot.py
+      python: ../../physicals/plot.py
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
@@ -569,7 +572,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: carla/carla_source_node.py
+      run: ../../carla/carla_source_node.py
       env: 
         SET_AUTOPILOT: true 
 
@@ -579,7 +582,7 @@ nodes:
         - bbox
       inputs:
         image: carla_source_node/image
-      python: operators/yolov5_op.py
+      python: ../../operators/yolov5_op.py
 
   - id: yolop
     operator: 
@@ -588,7 +591,7 @@ nodes:
         - drivable_area
       inputs:
         image: carla_source_node/image
-      python: operators/yolop_op.py
+      python: ../../operators/yolop_op.py
 
   - id: strong_sort
     operator: 
@@ -597,11 +600,11 @@ nodes:
       inputs:
         image: carla_source_node/image
         obstacles_bbox: yolov5/bbox
-      python: operators/strong_sort_op.py
+      python: ../../operators/strong_sort_op.py
 
   - id: plot
     operator:
-      python: physicals/plot.py
+      python: ../../physicals/plot.py
       inputs:
         image: carla_source_node/image
         obstacles_bbox: yolov5/bbox
@@ -693,7 +696,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: carla/carla_source_node.py
+      run: ../../carla/carla_source_node.py
 
   - id: yolov5
     operator: 
@@ -701,7 +704,7 @@ nodes:
         - bbox
       inputs:
         image: carla_source_node/image
-      python: operators/yolov5_op.py
+      python: ../../operators/yolov5_op.py
   
   - id: obstacle_location_op
     operator: 
@@ -712,11 +715,11 @@ nodes:
         lidar_pc: carla_source_node/lidar_pc
         obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
-      python: operators/obstacle_location_op.py
+      python: ../../operators/obstacle_location_op.py
       
   - id: carla_gps_op
     operator:
-      python: carla/carla_gps_op.py
+      python: ../../carla/carla_gps_op.py
       outputs:
         - gps_waypoints
       inputs:
@@ -724,7 +727,7 @@ nodes:
 
   - id: hybrid_astar_op
     operator:
-      python: operators/hybrid_astar_op.py
+      python: ../../operators/hybrid_astar_op.py
       outputs:
         - waypoints
       inputs:
@@ -734,7 +737,7 @@ nodes:
 
   - id: pid_control_op
     operator:
-      python: operators/pid_control_op.py
+      python: ../../operators/pid_control_op.py
       outputs:
         - control
       inputs:
@@ -743,7 +746,7 @@ nodes:
 
   - id: carla_control_op
     operator:
-      python: carla/carla_control_op.py
+      python: ../../carla/carla_control_op.py
       outputs:
         - control_status
       inputs:
@@ -759,7 +762,7 @@ nodes:
         obstacles: obstacle_location_op/obstacles
         obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
-      python: operators/plot_op.py
+      python: ../../operators/plot_op.py
 </code></pre>
 <pre><code class="language-mermaid">flowchart TB
   carla_source_node[\carla_source_node/]
