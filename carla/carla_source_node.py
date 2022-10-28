@@ -1,4 +1,4 @@
-#!/opt/conda/envs/dora3.8/bin/python
+#!/usr/bin/env python
 
 import logging
 import time
@@ -7,6 +7,15 @@ import zlib
 import cv2
 import numpy as np
 from dora import Node
+import typing
+from opentelemetry import trace
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.trace.propagation.tracecontext import (
+    TraceContextTextMapPropagator,
+)
 
 from _generate_world import (
     add_camera,
@@ -18,7 +27,30 @@ from _generate_world import (
 )
 from carla import Client, Location, Rotation, Transform
 
+
+def serialize_context(context: dict) -> str:
+    output = ""
+    for key, value in context.items():
+        output += f"{key}:{value};"
+    return output
+
+
 logger = logging.Logger("")
+CarrierT = typing.TypeVar("CarrierT")
+propagator = TraceContextTextMapPropagator()
+
+trace.set_tracer_provider(
+    TracerProvider(
+        resource=Resource.create({SERVICE_NAME: "carla_source_node"})
+    )
+)
+tracer = trace.get_tracer(__name__)
+jaeger_exporter = JaegerExporter(
+    agent_host_name="172.17.0.1",
+    agent_port=6831,
+)
+span_processor = BatchSpanProcessor(jaeger_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 
 CARLA_SIMULATOR_HOST = "localhost"
@@ -87,8 +119,8 @@ world = client.get_world()
     "0.9.10",
     -1,
     True,
-    10,
-    10,
+    0,
+    0,
     logger,
 )
 
@@ -134,12 +166,15 @@ def main():
     forward_speed = np.linalg.norm([vx, vy, vz])
 
     position = np.array([x, y, z, pitch, yaw, roll, forward_speed])
-
-    node.send_output("position", position.tobytes())
-    node.send_output("image", camera_frame)
-    node.send_output("depth_frame", depth_frame)
-    node.send_output("segmented_frame", segmented_frame)
-    node.send_output("lidar_pc", lidar_pc)
+    with tracer.start_as_current_span("source") as _span:
+        output = {}
+        propagator.inject(output)
+        metadata = {"open_telemetry_context": serialize_context(output)}
+        node.send_output("position", position.tobytes(), metadata)
+        node.send_output("image", camera_frame, metadata)
+        node.send_output("depth_frame", depth_frame, metadata)
+        node.send_output("segmented_frame", segmented_frame, metadata)
+        node.send_output("lidar_pc", lidar_pc, metadata)
 
 
 for _ in range(1000):

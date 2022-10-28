@@ -19,11 +19,12 @@ if [ ! -z ${build+x} ]; then
     export RUSTFLAGS="--cfg tokio_unstable"
     cargo build  -p dora-coordinator --release  
     if [ ! -z ${tracing+x} ]; then
-        cargo build  -p dora-runtime --release  --features tracing  
+        cargo build  -p dora-runtime --release  --features tracing
     else
         cargo build  -p dora-runtime --release 
 
     fi
+
     cd apis/python/node
     maturin build --release
     cd ../../../
@@ -68,7 +69,10 @@ if [ ! -z ${sim+x} ]; then
     docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
 fi
 
+if [ ! -z ${tracing+x} ]; then
+    docker exec -itd dora /home/dora/workspace/dora-drives/telegraf-1.22.4/usr/bin/telegraf --config https://eu-central-1-1.aws.cloud2.influxdata.com/api/v2/telegrafs/09671055edbf6000
+fi
 
 docker exec -itd dora /home/dora/workspace/dora-drives/bin/iox-roudi 
 sleep 5
-docker  exec -it dora /home/dora/workspace/dora-drives/bin/dora-coordinator run /home/dora/workspace/dora-drives/graphs/$GRAPH
+nvidia-docker  exec -it dora bash -c "cd /home/dora/workspace/dora-drives && ./bin/dora-coordinator --run-dataflow graphs/$GRAPH"

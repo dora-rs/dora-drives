@@ -159,7 +159,7 @@ class Operator:
         if len(obstacle_list) == 0:
             # Do not use Hybrid A* if there are no obstacles.
             speeds = np.array([TARGET_SPEED] * len(self.gps_waypoints))
-            self.metadata = self.gps_metadata
+            self.metadata = self.obstacle_metadata
             return self.gps_waypoints, speeds
 
         # Remove already past waypoints

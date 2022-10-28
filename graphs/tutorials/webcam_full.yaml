@@ -5,7 +5,7 @@ communication:
 nodes:
   - id: webcam
     custom:
-      run: physicals/webcam.py
+      run: ../../physicals/webcam.py
       inputs:
         timer: dora/timer/millis/100
       outputs:
@@ -17,7 +17,7 @@ nodes:
         - bbox
       inputs:
         image: webcam/image
-      python: operators/yolov5_op.py
+      python: ../../operators/yolov5_op.py
 
   - id: yolop
     operator: 
@@ -26,7 +26,7 @@ nodes:
         - drivable_area
       inputs:
         image: webcam/image
-      python: operators/yolop_op.py
+      python: ../../operators/yolop_op.py
 
   ## Commented out as it takes a lot of GPU memory.
   #- id: traffic_sign
@@ -44,11 +44,11 @@ nodes:
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
-      python: operators/strong_sort_op.py
+      python: ../../operators/strong_sort_op.py
 
   - id: plot
     operator:
-      python: physicals/plot.py
+      python: ../../physicals/plot.py
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
