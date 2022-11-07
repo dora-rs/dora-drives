@@ -1,10 +1,14 @@
 from typing import Callable
+from enum import Enum
 
 import cv2
 import numpy as np
 import torch
 
-from dora_utils import DoraStatus
+
+class DoraStatus(Enum):
+    CONTINUE = 0
+    STOP = 1
 
 
 class Operator:

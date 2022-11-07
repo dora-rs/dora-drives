@@ -1,13 +1,17 @@
 from typing import Callable
+from enum import Enum
 
 import cv2
 import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
-from PIL import Image
 
-from dora_utils import DoraStatus
+
+class DoraStatus(Enum):
+    CONTINUE = 0
+    STOP = 1
+
 
 normalize = transforms.Normalize(
     mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
@@ -321,9 +325,13 @@ class Operator:
         if len(contours) != 0:
             contour = max(contours, key=cv2.contourArea)
             contour = contour.astype(np.int32)
-            send_output("drivable_area", contour.tobytes(), dora_input["metadata"])
+            send_output(
+                "drivable_area", contour.tobytes(), dora_input["metadata"]
+            )
         else:
-            send_output("drivable_area", np.array([]).tobytes(), dora_input["metadata"])
+            send_output(
+                "drivable_area", np.array([]).tobytes(), dora_input["metadata"]
+            )
 
         ll_predict = ll_seg_out[
             :, :, pad_h : (h0 - pad_h), pad_w : (w0 - pad_w)
