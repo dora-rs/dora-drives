@@ -392,12 +392,16 @@ nodes:
 <div style="break-before: page; page-break-before: always;"></div><h1 id="making-the-video-stream-intelligent"><a class="header" href="#making-the-video-stream-intelligent">Making the video stream intelligent</a></h1>
 <p>To add a node, you will just have to specify it in the dataflow. Let's add a <code>yolov5</code> object detection operator that has already been written for us in <code>./operators/yolov5_op.py</code>.</p>
 <pre><code class="language-python">from typing import Callable
+from enum import Enum
 
 import cv2
 import numpy as np
 import torch
 
-from dora_utils import DoraStatus
+
+class DoraStatus(Enum):
+    CONTINUE = 0
+    STOP = 1
 
 
 class Operator:
@@ -696,7 +700,8 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: ../../carla/carla_source_node.py
+      source: ../../carla/carla_source_node.py
+
 
   - id: yolov5
     operator: 
