@@ -12,7 +12,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: ../../carla/carla_source_node.py
+      source: ../../carla/carla_source_node.py
 
   - id: yolov5
     operator: 
