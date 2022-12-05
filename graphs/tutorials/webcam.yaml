@@ -4,15 +4,15 @@ communication:
 
 nodes:
   - id: webcam
-    custom:
-      run: ../../physicals/webcam.py
+    operator:
+      python: ../../operators/webcam_op.py
       inputs:
-        timer: dora/timer/millis/100
+        tick: dora/timer/millis/100
       outputs:
         - image
 
   - id: plot
     operator:
-      python: ../../physicals/simple_plot.py
+      python: ../../operators/simple_plot.py
       inputs:
         image: webcam/image

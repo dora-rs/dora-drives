@@ -4,10 +4,10 @@ communication:
 
 nodes:
   - id: webcam
-    custom:
-      run: ../../physicals/webcam.py
+    operator:
+      python: ../../operators/webcam_op.py
       inputs:
-        timer: dora/timer/millis/100
+        tick: dora/timer/millis/100
       outputs:
         - image
 
@@ -48,7 +48,7 @@ nodes:
 
   - id: plot
     operator:
-      python: ../../physicals/plot.py
+      python: ../../operators/plot.py
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
@@ -56,3 +56,4 @@ nodes:
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
         obstacles_id: strong_sort/obstacles_id
+        tick: dora/timer/millis/100

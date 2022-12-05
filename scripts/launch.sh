@@ -14,28 +14,6 @@ done
 [ "$(docker ps -a | grep dora)" ] && docker stop dora && docker rm dora 
 
 if [ ! -z ${build+x} ]; then
-
-    cd ../dora
-    export RUSTFLAGS="--cfg tokio_unstable"
-    cargo build  -p dora-coordinator --release  
-    if [ ! -z ${tracing+x} ]; then
-        cargo build  -p dora-runtime --release  --features tracing
-    else
-        cargo build  -p dora-runtime --release 
-
-    fi
-
-    cd apis/python/node
-    maturin build --release
-    cd ../../../
-
-    cd ../dora-drives
-    mkdir -p bin
-    cp ../dora/target/release/dora-coordinator bin/dora-coordinator
-    cp ../dora/target/release/dora-runtime bin/dora-runtime
-    find ../dora/target/release -type f -wholename "*/iceoryx-install/bin/iox-roudi" -exec cp {} bin \; 
-
-    cp -r ../dora/target/wheels .
     docker build --tag haixuantao/dora-drives .
 fi
 
@@ -48,7 +26,7 @@ if [ -e /dev/video0 ]; then
         --device=/dev/video0:/dev/video0 \
         --net=host \
         -itd \
-        --shm-size=256m \
+        --shm-size=2g \
         --name dora \
         haixuantao/dora-drives /bin/bash
         
@@ -60,7 +38,7 @@ else
         --env-file variables.env \
         --net=host \
         -itd \
-        --shm-size=256m \
+        --shm-size=2g \
         --name dora \
         haixuantao/dora-drives /bin/bash
 fi
@@ -73,6 +51,5 @@ if [ ! -z ${tracing+x} ]; then
     docker exec -itd dora /home/dora/workspace/dora-drives/telegraf-1.22.4/usr/bin/telegraf --config https://eu-central-1-1.aws.cloud2.influxdata.com/api/v2/telegrafs/09671055edbf6000
 fi
 
-docker exec -itd dora /home/dora/workspace/dora-drives/bin/iox-roudi 
 sleep 5
-nvidia-docker  exec -it dora bash -c "cd /home/dora/workspace/dora-drives && ./bin/dora-coordinator --run-dataflow graphs/$GRAPH"
+nvidia-docker  exec -it dora bash -c "dora up && cd /home/dora/workspace/dora-drives && dora-coordinator --run-dataflow graphs/$GRAPH"

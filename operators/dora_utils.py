@@ -1,13 +1,13 @@
-import math
 from enum import Enum
 from typing import Tuple
 
 import numpy as np
 from sklearn.metrics import pairwise_distances
+from scipy.spatial.transform import Rotation as R
 
 
 def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:
-    return np.linalg.norm(left_vertix[:3] - right_vertix[:3])
+    return np.linalg.norm(left_vertix[:2] - right_vertix[:2])
 
 
 def distance_points(left_point: np.array, right_point: np.array) -> np.array:
@@ -36,13 +36,17 @@ def get_projection_matrix(position: np.array):
         A 4x4 numpy matrix which represents the transformation matrix.
     """
     matrix = np.identity(4)
-    [x, y, z, pitch, yaw, roll] = position
-    cy = np.cos(np.radians(yaw))
-    sy = np.sin(np.radians(yaw))
-    cr = np.cos(np.radians(roll))
-    sr = np.sin(np.radians(roll))
-    cp = np.cos(np.radians(pitch))
-    sp = np.sin(np.radians(pitch))
+    [x, y, z, rx, ry, rz, rw] = position
+    [roll, pitch, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
+        "xyz", degrees=False
+    )
+
+    cy = np.cos((yaw))
+    sy = np.sin((yaw))
+    cr = np.cos((roll))
+    sr = np.sin((roll))
+    cp = np.cos((pitch))
+    sp = np.sin((pitch))
     matrix[:3, 3] = [x, y, z]
     matrix[0, 0] = cp * cy
     matrix[0, 1] = cy * sp * sr - sy * cr
@@ -62,12 +66,10 @@ def to_world_coordinate(points: np.array, matrix: np.array) -> np.array:
     coordinate space relative to the transform to the world coordinate
     space (using self.matrix), or from world coordinate space to the
     space relative to the transform (using inv(self.matrix))
-
     Args:
         points: An n by 3 numpy array, where each row is the
             (x, y, z) coordinates of a point.
         matrix: The matrix of the transformation to apply.
-
     Returns:
         An n by 3 numpy array of transformed points.
     """
@@ -103,7 +105,7 @@ def get_extrinsic_matrix(transform):
     """
 
     to_unreal_transform = np.array(
-        [[0, 0, 1, 0], [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 0, 1]]
+        [[0, 0, 1, 0], [-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 0, 1]]
     )
     return np.dot(transform, to_unreal_transform)
 
@@ -132,20 +134,6 @@ def get_intrinsic_matrix(width: int, height: int, fov: float):
     return k
 
 
-def get_angle(left, right) -> float:
-    """Computes the angle between the vector and another vector
-    in radians."""
-    [left_x, left_y] = left
-    [right_x, right_y] = right
-
-    angle = math.atan2(left_y, left_x) - math.atan2(right_y, right_x)
-    if angle > math.pi:
-        angle -= 2 * math.pi
-    elif angle < -math.pi:
-        angle += 2 * math.pi
-    return angle
-
-
 def location_to_camera_view(
     location: np.array, intrinsic_matrix, inv_extrinsic_matrix
 ):
@@ -158,8 +146,10 @@ def location_to_camera_view(
         :py:class:`.Vector3D`: An instance with the coordinates converted
         to the camera view.
     """
-    position_vector = location.T
-    position_vector = np.append(position_vector, [[1.0]])
+    if len(location) == 0:
+        return np.array([])
+    position_vector = np.hstack((location, np.ones((location.shape[0], 1))))
+    position_vector = position_vector.T
 
     # Transform the points to the camera in 3D.
     transformed_3D_pos = np.dot(inv_extrinsic_matrix, position_vector)
@@ -168,14 +158,50 @@ def location_to_camera_view(
     position_2D = np.dot(intrinsic_matrix, transformed_3D_pos[:3])
 
     # Normalize the 2D points.
+    if not position_2D[2].all():
+        print("could not inverse to camera image")
+        return np.array([])
+
     location_2D = np.array(
         [
-            float(position_2D[0] / position_2D[2]),
-            float(position_2D[1] / position_2D[2]),
-            float(position_2D[2]),
+            (position_2D[0] / position_2D[2]),
+            (position_2D[1] / position_2D[2]),
+            (position_2D[2]),
         ]
     )
     return location_2D
+
+
+def local_points_to_camera_view(location: np.array, intrinsic_matrix):
+    """Converts the given 3D vector to the view of the camera using
+    the extrinsic and the intrinsic matrix.
+    Args:
+        location = [[x, y, z]]
+        extrinsic_matrix: The extrinsic matrix of the camera.
+    Returns:
+        :py:class:`.Vector3D`: An instance with the coordinates converted
+        to the camera view.
+    """
+    if len(location) == 0:
+        return np.array([])
+
+    # Transform the points to 2D.
+    position_2D = np.dot(intrinsic_matrix, location.T)
+
+    # Normalize the 2D points.
+    if not position_2D[2].all():
+        print("could not inverse to camera image")
+        return np.array([])
+
+    location_2D = np.array(
+        [
+            (position_2D[0] / position_2D[2]),
+            (position_2D[1] / position_2D[2]),
+            (position_2D[2]),
+        ]
+    )
+    return location_2D
+
 
 class DoraStatus(Enum):
     CONTINUE = 0
