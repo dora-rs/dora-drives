@@ -12,7 +12,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      run: ../../carla/carla_source_node.py
+      source: ../../carla/carla_source_node.py
       env: 
         SET_AUTOPILOT: true 
 
@@ -33,18 +33,19 @@ nodes:
         image: carla_source_node/image
       python: ../../operators/yolop_op.py
 
-  - id: strong_sort
-    operator: 
-      outputs:
-        - obstacles_id
-      inputs:
-        image: carla_source_node/image
-        obstacles_bbox: yolov5/bbox
-      python: ../../operators/strong_sort_op.py
+  ## Commented out as it takes a bit of GPU memory.
+  #- id: strong_sort
+    #operator: 
+      #outputs:
+        #- obstacles_id
+      #inputs:
+        #image: carla_source_node/image
+        #obstacles_bbox: yolov5/bbox
+      #python: ../../operators/strong_sort_op.py
 
   - id: plot
     operator:
-      python: ../../physicals/plot.py
+      python: ../../operators/plot.py
       inputs:
         image: carla_source_node/image
         obstacles_bbox: yolov5/bbox
@@ -52,3 +53,4 @@ nodes:
         traffic_sign_bbox: traffic_sign/bbox
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
+        tick: dora/timer/millis/100

@@ -107,22 +107,26 @@ RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 COPY requirements.txt requirements.txt 
 RUN conda activate dora3.8 && python3 -m pip install -r requirements.txt
 
+RUN sudo apt-get -yq install libssl-dev 
+
 RUN sudo chown -R dora:dora .
 
 # Cache model weight
-RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
+# RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
 RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
 RUN cd /home/dora/workspace/dora-drives && conda activate dora3.8 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
 RUN conda activate dora3.8 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
 RUN conda activate dora3.8 && python3 -c "import yolov7_tt100k"
+
+RUN cd /bin && sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.1/dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo unzip dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo mv iceoryx/iox-roudi .
+RUN conda activate dora3.8 && python3 -m pip install dora-rs
+
 
 COPY . .
 
 RUN sudo chown -R dora:dora .
 
 COPY .bashrc  /home/dora/.bashrc
-
-RUN conda activate dora3.8 && python3 -m pip install /home/dora/workspace/dora-drives/wheels/dora_rs-0.1.0-cp37-abi3-manylinux_2_31_x86_64.whl
 
 RUN sudo chmod +x /home/dora/workspace/dora-drives/carla/carla_source_node.py
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*

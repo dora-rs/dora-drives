@@ -70,13 +70,14 @@ nodes:
         control: pid_control_op/control
         vehicle_id: carla_source_node/vehicle_id
 
-  - id: plot_op
+  - id: plot
     operator:
-      description: Plot operator
-      inputs: 
-        waypoints: hybrid_astar_op/waypoints
+      python: ../../operators/plot.py
+      inputs:
         image: carla_source_node/image
-        obstacles: obstacle_location_op/obstacles
         obstacles_bbox: yolov5/bbox
-        position: carla_source_node/position
-      python: ../../operators/plot_op.py
+        traffic_sign_bbox: traffic_sign/bbox
+        lanes: yolop/lanes
+        drivable_area: yolop/drivable_area
+        obstacles_id: strong_sort/obstacles_id
+        tick: dora/timer/millis/100

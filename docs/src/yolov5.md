@@ -1,6 +1,6 @@
 # Making the video stream intelligent
 
-To add a node, you will just have to specify it in the dataflow. Let's add a `yolov5` object detection operator that has already been written for us in `./operators/yolov5_op.py`.
+To add an operator, you will just have to specify it in the dataflow. Let's add a `yolov5` object detection operator that has already been written for us in `./operators/yolov5_op.py`.
 
 ```python
 {{#include ../../operators/yolov5_op.py }}
