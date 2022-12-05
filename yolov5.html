@@ -144,7 +144,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="making-the-video-stream-intelligent"><a class="header" href="#making-the-video-stream-intelligent">Making the video stream intelligent</a></h1>
-<p>To add a node, you will just have to specify it in the dataflow. Let's add a <code>yolov5</code> object detection operator that has already been written for us in <code>./operators/yolov5_op.py</code>.</p>
+<p>To add an operator, you will just have to specify it in the dataflow. Let's add a <code>yolov5</code> object detection operator that has already been written for us in <code>./operators/yolov5_op.py</code>.</p>
 <pre><code class="language-python">from typing import Callable
 from enum import Enum
 
@@ -211,10 +211,10 @@ It sends the bounding box as a numpy bytes array with type <code>int32</code>.</
 
 nodes:
   - id: webcam
-    custom:
-      run: ../../physicals/webcam.py
+    operator:
+      python: ../../operators/webcam_op.py
       inputs:
-        timer: dora/timer/millis/100
+        tick: dora/timer/millis/100
       outputs:
         - image
 
@@ -228,10 +228,11 @@ nodes:
 
   - id: plot
     operator:
-      python: ../../physicals/plot.py
+      python: ../../operators/plot.py
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
+        tick: dora/timer/millis/100
 </code></pre>
 <p>Inputs are prefixed by the node name to be able to separate name conflicts.</p>
 <p>I've added capabilities for the plot to show the bounding box found by the <code>yolov5</code> operator in <code>physicals/plot.py</code>, which is basically mangling with cv2 API.</p>
