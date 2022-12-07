@@ -1,51 +1,32 @@
-import zlib
-from typing import Callable
-
-import numpy as np
-import numpy.matlib
-
 from dora_utils import (
+    LABELS,
     DoraStatus,
-    closest_vertex,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,
+    location_to_camera_view,
+    local_points_to_camera_view,
     to_world_coordinate,
 )
 
-DEPTH_CAMERA_MAX_DEPTH = 1000
+import numpy as np
+from typing import Callable
+from scipy.spatial.transform import Rotation as R
+
+
+CAMERA_WIDTH = 800
+CAMERA_HEIGHT = 600
 DEPTH_IMAGE_WIDTH = 800
 DEPTH_IMAGE_HEIGHT = 600
-DEPTH_IMAGE_CHANNEL = 4
-PIXEL_LENGTH = DEPTH_IMAGE_WIDTH * DEPTH_IMAGE_HEIGHT
 DEPTH_FOV = 90
+SENSOR_POSITION = np.array([3, 0, 1, 0, 0, 0])
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
+
 INV_INTRINSIC_MATRIX = np.linalg.inv(INTRINSIC_MATRIX)
-
-
-def get_closest_point_in_point_cloud(
-    point_cloud: np.array, point: np.array, normalized: bool = False
-):
-    """Finds the closest point in the point cloud to the given point."""
-    # Select x and y.
-    pc_xy = point_cloud[:, 0:2]
-
-    # Compute distance
-    if normalized:
-        # Select z
-        pc_z = point_cloud[:, 2]
-        # Divize x, y by z
-        normalized_pc = pc_xy / pc_z[:, None]
-    else:
-        normalized_pc = pc_xy
-
-    # Select index of the closest point.
-    (closest_point, _) = closest_vertex(normalized_pc, point)
-
-    # Return the closest point.
-    return point_cloud[closest_point]
+VELODYNE_MATRIX = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
+INV_VELODYNE_MATRIX = np.linalg.inv(VELODYNE_MATRIX)
 
 
 def get_predictions(obstacles, obstacle_with_locations):
@@ -63,46 +44,9 @@ def get_predictions(obstacles, obstacle_with_locations):
     return predictions
 
 
-def get_obstacle_locations(
-    obstacles,
-    point_cloud: np.array,
-):
-    obstacle_with_locations = []
-    for obstacle in obstacles:
-        # Sample several points around the center of the bounding box
-        # in case the bounding box is not well centered on the obstacle.
-        # In such situations the center point might be in between legs,
-        # and thus we might overestimate the distance.
-
-        obstacle_center = np.array(
-            [
-                [
-                    (obstacle[1] + obstacle[0]) / 2.0,
-                    (obstacle[3] + obstacle[2]) / 2.0,
-                    1.0,
-                ]
-            ]
-        )
-
-        # Project our 2D pixel location into 3D space, onto the z=1 plane.
-        p3d = np.dot(
-            INV_INTRINSIC_MATRIX, obstacle_center.transpose()
-        ).transpose()
-
-        # Choose the closest from the locations of the sampled points.
-        min_location = get_closest_point_in_point_cloud(
-            point_cloud, p3d[:, :2], True
-        )
-        p3d *= min_location[2]
-
-        obstacle_with_locations.append(p3d[0])
-
-    return obstacle_with_locations
-
-
 class Operator:
     """
-    Compute a `control` based on the position and the waypoints of the car.
+    Compute the location of obstacles.
     """
 
     def __init__(self):
@@ -115,60 +59,76 @@ class Operator:
         dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
+        if "lidar_pc" == dora_input["id"]:
+            point_cloud = np.frombuffer(dora_input["data"], dtype=np.float32)
+            point_cloud = point_cloud.reshape((-1, 3))
 
-        if dora_input["id"] == "position":
-            # Add sensor transform
-            position = np.frombuffer(dora_input["data"])[:6]
-            projection_matrix = get_projection_matrix(position)
-            extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
-            sensor_transform = to_world_coordinate(
-                np.array([[3.0, 0, 1]]), extrinsic_matrix
-            )[0]
-            self.position = np.concatenate([sensor_transform, position[3:]])
-        elif dora_input["id"] == "lidar_pc":
-            point_cloud = np.frombuffer(
-                zlib.decompress(dora_input["data"]), dtype=np.dtype("f4")
-            )
-            point_cloud = np.reshape(
-                point_cloud, (int(point_cloud.shape[0] / 4), 4)
-            )
-
-            # To camera coordinate
-            # The latest coordinate space is the unreal space.
             point_cloud = np.dot(
                 point_cloud,
-                np.array(
-                    [[0, 0, 1, 0], [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 0, 1]]
-                ),
+                np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]]),
             )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
-            self.point_cloud = point_cloud[:, :3]
+            point_cloud = local_points_to_camera_view(
+                point_cloud, INTRINSIC_MATRIX
+            )
 
-        elif (
-            dora_input["id"] == "obstacles_bbox"
-            and len(self.point_cloud) != 0
-            and len(self.position) != 0
-        ):
-            if len(dora_input["data"]) == 0:
-                send_output("obstacles", np.array([]).tobytes())
+            if len(point_cloud) != 0:
+                self.point_cloud = point_cloud.T
+        elif "position" == dora_input["id"]:
+            # Add sensor transform
+            self.position = np.frombuffer(dora_input["data"], np.float32)
+        elif "obstacles_bbox" == dora_input["id"]:
+            if len(self.position) == 0 or len(self.point_cloud) == 0:
                 return DoraStatus.CONTINUE
-            obstacles = (
-                np.frombuffer(dora_input["data"], dtype="int32")
-                .reshape((-1, 6))
-                .astype(np.float32)
-            )
-            obstacles_with_location = get_obstacle_locations(
-                obstacles, self.point_cloud
-            )
 
-            projection_matrix = get_projection_matrix(self.position)
-            extrinsic_matrix = get_extrinsic_matrix(projection_matrix)
-            obstacles_with_location = to_world_coordinate(
-                np.array(obstacles_with_location), extrinsic_matrix
-            )
+            self.obstacles_bbox = np.frombuffer(
+                dora_input["data"], dtype="int32"
+            ).reshape((-1, 6))
 
-            predictions = get_predictions(obstacles, obstacles_with_location)
-            predictions_bytes = np.array(predictions, dtype="float32").tobytes()
+            obstacles_with_location = []
+            for obstacle_bb in self.obstacles_bbox:
+                [min_x, max_x, min_y, max_y, confidence, label] = obstacle_bb
+                z_points = self.point_cloud[
+                    np.where(
+                        (self.point_cloud[:, 0] > min_x)
+                        & (self.point_cloud[:, 0] < max_x)
+                        & (self.point_cloud[:, 1] > min_y)
+                        & (self.point_cloud[:, 1] < max_y)
+                    )
+                ][:, 2]
+                if len(z_points) > 0:
+                    min_z = np.percentile(z_points, 5)
+                    obstacles_with_location.append(
+                        [(min_x + max_x) / 2, (min_y + max_y) / 2, min_z]
+                    )
+            if len(obstacles_with_location) > 0:
+                obstacles_with_location = np.array(obstacles_with_location)
+                obstacles_with_location = np.dot(
+                    INV_INTRINSIC_MATRIX, obstacles_with_location.T
+                ).T
 
-            send_output("obstacles", predictions_bytes, dora_input["metadata"])
+                obstacles_with_location = np.dot(
+                    obstacles_with_location, INV_VELODYNE_MATRIX
+                )
+                [x, y, z, rx, ry, rz, rw] = self.position
+                rot = R.from_quat([rx, ry, rz, rw])
+                obstacles_with_location = rot.apply(obstacles_with_location) + [
+                    x,
+                    y,
+                    z,
+                ]
+                predictions = get_predictions(
+                    self.obstacles_bbox, obstacles_with_location
+                )
+                predictions_bytes = np.array(
+                    predictions, dtype="float32"
+                ).tobytes()
+
+                send_output(
+                    "obstacles", predictions_bytes, dora_input["metadata"]
+                )
+            else:
+                send_output(
+                    "obstacles", np.array([]).tobytes(), dora_input["metadata"]
+                )
         return DoraStatus.CONTINUE

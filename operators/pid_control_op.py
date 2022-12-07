@@ -7,8 +7,9 @@ from typing import Callable
 import numpy as np
 from sklearn.metrics import pairwise_distances
 
-from dora_utils import DoraStatus, get_angle
-
+from dora_utils import DoraStatus
+from scipy.spatial.transform import Rotation as R
+from numpy import linalg as LA
 
 MIN_PID_WAYPOINT_DISTANCE = 5
 STEER_GAIN = 0.7
@@ -21,6 +22,18 @@ pid_use_real_time = True
 
 BRAKE_MAX = 1.0
 THROTTLE_MAX = 0.5
+
+
+def get_angle(left, right) -> float:
+    """Computes the angle between the vector and another vector
+    in radians."""
+
+    angle = left - right
+    if angle > math.pi:
+        angle -= 2 * math.pi
+    elif angle < -math.pi:
+        angle += 2 * math.pi
+    return angle
 
 
 def radians_to_steer(rad: float, steer_gain: float):
@@ -142,6 +155,9 @@ class Operator:
         self.target_speeds = []
         self.metadata = {}
         self.position = []
+        self.previous_position = []
+        self.current_speed = []
+        self.previous_time = time.time()
 
     def on_input(
         self,
@@ -156,22 +172,36 @@ class Operator:
         """
 
         if "position" == dora_input["id"]:
-            position = np.frombuffer(dora_input["data"])
+            position = np.frombuffer(dora_input["data"], np.float32)
             self.position = position
+            if len(self.previous_position) == 0:
+                self.previous_position = self.position
+                self.previous_time = time.time()
+                return DoraStatus.CONTINUE
+
+            self.current_speed = (position[:3] - self.previous_position[:3]) / (
+                time.time() - self.previous_time
+            )
+            self.previous_position = self.position
+            self.previous_time = time.time()
+
             return DoraStatus.CONTINUE
             # Vehicle speed in m/s.
         elif "waypoints" == dora_input["id"]:
-            waypoints = np.frombuffer(dora_input["data"])
-            waypoints = waypoints.reshape((3, -1))
+            waypoints = np.frombuffer(dora_input["data"], np.float32)
+            waypoints = waypoints.reshape((-1, 3))
 
-            self.target_speeds = waypoints[2, :]
-            self.waypoints = np.ascontiguousarray(waypoints[:2, :].T)
+            self.target_speeds = waypoints[:, 2]
+            self.waypoints = waypoints[:, :2]
             self.metadata = dora_input["metadata"]
 
         if len(self.position) == 0:
             return DoraStatus.CONTINUE
 
-        [x, y, _, _, yaw, _, current_speed] = self.position
+        [x, y, _, rx, ry, rz, rw] = self.position
+        [_, _, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
+            "xyz", degrees=False
+        )
         distances = pairwise_distances(self.waypoints, np.array([[x, y]])).T[0]
 
         index = distances > MIN_PID_WAYPOINT_DISTANCE
@@ -192,14 +222,13 @@ class Operator:
 
             ## Compute the angle of steering
             target_vector = target_location - [x, y]
-            forward_vector = [
-                math.cos(math.radians(yaw)),
-                math.sin(math.radians(yaw)),
-            ]
-            target_angle = get_angle(target_vector, forward_vector)
+
+            target_angle = get_angle(
+                math.atan2(target_vector[1], target_vector[0]), yaw
+            )
 
         throttle, brake = compute_throttle_and_brake(
-            pid, current_speed, target_speed
+            pid, LA.norm(self.current_speed), target_speed
         )
 
         steer = radians_to_steer(target_angle, STEER_GAIN)

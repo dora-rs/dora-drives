@@ -101,14 +101,14 @@ class Operator:
 
         if dora_input["id"] == "gps_waypoints":
             waypoints = np.frombuffer(dora_input["data"])
-            waypoints = waypoints.reshape((3, -1))
+            waypoints = waypoints.reshape((-1, 3))
             self.gps_waypoints = waypoints[0:2].T
             self.gps_metadata = dora_input["metadata"]
             if len(self.waypoints) == 0:
                 self.waypoints = self.gps_waypoints
 
         elif dora_input["id"] == "position":
-            self.position = np.frombuffer(dora_input["data"])
+            self.position = np.frombuffer(dora_input["data"], np.float32)
 
         elif dora_input["id"] == "obstacles":
             obstacles = np.frombuffer(
@@ -125,7 +125,7 @@ class Operator:
 
                 waypoints_array = np.concatenate(
                     [waypoints.T, target_speeds.reshape(1, -1)]
-                )
+                ).T
 
                 send_output(
                     "waypoints", waypoints_array.tobytes(), self.metadata

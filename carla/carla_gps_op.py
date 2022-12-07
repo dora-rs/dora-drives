@@ -40,7 +40,7 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
 
-        self.position = np.frombuffer(dora_input["data"])
+        self.position = np.frombuffer(dora_input["data"], np.float32)
 
         if len(self.waypoints) != 0:
             (index, _) = closest_vertex(
@@ -59,11 +59,11 @@ class Operator:
                 self.position[:3], self._goal_location
             )[:NUM_WAYPOINTS_AHEAD]
             self.waypoints = waypoints
-            self.target_speeds = np.array([0.0] * len(waypoints))
+            self.target_speeds = np.array([5.0] * len(waypoints))
 
         waypoints_array = np.concatenate(
             [self.waypoints.T, self.target_speeds.reshape(1, -1)]
-        )
+        ).T.astype(np.float32)
 
         send_output(
             "gps_waypoints", waypoints_array.tobytes(), dora_input["metadata"]

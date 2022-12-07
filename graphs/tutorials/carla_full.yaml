@@ -5,10 +5,12 @@ communication:
 nodes:
   - id: carla_source_node
     custom:
+      inputs:
+        tick: dora/timer/millis/300
       outputs:
         - position
-        - depth_frame
-        - segmented_frame
+        #- depth_frame
+        #- segmented_frame
         - vehicle_id
         - image
         - lidar_pc
@@ -42,15 +44,15 @@ nodes:
       inputs:
         position: carla_source_node/position
 
-  - id: hybrid_astar_op
-    operator:
-      python: ../../operators/hybrid_astar_op.py
-      outputs:
-        - waypoints
-      inputs:
-        position: carla_source_node/position
-        obstacles: obstacle_location_op/obstacles
-        gps_waypoints: carla_gps_op/gps_waypoints
+  #- id: fot_op
+    #operator:
+      #python: ../../operators/fot_op.py
+      #outputs:
+        #- waypoints
+      #inputs:
+        #position: carla_source_node/position
+        #obstacles: obstacle_location_op/obstacles
+        #gps_waypoints: carla_gps_op/gps_waypoints
 
   - id: pid_control_op
     operator:
@@ -59,7 +61,7 @@ nodes:
         - control
       inputs:
         position: carla_source_node/position
-        waypoints: hybrid_astar_op/waypoints
+        waypoints: carla_gps_op/gps_waypoints
 
   - id: carla_control_op
     operator:
@@ -81,3 +83,9 @@ nodes:
         drivable_area: yolop/drivable_area
         obstacles_id: strong_sort/obstacles_id
         tick: dora/timer/millis/100
+        gps_waypoints: carla_gps_op/gps_waypoints
+        position: carla_source_node/position
+        waypoints: fot_op/waypoints
+        control: pid_control_op/control
+      #  lidar_pc: carla_source_node/lidar_pc
+
