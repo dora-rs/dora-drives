@@ -88,4 +88,3 @@ nodes:
         waypoints: fot_op/waypoints
         control: pid_control_op/control
       #  lidar_pc: carla_source_node/lidar_pc
-

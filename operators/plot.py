@@ -26,6 +26,7 @@ DEPTH_IMAGE_WIDTH = 800
 DEPTH_IMAGE_HEIGHT = 600
 DEPTH_FOV = 90
 SENSOR_POSITION = np.array([3, 0, 1])
+
 VELODYNE_MATRIX = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
 INV_VELODYNE_MATRIX = np.linalg.inv(VELODYNE_MATRIX)
 INTRINSIC_MATRIX = get_intrinsic_matrix(
@@ -146,7 +147,6 @@ class Operator:
                 np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]]),
             )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
-
             point_cloud = local_points_to_camera_view(
                 point_cloud, INTRINSIC_MATRIX
             )
@@ -174,6 +174,7 @@ class Operator:
             inv_extrinsic_matrix = None
             print("no position messages.")
 
+
         resized_image = self.camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
 
@@ -186,6 +187,7 @@ class Operator:
             for waypoint in waypoints:
                 if np.isnan(waypoint).any():
                     break
+
                 cv2.circle(
                     resized_image,
                     (int(waypoint[0]), int(waypoint[1])),
