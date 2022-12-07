@@ -5,6 +5,8 @@ communication:
 nodes:
   - id: carla_source_node
     custom:
+      inputs:
+        tick: dora/timer/millis/300
       outputs:
         - position
         - depth_frame
@@ -54,3 +56,4 @@ nodes:
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
         tick: dora/timer/millis/100
+        position: carla_source_node/position

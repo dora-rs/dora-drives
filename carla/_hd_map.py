@@ -178,7 +178,7 @@ class HDMap(object):
     ):
         [x, y, z] = location
         waypoint = self._map.get_waypoint(
-            Location(x, y, z),
+            Location(float(x), float(y), float(z)),
             project_to_road=project_to_road,
             lane_type=lane_type,
         )

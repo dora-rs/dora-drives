@@ -329,7 +329,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "position":
-            self.position = np.frombuffer(dora_input["data"])[:6]
+            self.position = np.frombuffer(dora_input["data"], np.float32)
 
         if (
             len(self.position) == 0

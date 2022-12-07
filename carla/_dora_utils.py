@@ -3,7 +3,7 @@ from enum import Enum
 
 import numpy as np
 from sklearn.metrics import pairwise_distances
-
+from typing import Tuple
 
 def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:
     return np.linalg.norm(left_vertix[:3] - right_vertix[:3])
@@ -13,7 +13,7 @@ def distance_points(left_point: np.array, right_point: np.array) -> np.array:
     return np.linalg.norm(left_point - right_point)
 
 
-def closest_vertex(vertices: np.array, point: np.array) -> (int, np.array):
+def closest_vertex(vertices: np.array, point: np.array) -> Tuple[int, np.array]:
     assert (
         vertices.shape[1] == point.shape[1]
     ), "vertice has more coordinate than point"

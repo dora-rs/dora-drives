@@ -16,6 +16,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace.propagation.tracecontext import (
     TraceContextTextMapPropagator,
 )
+from scipy.spatial.transform import Rotation as R
 
 from _generate_world import (
     add_camera,
@@ -26,6 +27,22 @@ from _generate_world import (
     spawn_driving_vehicle,
 )
 from carla import Client, Location, Rotation, Transform
+
+
+def euler_to_quaternion(yaw, pitch, roll):
+    qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(
+        roll / 2
+    ) * np.sin(pitch / 2) * np.sin(yaw / 2)
+    qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(
+        roll / 2
+    ) * np.cos(pitch / 2) * np.sin(yaw / 2)
+    qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(
+        roll / 2
+    ) * np.sin(pitch / 2) * np.cos(yaw / 2)
+    qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(
+        roll / 2
+    ) * np.sin(pitch / 2) * np.sin(yaw / 2)
+    return [qx, qy, qz, qw]
 
 
 def serialize_context(context: dict) -> str:
@@ -82,7 +99,11 @@ def on_segmented_msg(frame):
 def on_lidar_msg(frame):
 
     global lidar_pc
-    lidar_pc = zlib.compress(frame.raw_data.tobytes())
+    frame = np.frombuffer(frame.raw_data, dtype=np.dtype("float32"))
+    point_cloud = np.reshape(frame, (-1, 4))
+    point_cloud = point_cloud[:, :3]
+
+    lidar_pc = point_cloud.tobytes()
 
 
 def on_camera_msg(frame):
@@ -143,8 +164,8 @@ node.send_output("vehicle_id", vehicle_id.to_bytes(2, "big"))
 def main():
 
     global camera_frame
-    global segmented_frame
-    global depth_frame
+    # global segmented_frame
+    # global depth_frame
     global lidar_pc
 
     if camera_frame is None or segmented_frame is None or depth_frame is None:
@@ -155,28 +176,25 @@ def main():
     x = vec_transform.location.x
     y = vec_transform.location.y
     z = vec_transform.location.z
-    pitch = vec_transform.rotation.pitch
     yaw = vec_transform.rotation.yaw
+    pitch = vec_transform.rotation.pitch
     roll = vec_transform.rotation.roll
 
-    vx = velocity_vector.x
-    vy = velocity_vector.y
-    vz = velocity_vector.z
+    [[qx, qy, qz, qw]] = R.from_euler(
+        "xyz", [[roll, pitch, yaw]], degrees=True
+    ).as_quat()
 
-    forward_speed = np.linalg.norm([vx, vy, vz])
-
-    position = np.array([x, y, z, pitch, yaw, roll, forward_speed])
-    with tracer.start_as_current_span("source") as _span:
-        output = {}
-        propagator.inject(output)
-        metadata = {"open_telemetry_context": serialize_context(output)}
-        node.send_output("position", position.tobytes(), metadata)
-        node.send_output("image", camera_frame, metadata)
-        node.send_output("depth_frame", depth_frame, metadata)
-        node.send_output("segmented_frame", segmented_frame, metadata)
-        node.send_output("lidar_pc", lidar_pc, metadata)
+    position = np.array([x, y, z, qx, qy, qz, qw], np.float32)
+    # with tracer.start_as_current_span("source") as _span:
+    output = {}
+    propagator.inject(output)
+    metadata = {"open_telemetry_context": serialize_context(output)}
+    node.send_output("position", position.tobytes(), metadata)
+    node.send_output("image", camera_frame, metadata)
+    # node.send_output("depth_frame", depth_frame, metadata)
+    # node.send_output("segmented_frame", segmented_frame, metadata)
+    node.send_output("lidar_pc", lidar_pc, metadata)
 
 
-for _ in range(1000):
-    time.sleep(0.3)
+for input_id, value, metadata in node:
     main()
