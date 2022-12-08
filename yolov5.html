@@ -234,12 +234,20 @@ nodes:
         obstacles_bbox: yolov5/bbox
         tick: dora/timer/millis/100
 </code></pre>
+<blockquote>
+<p>I have replaced link with local files for clarity.</p>
+</blockquote>
 <p>Inputs are prefixed by the node name to be able to separate name conflicts.</p>
 <p>I've added capabilities for the plot to show the bounding box found by the <code>yolov5</code> operator in <code>physicals/plot.py</code>, which is basically mangling with cv2 API.</p>
 <ul>
-<li>To run it:</li>
+<li>To run it with docker:</li>
 </ul>
 <pre><code class="language-bash">./scripts/launch.sh -b -g tutorials/webcam_yolov5.yaml
+</code></pre>
+<ul>
+<li>To run it without docker:</li>
+</ul>
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/tutorials/webcam_yolov5.yaml
 </code></pre>
 
                     </main>

@@ -197,7 +197,7 @@ You will need to have <code>/etc/docker/daemon.json</code> to be exactly:</p>
 <tr><td>Miniconda</td><td>22.11.1</td><td>Check the Dockerfile</td></tr>
 <tr><td>Pytorch</td><td>1.11</td><td>Installation below</td></tr>
 <tr><td>Carla</td><td>0.9.10</td><td>Installation below in <code>scripts/install.sh</code></td></tr>
-<tr><td>dora-rs</td><td>0.1.1</td><td>Installation below in <code>scripts/install.sh</code></td></tr>
+<tr><td>dora-rs</td><td>0.1.1</td><td>Installation below</td></tr>
 </tbody></table>
 <h3 id="environments-2"><a class="header" href="#environments-2">Environments</a></h3>
 <h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
@@ -215,7 +215,7 @@ sudo apt-get -y --fix-missing update &amp;&amp; sudo apt-get install --fix-missi
 ## Installing dependencies
 conda create -n dora3.8 python=3.8 -y
 conda activate dora3.8
-conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch -y
+conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch -y
 pip install -r install_requirements.txt
 pip install -r requirements.txt
 

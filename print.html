@@ -272,7 +272,7 @@ You will need to have <code>/etc/docker/daemon.json</code> to be exactly:</p>
 <tr><td>Miniconda</td><td>22.11.1</td><td>Check the Dockerfile</td></tr>
 <tr><td>Pytorch</td><td>1.11</td><td>Installation below</td></tr>
 <tr><td>Carla</td><td>0.9.10</td><td>Installation below in <code>scripts/install.sh</code></td></tr>
-<tr><td>dora-rs</td><td>0.1.1</td><td>Installation below in <code>scripts/install.sh</code></td></tr>
+<tr><td>dora-rs</td><td>0.1.1</td><td>Installation below</td></tr>
 </tbody></table>
 <h3 id="environments-2"><a class="header" href="#environments-2">Environments</a></h3>
 <h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
@@ -290,7 +290,7 @@ sudo apt-get -y --fix-missing update &amp;&amp; sudo apt-get install --fix-missi
 ## Installing dependencies
 conda create -n dora3.8 python=3.8 -y
 conda activate dora3.8
-conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch -y
+conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch -y
 pip install -r install_requirements.txt
 pip install -r requirements.txt
 
@@ -321,36 +321,8 @@ sudo rm -rf $DORA_DEP_HOME/dependencies
 rm ~/.local/bin/dora*
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h2>
-<p>This first tutorial enables to stream a video stream from a webcam.</p>
+<p>This first tutorial enables to stream a video stream from a webcam from scratch.</p>
 <ol>
-<li>Install <code>dora</code> binaries from GitHub releases</li>
-</ol>
-<p>For linux</p>
-<pre><code class="language-bash">wget https://github.com/dora-rs/dora/releases/download/&lt;version&gt;/dora-&lt;version&gt;-x86_64-Linux.zip
-unzip dora-&lt;version&gt;-x86_64-Linux.zip
-PATH=$PATH:$(pwd):$(pwd)/iceoryx
-dora --help
-</code></pre>
-<details>
-  <summary> For Macos </summary>
-<pre><code class="language-bash">wget https://github.com/dora-rs/dora/releases/download/&lt;version&gt;/dora-&lt;version&gt;-x86_64-macOS.zip
-unzip dora-&lt;version&gt;-x86_64-macOS.zip
-PATH=$PATH:$(pwd):$(pwd)/iceoryx
-dora --help
-</code></pre>
-</details>
-<details>
-  <summary> For Windows </summary>
-<pre><code class="language-bash">wget https://github.com/dora-rs/dora/releases/download/&lt;version&gt;/dora-&lt;version&gt;-x86_64-Windows.zip
-unzip dora-&lt;version&gt;-x86_64-Windows.zip
-PATH=$PATH:$(pwd):$(pwd)/iceoryx
-dora --help
-</code></pre>
-</details>
-<blockquote>
-<p>This is <code>x86_64</code> only for the moment.</p>
-</blockquote>
-<ol start="2">
 <li>Create a new dataflow</li>
 </ol>
 <pre><code class="language-bash">dora new abc_project --lang python
@@ -422,6 +394,11 @@ nodes:
       python: https://raw.githubusercontent.com/dora-rs/dora-drives/main/physicals/plot.py
       inputs:
         image: op_1/image 
+</code></pre>
+<ol start="9">
+<li>Then restart the dataflow</li>
+</ol>
+<pre><code class="language-bash">dora start dataflow.yml
 </code></pre>
 <blockquote>
 <p>Make sure to have a webcam and cv2 install via: <code>pip install opencv-python</code></p>
@@ -518,12 +495,20 @@ nodes:
         obstacles_bbox: yolov5/bbox
         tick: dora/timer/millis/100
 </code></pre>
+<blockquote>
+<p>I have replaced link with local files for clarity.</p>
+</blockquote>
 <p>Inputs are prefixed by the node name to be able to separate name conflicts.</p>
 <p>I've added capabilities for the plot to show the bounding box found by the <code>yolov5</code> operator in <code>physicals/plot.py</code>, which is basically mangling with cv2 API.</p>
 <ul>
-<li>To run it:</li>
+<li>To run it with docker:</li>
 </ul>
 <pre><code class="language-bash">./scripts/launch.sh -b -g tutorials/webcam_yolov5.yaml
+</code></pre>
+<ul>
+<li>To run it without docker:</li>
+</ul>
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/tutorials/webcam_yolov5.yaml
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="full-perception"><a class="header" href="#full-perception">Full perception</a></h1>
 <p>Let's add all the operators currently provided by <code>dora-drives</code> that works on image frame. We currently have implemented:</p>
@@ -594,8 +579,13 @@ nodes:
         obstacles_id: strong_sort/obstacles_id
         tick: dora/timer/millis/100
 </code></pre>
-<p>Run it with</p>
+<p>Run it with docker:</p>
 <pre><code class="language-bash">./scripts/launch.sh -g tutorials/webcam_full.yaml
+</code></pre>
+<ul>
+<li>To run it without docker:</li>
+</ul>
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/tutorials/webcam_full.yaml
 </code></pre>
 <p>Nice 🥳 As you can see, the value of <code>dora</code> comes from the idea that you can compose different algorithm really quickly.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="carla-simulator"><a class="header" href="#carla-simulator">Carla simulator</a></h1>
@@ -666,6 +656,20 @@ nodes:
 <p>We can then tun it with the following command:</p>
 <pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_perception.yaml
 </code></pre>
+<ul>
+<li>To run it without docker:</li>
+</ul>
+<pre><code class="language-bash">## Make sure your environment variable are well set.
+export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt; # Ex: $HOME/Documents
+export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1
+export PYLOT_HOME=$DORA_DEP_HOME
+export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/
+
+## First start the simulator if it is not started
+./scripts/run_simulator.sh &amp;
+
+dora-coordinator --run-dataflow graphs/tutorials/carla_perception.yaml
+</code></pre>
 <blockquote>
 <p>I have removed the traffic sign operator to reduce GPU memory consumption.</p>
 </blockquote>
@@ -726,6 +730,11 @@ nodes:
 </code></pre>
 <p>To test waypoints algorithms, launch:</p>
 <pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_waypoints.yaml
+</code></pre>
+<ul>
+<li>To run it without docker:</li>
+</ul>
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/tutorials/carla_waypoints.yaml
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="control"><a class="header" href="#control">Control</a></h1>
 <p>Car can simplistically be controlled in general using 3 variables: <code>throttle, steering, brake</code>. We're going to focus on those 3 for the moment.</p>
@@ -867,6 +876,11 @@ end
 </code></pre>
 <p>To test it out:</p>
 <pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
+</code></pre>
+<ul>
+<li>To run it without docker:</li>
+</ul>
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/tutorials/carla_full.yaml
 </code></pre>
 <p>😎 We now have a working autonomous car!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="carla-source-node"><a class="header" href="#carla-source-node">Carla Source Node</a></h1>
