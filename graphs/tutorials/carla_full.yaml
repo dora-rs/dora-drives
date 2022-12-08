@@ -14,7 +14,8 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      source: ../../carla/carla_source_node.py
+      source: python
+      args: ../../carla/carla_source_node.py
 
 
   - id: yolov5
@@ -82,7 +83,7 @@ nodes:
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
         obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/100
+        tick: dora/timer/millis/300
         gps_waypoints: carla_gps_op/gps_waypoints
         position: carla_source_node/position
         waypoints: fot_op/waypoints
