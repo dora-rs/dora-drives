@@ -149,32 +149,27 @@
 <li>NVIDIA GPU with CUDA</li>
 </ul>
 <h2 id="from-docker-hub"><a class="header" href="#from-docker-hub">From Docker Hub</a></h2>
-<p>You will only need <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></p>
-<p>To start with docker which is the easiest:</p>
+<h3 id="environments"><a class="header" href="#environments">Environments</a></h3>
+<table><thead><tr><th>Software</th><th>Version</th><th>Installation Guide</th></tr></thead><tbody>
+<tr><td><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></td><td>20.10.18</td><td><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">Installation Guide</a></td></tr>
+</tbody></table>
+<p>To start the docker container:</p>
 <pre><code class="language-bash">docker pull haixuantao/dora-drives
-docker run --gpus all --env-file variables.env --net=host -e DISPLAY -itd --shm-size=256m --name dora haixuantao/dora-drives /home/dora/workspace/dora-drives/scripts/run_simulator.sh
-docker exec -itd dora /home/dora/workspace/dora-drives/bin/iox-roudi 
-sleep 5
-docker  exec -it dora /home/dora/workspace/dora-drives/bin/dora-coordinator run /home/dora/workspace/dora-drives/graphs/yolov5_dataflow.yaml
+./scripts/launch.sh -s -g tutorials/carla_full.yaml
 </code></pre>
 <blockquote>
 <p>This docker image has been built with my setup and it might not work on all machines. In case it doesn't work. Please check the following <code>From Source</code>.</p>
 </blockquote>
-<h2 id="from-source"><a class="header" href="#from-source">From Source</a></h2>
-<p>You will need:</p>
-<ul>
-<li><a href="https://rustup.rs/">Rust</a></li>
-<li><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></li>
-<li>Python v3.8.10</li>
-<li>maturin <code>pip install maturin</code></li>
-<li>Linux</li>
-</ul>
+<h2 id="building-docker-from-source"><a class="header" href="#building-docker-from-source">Building Docker From Source</a></h2>
+<h3 id="environments-1"><a class="header" href="#environments-1">Environments</a></h3>
+<table><thead><tr><th>Software</th><th>Version</th><th>Installation Guide</th></tr></thead><tbody>
+<tr><td><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></td><td>20.10.18</td><td><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">nvidia-docker</a></td></tr>
+<tr><td>Linux</td><td>Ubuntu 20.04.5 LTS</td><td></td></tr>
+</tbody></table>
 <p>For linux, run:</p>
-<pre><code class="language-bash">git clone git@github.com:futurewei-tech/dora.git
-git clone git@github.com:futurewei-tech/dora-drives.git
+<pre><code class="language-bash">git clone git@github.com:futurewei-tech/dora-drives.git
 cd dora-drives
-# Compile with Python 3.8 as default interpreter
-./scripts/launch.sh -b 
+./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
 </code></pre>
 <blockquote>
 <p>This script has been built with my setup and you might need to install further dependencies that I have not listed, and additional configuration for cross-compiling on other OS.</p>
@@ -196,6 +191,60 @@ You will need to have <code>/etc/docker/daemon.json</code> to be exactly:</p>
 <pre><code class="language-bash">sudo systemctl restart docker
 </code></pre>
 </blockquote>
+<h2 id="using-dora-drives-without-docker"><a class="header" href="#using-dora-drives-without-docker">Using <code>dora-drives</code> without Docker</a></h2>
+<table><thead><tr><th>Software</th><th>Version Tested</th><th>Installation Guide</th></tr></thead><tbody>
+<tr><td>Linux</td><td>Ubuntu 20.04.5 LTS</td><td></td></tr>
+<tr><td>Miniconda</td><td>22.11.1</td><td>Check the Dockerfile</td></tr>
+<tr><td>Pytorch</td><td>1.11</td><td>Installation below</td></tr>
+<tr><td>Carla</td><td>0.9.10</td><td>Installation below in <code>scripts/install.sh</code></td></tr>
+<tr><td>dora-rs</td><td>0.1.1</td><td>Installation below in <code>scripts/install.sh</code></td></tr>
+</tbody></table>
+<h3 id="environments-2"><a class="header" href="#environments-2">Environments</a></h3>
+<h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
+<pre><code class="language-bash">export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt; # Ex: $HOME/Documents
+export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1
+export PYLOT_HOME=$DORA_DEP_HOME
+export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/
+
+## Add missing linux dependencies
+sudo apt-get -y update 
+sudo apt-get -y install apt-utils git curl clang wget
+sudo apt-get install -y cmake unzip libpng-dev libgeos-dev python3-opencv
+sudo apt-get -y --fix-missing update &amp;&amp; sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk libgeos-dev vim build-essential libopenblas-dev libssl-dev 
+
+## Installing dependencies
+conda create -n dora3.8 python=3.8 -y
+conda activate dora3.8
+conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch -y
+pip install -r install_requirements.txt
+pip install -r requirements.txt
+
+
+chmod +x ./scripts/*
+./scripts/install.sh
+
+## Installing dora
+
+sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.1/dora-v0.1.1-x86_64-ubuntu-20.04.zip &amp;&amp; sudo unzip dora-v0.1.1-x86_64-ubuntu-20.04.zip -d ~/.local/bin &amp;&amp; sudo mv ~/.local/bin/iceoryx/iox-roudi ~/.local/bin
+</code></pre>
+<h3 id="running-the-graph"><a class="header" href="#running-the-graph">Running the graph</a></h3>
+<pre><code class="language-bash">export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt;
+export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1
+export PYLOT_HOME=$DORA_DEP_HOME
+export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/
+
+## Running the simulation
+./scripts/run_simulator.sh &amp;
+dora up
+
+## Spawn the dataflow
+dora-coordinator --run-dataflow graphs/tutorials/carla_waypoints.yaml
+</code></pre>
+<h3 id="uninstalling-package"><a class="header" href="#uninstalling-package">Uninstalling package</a></h3>
+<pre><code class="language-bash">conda remove --name dora3.8 --all
+sudo rm -rf $DORA_DEP_HOME/dependencies
+rm ~/.local/bin/dora*
+</code></pre>
 
                     </main>
 

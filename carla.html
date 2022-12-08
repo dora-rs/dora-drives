@@ -163,7 +163,8 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
-      source: ../../carla/carla_source_node.py
+      source: python
+      args: ../../carla/carla_source_node.py
       env: 
         SET_AUTOPILOT: true 
 
@@ -204,7 +205,7 @@ nodes:
         traffic_sign_bbox: traffic_sign/bbox
         lanes: yolop/lanes
         drivable_area: yolop/drivable_area
-        tick: dora/timer/millis/100
+        tick: dora/timer/millis/300
         position: carla_source_node/position
 </code></pre>
 <p>We can then tun it with the following command:</p>
