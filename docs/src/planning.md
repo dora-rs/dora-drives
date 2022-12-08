@@ -48,3 +48,8 @@ To test waypoints algorithms, launch:
 ./scripts/launch.sh -b -s -g tutorials/carla_waypoints.yaml
 ```
 
+- To run it without docker:
+
+```bash
+dora-coordinator --run-dataflow graphs/tutorials/carla_waypoints.yaml
+```

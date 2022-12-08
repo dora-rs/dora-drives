@@ -61,4 +61,10 @@ To test it out:
 ./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
 ```
 
+- To run it without docker:
+
+```bash
+dora-coordinator --run-dataflow graphs/tutorials/carla_full.yaml
+```
+
 😎 We now have a working autonomous car!

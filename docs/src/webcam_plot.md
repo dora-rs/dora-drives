@@ -1,44 +1,8 @@
 ## Getting started
 
-This first tutorial enables to stream a video stream from a webcam.
+This first tutorial enables to stream a video stream from a webcam from scratch.
 
-1. Install `dora` binaries from GitHub releases
-
-For linux
-```bash
-wget https://github.com/dora-rs/dora/releases/download/<version>/dora-<version>-x86_64-Linux.zip
-unzip dora-<version>-x86_64-Linux.zip
-PATH=$PATH:$(pwd):$(pwd)/iceoryx
-dora --help
-```
-
-<details>
-  <summary> For Macos </summary>
-
-```bash
-wget https://github.com/dora-rs/dora/releases/download/<version>/dora-<version>-x86_64-macOS.zip
-unzip dora-<version>-x86_64-macOS.zip
-PATH=$PATH:$(pwd):$(pwd)/iceoryx
-dora --help
-```
-
-</details>
-
-<details>
-  <summary> For Windows </summary>
-
-```bash
-wget https://github.com/dora-rs/dora/releases/download/<version>/dora-<version>-x86_64-Windows.zip
-unzip dora-<version>-x86_64-Windows.zip
-PATH=$PATH:$(pwd):$(pwd)/iceoryx
-dora --help
-```
-
-</details>
-
-> This is `x86_64` only for the moment.
-
-2. Create a new dataflow
+1. Create a new dataflow
 
 ```bash
 dora new abc_project --lang python
@@ -112,6 +76,12 @@ nodes:
       python: https://raw.githubusercontent.com/dora-rs/dora-drives/main/physicals/plot.py
       inputs:
         image: op_1/image 
+```
+
+9. Then restart the dataflow
+
+```bash
+dora start dataflow.yml
 ```
 
 > Make sure to have a webcam and cv2 install via: `pip install opencv-python`

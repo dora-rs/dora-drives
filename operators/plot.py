@@ -172,7 +172,7 @@ class Operator:
             )
         else:
             inv_extrinsic_matrix = None
-            print("no position messages.")
+            # print("no position messages.")
 
 
         resized_image = self.camera_frame[:, :, :3]

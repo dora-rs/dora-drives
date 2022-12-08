@@ -14,14 +14,20 @@ To use it, just add it to the graph:
 ```yaml
 {{#include ../../graphs/tutorials/webcam_yolov5.yaml }}
 ```
+> I have replaced link with local files for clarity.
 
 Inputs are prefixed by the node name to be able to separate name conflicts.
 
 I've added capabilities for the plot to show the bounding box found by the `yolov5` operator in `physicals/plot.py`, which is basically mangling with cv2 API.
 
-- To run it:
+- To run it with docker:
 
 ```bash
 ./scripts/launch.sh -b -g tutorials/webcam_yolov5.yaml
 ```
 
+- To run it without docker:
+
+```bash
+dora-coordinator --run-dataflow graphs/tutorials/webcam_yolov5.yaml
+```
