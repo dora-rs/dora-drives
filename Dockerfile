@@ -52,28 +52,41 @@ ENV PATH $CONDA_DIR/bin:$PATH
 RUN sudo chown -R dora:dora /opt/conda
 RUN conda init bash
 
+# Set up ssh access to the container.
+RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
+RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
+# RUN sudo sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
+
 # Setup Rust and install dora.
 RUN mkdir -p /home/dora/workspace
 
-RUN sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk libgeos-dev vim build-essential libopenblas-dev
+RUN sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk libgeos-dev vim build-essential libopenblas-dev libssl-dev 
+RUN sudo apt-get --fix-missing install -y cmake unzip libpng-dev libgeos-dev python3-opencv
+
+# Install all the dependencies.
+ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies
+ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1
+COPY .bashrc  /home/dora/.bashrc
 
 RUN mkdir -p /home/dora/workspace/dora_dependencies
 
 WORKDIR /home/dora/workspace/dora_dependencies
 
-COPY scripts/install_requirements.txt .
+#### COPY scripts/install_requirements.txt .
+RUN conda create -n dora3.8 python=3.8
+RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch
+COPY install_requirements.txt .
+COPY requirements.txt .
+RUN conda activate dora3.8 && pip install -r install_requirements.txt
+RUN conda activate dora3.8 && pip install -r requirements.txt
 
-ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies
-# Install all the Python dependencies.
 COPY scripts/install.sh  /home/dora/workspace/dora_dependencies/install.sh
 
 # Get the Pylot models and code dependencies.
 RUN echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
-RUN sudo apt-get install -y -q
-RUN DEBIAN_FRONTEND=noninteractive sudo chmod +x /home/dora/workspace/dora_dependencies/install.sh
+RUN sudo chmod +x /home/dora/workspace/dora_dependencies/install.sh
 RUN DEBIAN_FRONTEND=noninteractive /home/dora/workspace/dora_dependencies/install.sh
 
-ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1
 # # Clone scenario_runner.
 # RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/scenario_runner.git && cd scenario_runner && git checkout 0.9.10
 # # Install scenario_runner's dependencies.
@@ -82,51 +95,35 @@ ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.
 # RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/leaderboard.git && cd leaderboard && git checkout stable
 # RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
 
-RUN echo "if [ -f ~/.bashrc ]; then . ~/.bashrc ; fi" >> ~/.bash_profile
-# Set up ssh access to the container.
-RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
-RUN sudo sed -i 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
-
-WORKDIR /home/dora/workspace/dora_dependencies
-
-WORKDIR /home/dora/workspace/dora-drives
-
+## Install Telegrah
 # RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_amd64.tar.gz
-
 # RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
 
-RUN conda activate dora3.8 && pip install --upgrade pip
-RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
-RUN conda activate dora3.8 && python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA seems to not be available on build, Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626'" 
 
-RUN conda activate dora3.8 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
-RUN sudo wget https://dl.influxdata.com/telegraf/releases/telegraf-1.22.4_linux_amd64.tar.gz
-
-RUN sudo tar xf telegraf-1.22.4_linux_amd64.tar.gz
-
-COPY requirements.txt requirements.txt 
-RUN conda activate dora3.8 && python3 -m pip install -r requirements.txt
-
-RUN sudo apt-get -yq install libssl-dev 
+#### COPY requirements.txt requirements.txt 
+#### RUN conda activate dora3.8 && python3 -m pip install -r requirements.txt
 
 RUN sudo chown -R dora:dora .
 
 # Cache model weight
 # RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
+#### RUN conda activate dora3.8 && pip install --upgrade pip
+#### RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
+RUN conda activate dora3.8 && python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA seems to not be available on build, Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626'" 
+# RUN conda activate dora3.8 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
 RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
-RUN cd /home/dora/workspace/dora-drives && conda activate dora3.8 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
+RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
 RUN conda activate dora3.8 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
 RUN conda activate dora3.8 && python3 -c "import yolov7_tt100k"
 
 RUN cd /bin && sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.1/dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo unzip dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo mv iceoryx/iox-roudi .
-RUN conda activate dora3.8 && python3 -m pip install dora-rs
+#### RUN conda activate dora3.8 && python3 -m pip install dora-rs
 
+WORKDIR /home/dora/workspace/dora-drives
 
 COPY . .
 
 RUN sudo chown -R dora:dora .
 
-COPY .bashrc  /home/dora/.bashrc
 
-RUN sudo chmod +x /home/dora/workspace/dora-drives/carla/carla_source_node.py
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*

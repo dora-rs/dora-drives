@@ -11,9 +11,16 @@ the graph will look as follows:
 {{#include ../../graphs/tutorials/webcam_full.yaml}}
 ```
 
-Run it with
+Run it with docker:
+
 ```bash
 ./scripts/launch.sh -g tutorials/webcam_full.yaml
+```
+
+- To run it without docker:
+
+```bash
+dora-coordinator --run-dataflow graphs/tutorials/webcam_full.yaml
 ```
 
 Nice 🥳 As you can see, the value of `dora` comes from the idea that you can compose different algorithm really quickly.
