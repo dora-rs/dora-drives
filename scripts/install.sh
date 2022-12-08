@@ -7,19 +7,15 @@ else
     echo "INFO: \$DORA_DEP_HOME is set to ${DORA_DEP_HOME}"
 fi
 
-sudo apt-get -y update
-sudo apt-get install -y git wget cmake unzip clang libpng-dev libgeos-dev
-
 # Install opencv separately because pip3 install doesn't install all libraries
 # opencv requires.
 
-source activate base
-conda create -n dora3.8 python=3.8
-conda activate dora3.8
-pip install -r install_requirements.txt
+#### . activate base
+#### conda create -n dora3.8 python=3.8
+#### conda activate dora3.8
+#### pip install -r install_requirements.txt
 
-sudo apt-get install -y python3-opencv
-python3 -m pip install user gdown
+
 
 ###############################################################################
 # Get models & code bases we depend on
