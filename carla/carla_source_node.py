@@ -172,7 +172,6 @@ def main():
         return {}
 
     vec_transform = ego_vehicle.get_transform()
-    velocity_vector = ego_vehicle.get_velocity()
     x = vec_transform.location.x
     y = vec_transform.location.y
     z = vec_transform.location.z

@@ -12,7 +12,6 @@ from scipy.spatial.transform import Rotation as R
 from numpy import linalg as LA
 
 MIN_PID_WAYPOINT_DISTANCE = 5
-STEER_GAIN = 0.7
 COAST_FACTOR = 1.75
 pid_p = 1.0
 pid_d = 0.0
@@ -34,20 +33,6 @@ def get_angle(left, right) -> float:
     elif angle < -math.pi:
         angle += 2 * math.pi
     return angle
-
-
-def radians_to_steer(rad: float, steer_gain: float):
-    """Converts radians to steer input.
-
-    Returns:
-        :obj:`float`: Between [-1.0, 1.0].
-    """
-    steer = steer_gain * rad
-    if steer > 0:
-        steer = min(steer, 1)
-    else:
-        steer = max(steer, -1)
-    return steer
 
 
 def compute_throttle_and_brake(pid, current_speed: float, target_speed: float):
@@ -231,11 +216,9 @@ class Operator:
             pid, LA.norm(self.current_speed), target_speed
         )
 
-        steer = radians_to_steer(target_angle, STEER_GAIN)
-
         send_output(
             "control",
-            np.array([throttle, steer, brake]).tobytes(),
+            np.array([throttle, target_angle, brake]).tobytes(),
             self.metadata,
         )
         return DoraStatus.CONTINUE
