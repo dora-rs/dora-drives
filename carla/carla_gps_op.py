@@ -40,33 +40,40 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
 
-        self.position = np.frombuffer(dora_input["data"], np.float32)
+        if "position" == dora_input["id"]:
+            self.position = np.frombuffer(dora_input["data"], np.float32)
+            return DoraStatus.CONTINUE
+        elif "tick" == dora_input["id"] and not isinstance(self.position, list):
 
-        if len(self.waypoints) != 0:
-            (index, _) = closest_vertex(
-                self.waypoints,
-                np.array([self.position[:2]]),
-            )
+            if len(self.waypoints) != 0:
+                (index, _) = closest_vertex(
+                    self.waypoints,
+                    np.array([self.position[:2]]),
+                )
 
-            self.waypoints = self.waypoints[index : index + NUM_WAYPOINTS_AHEAD]
-            self.target_speeds = self.target_speeds[
-                index : index + NUM_WAYPOINTS_AHEAD
-            ]
+                self.waypoints = self.waypoints[
+                    index : index + NUM_WAYPOINTS_AHEAD
+                ]
+                self.target_speeds = self.target_speeds[
+                    index : index + NUM_WAYPOINTS_AHEAD
+                ]
 
-        if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
+            if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
 
-            waypoints = self.hd_map.compute_waypoints(
-                self.position[:3], self._goal_location
-            )[:NUM_WAYPOINTS_AHEAD]
-            self.waypoints = waypoints
-            self.target_speeds = np.array([5.0] * len(waypoints))
+                waypoints = self.hd_map.compute_waypoints(
+                    self.position[:3], self._goal_location
+                )[:NUM_WAYPOINTS_AHEAD]
+                self.waypoints = waypoints
+                self.target_speeds = np.array([5.0] * len(waypoints))
 
-        waypoints_array = np.concatenate(
-            [self.waypoints.T, self.target_speeds.reshape(1, -1)]
-        ).T.astype(np.float32)
+            waypoints_array = np.concatenate(
+                [self.waypoints.T, self.target_speeds.reshape(1, -1)]
+            ).T.astype(np.float32)
 
-        send_output(
-            "gps_waypoints", waypoints_array.tobytes(), dora_input["metadata"]
-        )  # World coordinate
+            send_output(
+                "gps_waypoints",
+                waypoints_array.tobytes(),
+                dora_input["metadata"],
+            )  # World coordinate
 
         return DoraStatus.CONTINUE

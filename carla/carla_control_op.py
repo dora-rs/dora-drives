@@ -8,10 +8,25 @@ from carla import Client, VehicleControl, command
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
+STEER_GAIN = 0.7
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)
 
 mutex = threading.Lock()
+
+
+def radians_to_steer(rad: float, steer_gain: float):
+    """Converts radians to steer input.
+
+    Returns:
+        :obj:`float`: Between [-1.0, 1.0].
+    """
+    steer = steer_gain * rad
+    if steer > 0:
+        steer = min(steer, 1)
+    else:
+        steer = max(steer, -1)
+    return steer
 
 
 class Operator:
@@ -46,10 +61,11 @@ class Operator:
 
         control = np.frombuffer(dora_input["data"])
 
+        steer = radians_to_steer(control[2], STEER_GAIN)
         vec_control = VehicleControl(
             throttle=control[0],
             steer=control[1],
-            brake=control[2],
+            brake=steer,
             hand_brake=False,
             reverse=False,
         )

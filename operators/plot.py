@@ -46,6 +46,8 @@ fontColor = (255, 0, 255)
 thickness = 2
 lineType = 2
 
+latency = time.time()
+
 
 class Operator:
     """
@@ -78,7 +80,7 @@ class Operator:
             waypoints = waypoints.reshape((-1, 3))
             waypoints = waypoints[:, :2]
             waypoints = np.hstack(
-                (waypoints, -0.4 + np.zeros((waypoints.shape[0], 1)))
+                (waypoints, -0.5 + np.zeros((waypoints.shape[0], 1)))
             )
             self.waypoints = waypoints
 
@@ -173,7 +175,6 @@ class Operator:
         else:
             inv_extrinsic_matrix = None
             # print("no position messages.")
-
 
         resized_image = self.camera_frame[:, :, :3]
         resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
@@ -338,7 +339,7 @@ class Operator:
         if len(self.control) != 0:
             cv2.putText(
                 resized_image,
-                f"""ctl: {np.degrees(self.control[0]):.2f} """,
+                f"""throttle: {self.control[0]:.2f}, brake: {self.control[2]:.2f}, steering: {np.degrees(self.control[1]):.2f} """,
                 (10, 55),
                 font,
                 fontScale,
@@ -347,6 +348,18 @@ class Operator:
                 lineType,
             )
 
+        global latency
+        cv2.putText(
+            resized_image,
+            f"""latency: {(time.time() - latency) * 1000:.2f} ms""",
+            (10, 80),
+            font,
+            fontScale,
+            fontColor,
+            thickness,
+            lineType,
+        )
+        latency = time.time()
         writer.write(resized_image)
         cv2.imshow("image", resized_image)
         cv2.waitKey(1)
