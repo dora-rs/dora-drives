@@ -1,0 +1,91 @@
+communication:
+  iceoryx:
+    app_name_prefix: dora-iceoryx-example
+    
+nodes:
+  - id: dora_agent
+    custom:
+      inputs:
+        control: pid_control_op/control
+      outputs:
+        - position
+        - image
+      source: python
+      args: >
+        /home/peter/Documents/CONTRIB/dependencies/leaderboard/leaderboard/leaderboard_evaluator.py 
+        --routes /home/peter/Documents/CONTRIB/dependencies/leaderboard/data/routes_devtest.xml 
+        -a /home/peter/Documents/CONTRIB/dora-drives/carla/dora_agent.py
+
+
+  #- id: yolov5
+    #operator: 
+      #outputs:
+        #- bbox
+      #inputs:
+        #image: carla_source_node/image
+      #python: ../../operators/yolov5_op.py
+  
+  #- id: obstacle_location_op
+    #operator: 
+      #outputs:
+        #- obstacles
+      #inputs:
+        ## depth_frame: carla_source_node/depth_frame
+        #lidar_pc: carla_source_node/lidar_pc
+        #obstacles_bbox: yolov5/bbox
+        #position: carla_source_node/position
+      #python: ../../operators/obstacle_location_op.py
+      
+  - id: carla_gps_op
+    operator:
+      python: ../../carla/carla_gps_op.py
+      outputs:
+        - gps_waypoints
+      inputs:
+        position: carla_source_node/position
+        tick: dora/timer/millis/5000
+
+  #- id: fot_op
+    #operator:
+      #python: ../../operators/fot_op.py
+      #outputs:
+        #- waypoints
+      #inputs:
+        #position: carla_source_node/position
+        #obstacles: obstacle_location_op/obstacles
+        #gps_waypoints: carla_gps_op/gps_waypoints
+
+  - id: pid_control_op
+    operator:
+      python: ../../operators/pid_control_op.py
+      outputs:
+        - control
+      inputs:
+        position: carla_source_node/position
+        waypoints: carla_gps_op/gps_waypoints
+
+  - id: carla_control_op
+    operator:
+      python: ../../carla/carla_control_op.py
+      outputs:
+        - control_status
+      inputs:
+        control: pid_control_op/control
+        vehicle_id: carla_source_node/vehicle_id
+
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
+        image: carla_source_node/image
+        obstacles_bbox: yolov5/bbox
+        traffic_sign_bbox: traffic_sign/bbox
+        lanes: yolop/lanes
+        drivable_area: yolop/drivable_area
+        obstacles_id: strong_sort/obstacles_id
+        tick: dora/timer/millis/50
+        gps_waypoints: carla_gps_op/gps_waypoints
+        position: carla_source_node/position
+        waypoints: fot_op/waypoints
+        control: pid_control_op/control
+      #  lidar_pc: carla_source_node/lidar_pc
