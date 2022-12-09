@@ -73,12 +73,12 @@ RUN mkdir -p /home/dora/workspace/dora_dependencies
 WORKDIR /home/dora/workspace/dora_dependencies
 
 #### COPY scripts/install_requirements.txt .
-RUN conda create -n dora3.8 python=3.8
-RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch
+RUN conda create -n dora3.7 python=3.7
+RUN conda activate dora3.7 && conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch
 COPY install_requirements.txt .
 COPY requirements.txt .
-RUN conda activate dora3.8 && pip install -r install_requirements.txt
-RUN conda activate dora3.8 && pip install -r requirements.txt
+RUN conda activate dora3.7 && pip install -r install_requirements.txt
+RUN conda activate dora3.7 && pip install -r requirements.txt
 
 COPY scripts/install.sh  /home/dora/workspace/dora_dependencies/install.sh
 
@@ -92,7 +92,7 @@ RUN DEBIAN_FRONTEND=noninteractive /home/dora/workspace/dora_dependencies/instal
 # # Install scenario_runner's dependencies.
 # RUN python3 -m pip install -r /home/dora/workspace/scenario_runner/requirements.txt
 # # Clone leaderboard.
-# RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/leaderboard.git && cd leaderboard && git checkout stable
+# RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/leaderboard.git && cd leaderboard && git checkout leaderboard-2.0
 # RUN python3 -m pip install -r /home/dora/workspace/leaderboard/requirements.txt
 
 ## Install Telegrah
@@ -101,23 +101,23 @@ RUN DEBIAN_FRONTEND=noninteractive /home/dora/workspace/dora_dependencies/instal
 
 
 #### COPY requirements.txt requirements.txt 
-#### RUN conda activate dora3.8 && python3 -m pip install -r requirements.txt
+#### RUN conda activate dora3.7 && python3 -m pip install -r requirements.txt
 
 RUN sudo chown -R dora:dora .
 
 # Cache model weight
-# RUN conda activate dora3.8 && python3 -c "from imfnet import get_model; get_model()"
-#### RUN conda activate dora3.8 && pip install --upgrade pip
-#### RUN conda activate dora3.8 && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
-RUN conda activate dora3.8 && python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA seems to not be available on build, Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626'" 
-# RUN conda activate dora3.8 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
-RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
-RUN conda activate dora3.8 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
-RUN conda activate dora3.8 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
-RUN conda activate dora3.8 && python3 -c "import yolov7_tt100k"
+# RUN conda activate dora3.7 && python3 -c "from imfnet import get_model; get_model()"
+#### RUN conda activate dora3.7 && pip install --upgrade pip
+#### RUN conda activate dora3.7 && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
+RUN conda activate dora3.7 && python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA seems to not be available on build, Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626'" 
+# RUN conda activate dora3.7 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
+RUN conda activate dora3.7 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
+RUN conda activate dora3.7 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
+RUN conda activate dora3.7 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
+RUN conda activate dora3.7 && python3 -c "import yolov7_tt100k"
 
 RUN cd /bin && sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.1/dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo unzip dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo mv iceoryx/iox-roudi .
-#### RUN conda activate dora3.8 && python3 -m pip install dora-rs
+#### RUN conda activate dora3.7 && python3 -m pip install dora-rs
 
 WORKDIR /home/dora/workspace/dora-drives
 

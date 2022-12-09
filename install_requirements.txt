@@ -2,7 +2,7 @@ influxdb-client
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-exporter-jaeger-thrift
-scikit-learn==1.1
+scikit-learn==1.0.2
 pytest
 absl-py
 gdown
@@ -11,7 +11,7 @@ cvxpy
 erdos>=0.3.1
 lapsolver
 motmetrics
-numpy>1.22
+numpy==1.21.6
 open3d
 opencv-python>=4.1.0.25
 opencv-contrib-python>=4.1.0.25

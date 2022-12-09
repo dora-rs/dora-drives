@@ -9,7 +9,6 @@ import numpy as np
 
 # Import Planner from CARLA codebase
 from agents.navigation.global_route_planner import GlobalRoutePlanner
-from agents.navigation.global_route_planner_dao import GlobalRoutePlannerDAO
 from carla import LaneType, Location
 
 
@@ -29,9 +28,10 @@ class HDMap(object):
         self._map = simulator_map
         # Setup global planner.
         self._grp = GlobalRoutePlanner(
-            GlobalRoutePlannerDAO(self._map, 1.0)  # Distance between waypoints
+            self._map, 1.0  # Distance between waypoints
         )
-        self._grp.setup()
+
+    # self._grp.setup()
 
     def is_intersection(self, location: np.array) -> bool:
         """Checks if a location is in an intersection.

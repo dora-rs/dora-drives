@@ -66,7 +66,9 @@ You will need to have `/etc/docker/daemon.json` to be exactly:
 |Linux|Ubuntu 20.04.5 LTS||
 |Miniconda|22.11.1|Check the Dockerfile|
 |Pytorch|1.11|Installation below|
-|Carla|0.9.10|Installation below in `scripts/install.sh`|
+|Carla|Carla Leaderboard|Installation below in `scripts/install.sh`. Version: [Leaderboard Version](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/Leaderboard/CARLA_Leaderboard_20.tar.gz)|
+|NVIDIA Driver|515.86.01||
+|CUDA|11.7||
 |dora-rs|0.1.1|Installation below|
 
 
@@ -76,9 +78,9 @@ You will need to have `/etc/docker/daemon.json` to be exactly:
 
 ```bash
 export DORA_DEP_HOME=<PATH TO A PARENT FOLDER> # Ex: $HOME/Documents
-export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1
+export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.13
 export PYLOT_HOME=$DORA_DEP_HOME
-export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/
+export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.13/PythonAPI/carla:$DORA_DEP_HOME/dependencies/leaderboard:$DORA_DEP_HOME/dependencies/scenario_runner
 
 ## Add missing linux dependencies
 sudo apt-get -y update 
@@ -87,8 +89,8 @@ sudo apt-get install -y cmake unzip libpng-dev libgeos-dev python3-opencv
 sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk libgeos-dev vim build-essential libopenblas-dev libssl-dev 
 
 ## Installing dependencies
-conda create -n dora3.8 python=3.8 -y
-conda activate dora3.8
+conda create -n dora3.7 python=3.7 -y
+conda activate dora3.7
 conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch -y
 pip install -r install_requirements.txt
 pip install -r requirements.txt
@@ -105,9 +107,9 @@ sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.1/dora-v0.1.1-x
 ### Running the graph
 ```bash
 export DORA_DEP_HOME=<PATH TO A PARENT FOLDER>
-export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1
+export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.13
 export PYLOT_HOME=$DORA_DEP_HOME
-export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/
+export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.13/PythonAPI/carla:$DORA_DEP_HOME/dependencies/leaderboard:$DORA_DEP_HOME/dependencies/scenario_runner
 
 ## Running the simulation
 chmod +x ./scripts/run_simulator.sh
@@ -122,7 +124,7 @@ dora-coordinator --run-dataflow graphs/tutorials/carla_waypoints.yaml
 ### Uninstalling package
 
 ```bash
-conda remove --name dora3.8 --all
+conda remove --name dora3.7 --all
 sudo rm -rf $DORA_DEP_HOME/dependencies
 rm ~/.local/bin/dora*
 ```
