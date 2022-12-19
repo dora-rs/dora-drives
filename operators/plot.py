@@ -7,7 +7,6 @@ import os
 import sys
 
 sys.path.append(os.getcwd())
-from enum import Enum
 from scipy.spatial.transform import Rotation as R
 from dora_utils import (
     LABELS,
@@ -17,7 +16,6 @@ from dora_utils import (
     get_projection_matrix,
     location_to_camera_view,
     local_points_to_camera_view,
-    to_world_coordinate,
 )
 
 CAMERA_WIDTH = 800
@@ -78,7 +76,9 @@ class Operator:
         if "waypoints" == dora_input["id"]:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))
+            print(waypoints[:3])
             waypoints = waypoints[:, :2]
+            # Adding z axis for plot
             waypoints = np.hstack(
                 (waypoints, -0.5 + np.zeros((waypoints.shape[0], 1)))
             )
@@ -88,13 +88,14 @@ class Operator:
             gps_waypoints = np.frombuffer(dora_input["data"], np.float32)
             gps_waypoints = gps_waypoints.reshape((-1, 3))
             gps_waypoints = gps_waypoints[:, :2]
+            # Adding z axis for plot
             gps_waypoints = np.hstack(
                 (gps_waypoints, -0.5 + np.zeros((gps_waypoints.shape[0], 1)))
             )
             self.gps_waypoints = gps_waypoints
 
         elif "control" == dora_input["id"]:
-            self.control = np.frombuffer(dora_input["data"])
+            self.control = np.frombuffer(dora_input["data"], np.float16)
 
         elif "obstacles_bbox" == dora_input["id"]:
             self.obstacles_bbox = np.frombuffer(
@@ -184,7 +185,7 @@ class Operator:
             waypoints = location_to_camera_view(
                 self.waypoints, INTRINSIC_MATRIX, inv_extrinsic_matrix
             ).T
-
+            waypoints = np.clip(waypoints, 0, 1_000_000)
             for waypoint in waypoints:
                 if np.isnan(waypoint).any():
                     break
@@ -194,8 +195,8 @@ class Operator:
                     (int(waypoint[0]), int(waypoint[1])),
                     3,
                     (
-                        int(max(255 - waypoint[2] * 100, 0)),
-                        int(min(waypoint[2], 255)),
+                        int(np.clip(255 - waypoint[2] * 100, 0, 255)),
+                        int(np.clip(waypoint[2], 0, 255)),
                         255,
                     ),
                     -1,
@@ -215,8 +216,8 @@ class Operator:
                     (int(waypoint[0]), int(waypoint[1])),
                     3,
                     (
-                        int(max(255 - waypoint[2] * 100, 0)),
-                        int(min(waypoint[2], 255)),
+                        int(np.clip(255 - waypoint[2] * 100, 0, 255)),
+                        int(np.clip(waypoint[2], 0, 255)),
                         122,
                     ),
                     -1,
@@ -349,18 +350,18 @@ class Operator:
             )
 
         global latency
-        cv2.putText(
-            resized_image,
-            f"""latency: {(time.time() - latency) * 1000:.2f} ms""",
-            (10, 80),
-            font,
-            fontScale,
-            fontColor,
-            thickness,
-            lineType,
-        )
-        latency = time.time()
+        # cv2.putText(
+        # resized_image,
+        # f"""latency: {(time.time() - latency) * 1000:.2f} ms""",
+        # (10, 80),
+        # font,
+        # fontScale,
+        # fontColor,
+        # thickness,
+        # lineType,
+        # )
         writer.write(resized_image)
         cv2.imshow("image", resized_image)
         cv2.waitKey(1)
+        latency = time.time()
         return DoraStatus.CONTINUE

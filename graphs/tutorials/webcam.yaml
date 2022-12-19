@@ -7,7 +7,7 @@ nodes:
     operator:
       python: ../../operators/webcam_op.py
       inputs:
-        tick: dora/timer/millis/100
+        tick: dora/timer/millis/50
       outputs:
         - image
 

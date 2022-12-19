@@ -10,13 +10,9 @@ import os
 
 
 # Planning general
-TARGET_SPEED = 5
+TARGET_SPEED = 20
 NUM_WAYPOINTS_AHEAD = 10
-GOAL_WAYPOINTS = os.environ.get("GOAL_WAYPOINTS")
-if GOAL_WAYPOINTS:
-    GOAL_LOCATION = np.fromstring(GOAL_WAYPOINTS, dtype=float, sep=",")
-else:
-    GOAL_LOCATION = np.array([[0, 0], [0, 1.5], [3, 2.5]])
+
 OBSTACLE_CLEARANCE = 10
 OBSTACLE_RADIUS = 0.5
 
@@ -76,7 +72,7 @@ class Operator:
             "dt": 0.2,
             "maxt": 5.0,
             "mint": 2.0,
-            "d_t_s": 0.5,
+            "d_t_s": 5,
             "n_s_sample": 2.0,
             "obstacle_clearance": 0.1,
             "kd": 1.0,
@@ -102,6 +98,7 @@ class Operator:
 
         if dora_input["id"] == "position":
             self.position = np.frombuffer(dora_input["data"], np.float32)
+            return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "obstacles":
             obstacles = np.frombuffer(
@@ -110,11 +107,10 @@ class Operator:
             self.obstacles = obstacles
             return DoraStatus.CONTINUE
 
-        if "gps_waypoints" == dora_input["id"]:
+        elif "gps_waypoints" == dora_input["id"]:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))[:, :2]
             self.gps_waypoints = waypoints
-            return DoraStatus.CONTINUE
 
         if len(self.gps_waypoints) == 0:
             print("No waypoints")
@@ -135,7 +131,7 @@ class Operator:
             "ps": 0,
             "target_speed": self.conds["target_speed"],
             "pos": self.position[:2],
-            "vel": 0.5 * np.array([np.cos(yaw), np.sin(yaw)]),
+            "vel": 20 * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
             "obs": gps_obstacles,
         }
@@ -157,8 +153,10 @@ class Operator:
         ) = fot_wrapper.run_fot(initial_conditions, self.hyperparameters)
         if not success:
             print(f"fot failed. stopping with {initial_conditions}.")
-            send_output("waypoints", np.array([]).tobytes())
-            return DoraStatus.STOP
+            send_output(
+                "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
+            )
+            return DoraStatus.CONTINUE
 
         self.waypoints = np.concatenate([result_x, result_y]).reshape((2, -1)).T
 

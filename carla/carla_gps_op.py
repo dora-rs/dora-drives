@@ -5,7 +5,7 @@ import numpy as np
 
 from _dora_utils import DoraStatus, closest_vertex
 from _hd_map import HDMap
-from carla import Client
+from carla import Client, Map
 
 mutex = threading.Lock()
 
@@ -27,12 +27,15 @@ class Operator:
         self._goal_location = GOAL_LOCATION
         client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
         client.set_timeout(30.0)  # seconds
+        self.client = client
         carla_world = client.get_world()
+        self.carla_world_id = carla_world.id
         hd_map = HDMap(carla_world.get_map())
         self.position = []
         self.hd_map = hd_map
         self.waypoints = []
         self.target_speeds = []
+        self.objective_waypoints = []
 
     def on_input(
         self,
@@ -42,8 +45,32 @@ class Operator:
 
         if "position" == dora_input["id"]:
             self.position = np.frombuffer(dora_input["data"], np.float32)
+
             return DoraStatus.CONTINUE
-        elif "tick" == dora_input["id"] and not isinstance(self.position, list):
+
+        # if "opendrive" == dora_input["id"]:
+        # opendrive = dora_input["data"].decode()
+        # self.hd_map = HDMap(Map("map", opendrive))
+
+        if "objective_waypoints" == dora_input["id"]:
+            self.objective_waypoints = np.frombuffer(
+                dora_input["data"], np.float32
+            ).reshape((-1, 3))
+            # carla_world = self.client.get_world()
+            # if self.carla_world_id != carla_world.id:
+            # hd_map = HDMap(carla_world.get_map())
+            # self.hd_map = hd_map
+            # self.waypoints = []
+            # self.target_speeds = []
+            (index, _) = closest_vertex(
+                self.objective_waypoints,
+                np.array([self.position[:3]]),
+            )
+
+            self.objective_waypoints = self.objective_waypoints[
+                index : index + NUM_WAYPOINTS_AHEAD
+            ]
+            self._goal_location = self.objective_waypoints[0]
 
             if len(self.waypoints) != 0:
                 (index, _) = closest_vertex(

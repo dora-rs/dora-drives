@@ -1,9 +1,11 @@
 from enum import Enum
 
 import carla
+from carla import Client
 
 from leaderboard.autoagents.autonomous_agent import AutonomousAgent
 from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
+from srunner.tools.route_manipulation import _get_latlon_ref
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
@@ -16,24 +18,17 @@ import xml.etree.ElementTree as ET
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
 STEER_GAIN = 0.7
+CARLA_SIMULATOR_HOST = "localhost"
+CARLA_SIMULATOR_PORT = "2000"
+
+client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
+client.set_timeout(30.0)  # seconds
+world = client.get_world()
 
 node = Node()
 
 
-def _get_latlon_ref(world):
-    """
-    Convert from waypoints world coordinates to CARLA GPS coordinates
-    :return: tuple with lat and lon coordinates
-    """
-
-    # default reference
-    lat_ref = 42.0
-    lon_ref = 2.0
-
-    return lat_ref, lon_ref
-
-
-lat_ref, lon_ref = _get_latlon_ref(CarlaDataProvider.get_world())
+lat_ref, lon_ref = _get_latlon_ref(world)
 
 
 def from_gps_to_world_coordinate(lat, lon):
@@ -55,8 +50,8 @@ def from_gps_to_world_coordinate(lat, lon):
     my = math.log(math.tan((lat + 90.0) * math.pi / 360.0)) * (
         EARTH_RADIUS_EQUA * scale
     )
-    x = -(mx - mx_initial)
-    y = my - my_initial
+    x = mx - mx_initial
+    y = -(my - my_initial)
 
     return [x, y]
 
@@ -75,6 +70,10 @@ def radians_to_steer(rad: float, steer_gain: float):
     return steer
 
 
+def get_entry_point():
+    return "DoraAgent"
+
+
 class Track(Enum):
 
     """
@@ -85,16 +84,10 @@ class Track(Enum):
     MAP = "MAP"
 
 
-def get_entry_point():
-    return "DoraAgent"
-
-
 class DoraAgent(AutonomousAgent):
     # def setup(self, path_to_conf_file):
     # """
-    # Initialize everything needed by your agent and set the track attribute to the right type:
-    # Track.SENSORS : CAMERAS, LIDAR, RADAR, GPS and IMU sensors are allowed
-    # Track.MAP : OpenDRIVE map is also allowed
+    # Setup the agent parameters
     # """
     # self.track = Track.MAP
 
@@ -173,7 +166,7 @@ class DoraAgent(AutonomousAgent):
         ### Position preprocessing
         [lat, lon, z] = input_data["GPS"][1]
         [x, y] = from_gps_to_world_coordinate(lat, lon)
-        yaw = input_data["IMU"][1][-1]
+        yaw = input_data["IMU"][1][-1] - np.pi / 2
         roll = 0
         pitch = 0
         [[qx, qy, qz, qw]] = R.from_euler(
@@ -194,33 +187,42 @@ class DoraAgent(AutonomousAgent):
         point_cloud = point_cloud[:, :3]
         lidar_pc = point_cloud.tobytes()
 
+        ### Opendrive processing
+        # opendrive = input_data["OpenDRIVE"][1]
+        # node.send_output("opendrive", opendrive.encode())
+
         ### Waypoints preprocessing
-        waypoints_xy = np.array(
+        waypoints_xyz = np.array(
             [
-                [transform[0].location.x, transform[0].location.y]
+                [
+                    transform[0].location.x,
+                    transform[0].location.y,
+                    transform[0].location.z,
+                ]
                 for transform in self._global_plan_world_coord
             ]
         )
-        waypoints_xyv = np.hstack(
-            (waypoints_xy, 0.5 + np.zeros((waypoints_xy.shape[0], 1)))
-        ).astype(np.float32)
+        # waypoints_xyv = np.hstack(
+        # (waypoints_xy, 0.5 + np.zeros((waypoints_xy.shape[0], 1)))
+        # ).astype(np.float32)
 
         ## Sending data into the dataflow
         node.send_output("position", position.tobytes())
         node.send_output("image", camera_frame)
         node.send_output("lidar_pc", lidar_pc)
-        node.send_output("gps_waypoints", waypoints_xyv.tobytes())
+        node.send_output("objective_waypoints", waypoints_xyz.tobytes())
 
         ## Receiving back control information
         input_id, value, metadata = node.next()
 
-        control = np.frombuffer(value)
+        [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
 
-        steer = radians_to_steer(control[2], STEER_GAIN)
-        vec_control = carla.VehicleControl()
-        vec_control.steer = steer
-        vec_control.throttle = control[0]
-        vec_control.brake = control[1]
-        vec_control.hand_brake = False
+        steer = radians_to_steer(target_angle, STEER_GAIN)
+        vec_control = carla.VehicleControl(
+            steer=float(steer),
+            throttle=float(throttle),
+            brake=float(brake),
+            hand_brake=False,
+        )
 
         return vec_control
