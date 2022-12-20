@@ -95,12 +95,12 @@ class Operator:
                         & (self.point_cloud[:, 1] > min_y)
                         & (self.point_cloud[:, 1] < max_y)
                     )
-                ][:, 2]
+                ]
                 if len(z_points) > 0:
-                    min_z = np.percentile(z_points, 5)
-                    obstacles_with_location.append(
-                        [(min_x + max_x) / 2, (min_y + max_y) / 2, min_z]
-                    )
+                    closest_point = z_points[
+                        z_points[:, 2].argsort()[int(len(z_points) / 4)]
+                    ]
+                    obstacles_with_location.append(closest_point)
             if len(obstacles_with_location) > 0:
                 obstacles_with_location = np.array(obstacles_with_location)
                 obstacles_with_location = np.dot(
