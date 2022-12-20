@@ -4,20 +4,28 @@ import numpy as np
 from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
     fot_wrapper,
 )
-from dora_utils import DoraStatus, closest_vertex, pairwise_distances
+from dora_utils import DoraStatus, closest_vertex, pairwise_distances, LABELS
 from scipy.spatial.transform import Rotation as R
 import os
 
 
 # Planning general
-TARGET_SPEED = 20
+TARGET_SPEED = 10
 NUM_WAYPOINTS_AHEAD = 10
 
 OBSTACLE_CLEARANCE = 10
-OBSTACLE_RADIUS = 0.5
+OBSTACLE_RADIUS = 3
+OBSTACLE_RADIUS_TANGENT = 3
+MAX_CURBATURE = np.pi / 4
 
 
-def get_obstacle_list(obstacle_predictions, waypoints):
+def get_obstacle_list(position, obstacle_predictions, waypoints):
+
+    [x_ego, y_ego, z, rx, ry, rz, rw] = position
+    [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
+        "xyz", degrees=False
+    )
+
     if len(obstacle_predictions) == 0 or len(waypoints) == 0:
         return np.empty((0, 4))
     obstacle_list = []
@@ -27,14 +35,21 @@ def get_obstacle_list(obstacle_predictions, waypoints):
     )
     for distance, prediction in zip(distances, obstacle_predictions):
         # Use all prediction times as potential obstacles.
-        if distance < OBSTACLE_CLEARANCE:
-            [x, y, _, _confidence, _label] = prediction
+        [x, y, _, _confidence, _label] = prediction
+        angle = np.arctan2(y - y_ego, x - x_ego)
+        diff_angle = (yaw - angle) % 2 * np.pi
+
+        if distance < OBSTACLE_CLEARANCE and diff_angle < MAX_CURBATURE:
             obstacle_size = np.array(
                 [
-                    x,
-                    y,
-                    x + OBSTACLE_RADIUS,
-                    y + OBSTACLE_RADIUS,
+                    x - OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
+                    y - OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
+                    x
+                    + OBSTACLE_RADIUS * np.cos(angle)
+                    + OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
+                    y
+                    + OBSTACLE_RADIUS * np.sin(angle)
+                    + OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
                 ]
             )
 
@@ -66,10 +81,10 @@ class Operator:
             "max_speed": 25.0,
             "max_accel": 15.0,
             "max_curvature": 15.0,
-            "max_road_width_l": 5.0,
-            "max_road_width_r": 5.0,
-            "d_road_w": 0.5,
-            "dt": 0.2,
+            "max_road_width_l": 0.2,
+            "max_road_width_r": 0.2,
+            "d_road_w": 0.2,
+            "dt": 0.1,
             "maxt": 5.0,
             "mint": 2.0,
             "d_t_s": 5,
@@ -125,13 +140,15 @@ class Operator:
             "xyz", degrees=False
         )
 
-        gps_obstacles = get_obstacle_list(self.obstacles, self.gps_waypoints)
+        gps_obstacles = get_obstacle_list(
+            self.position, self.obstacles, self.gps_waypoints
+        )
 
         initial_conditions = {
             "ps": 0,
             "target_speed": self.conds["target_speed"],
             "pos": self.position[:2],
-            "vel": 20 * np.array([np.cos(yaw), np.sin(yaw)]),
+            "vel": 10 * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
             "obs": gps_obstacles,
         }
@@ -153,6 +170,10 @@ class Operator:
         ) = fot_wrapper.run_fot(initial_conditions, self.hyperparameters)
         if not success:
             print(f"fot failed. stopping with {initial_conditions}.")
+            for obstacle in self.obstacles:
+                print(
+                    f"obstacles:{obstacle}, label: {LABELS[int(obstacle[-1])]}"
+                )
             send_output(
                 "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
             )
