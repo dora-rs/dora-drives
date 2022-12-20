@@ -12,7 +12,7 @@ mutex = threading.Lock()
 
 # Planning general
 TARGET_SPEED = 10.0
-NUM_WAYPOINTS_AHEAD = 30
+NUM_WAYPOINTS_AHEAD = 90
 GOAL_LOCATION = [234, 59, 39]
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
@@ -90,6 +90,7 @@ class Operator:
                 waypoints = self.hd_map.compute_waypoints(
                     self.position[:3], self._goal_location
                 )[:NUM_WAYPOINTS_AHEAD]
+
                 self.waypoints = waypoints
                 self.target_speeds = np.array([5.0] * len(waypoints))
 

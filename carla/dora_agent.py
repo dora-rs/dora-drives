@@ -20,6 +20,7 @@ IMAGE_HEIGHT = 600
 STEER_GAIN = 0.7
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
+AVERAGE_WINDOW = 10
 
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)  # seconds
@@ -85,11 +86,11 @@ class Track(Enum):
 
 
 class DoraAgent(AutonomousAgent):
-    # def setup(self, path_to_conf_file):
-    # """
-    # Setup the agent parameters
-    # """
-    # self.track = Track.MAP
+    def setup(self, path_to_conf_file):
+        """
+        Setup the agent parameters
+        """
+        self.previous_positions = []
 
     def sensors(self):  # pylint: disable=no-self-use
         """
@@ -133,14 +134,14 @@ class DoraAgent(AutonomousAgent):
             {
                 "type": "sensor.other.gnss",
                 "id": "GPS",
-                "x": 0,
+                "x": 2,
                 "y": 0,
                 "z": 1.5,
             },
             {
                 "type": "sensor.other.imu",
                 "id": "IMU",
-                "x": 0,
+                "x": 2,
                 "y": 0,
                 "z": 1.5,
                 "roll": 0.0,
@@ -172,7 +173,21 @@ class DoraAgent(AutonomousAgent):
         [[qx, qy, qz, qw]] = R.from_euler(
             "xyz", [[roll, pitch, yaw]], degrees=False
         ).as_quat()
-        position = np.array([x, y, z, qx, qy, qz, qw], np.float32)
+        self.previous_positions.append([x, y])
+
+        if len(self.previous_positions) < AVERAGE_WINDOW:
+            return carla.VehicleControl(
+                steer=0.0,
+                throttle=0.0,
+                brake=0.0,
+                hand_brake=False,
+            )
+
+        ## Average last 5 position
+        [avg_x, avg_y] = np.array(
+            self.previous_positions[-AVERAGE_WINDOW:]
+        ).mean(axis=0)
+        position = np.array([avg_x, avg_y, 0, qx, qy, qz, qw], np.float32)
 
         ### Camera preprocessing
         frame_raw_data = input_data["camera.center"][1]

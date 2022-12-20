@@ -44,8 +44,6 @@ fontColor = (255, 0, 255)
 thickness = 2
 lineType = 2
 
-latency = time.time()
-
 
 class Operator:
     """
@@ -56,16 +54,20 @@ class Operator:
         self.waypoints = []
         self.gps_waypoints = []
         self.obstacles = []
+        self.raw_obstacles = []
         self.obstacles_bbox = []
         self.obstacles_id = []
         self.lanes = []
         self.drivable_area = []
         self.last_timestamp = time.time()
         self.position = []
+        self.last_position = []
         self.camera_frame = []
         self.traffic_sign_bbox = []
         self.point_cloud = np.array([])
         self.control = []
+        self.last_time = time.time()
+        self.current_speed = []
 
     def on_input(
         self,
@@ -76,7 +78,6 @@ class Operator:
         if "waypoints" == dora_input["id"]:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))
-            print(waypoints[:3])
             waypoints = waypoints[:, :2]
             # Adding z axis for plot
             waypoints = np.hstack(
@@ -116,6 +117,7 @@ class Operator:
             obstacles = np.frombuffer(
                 dora_input["data"], dtype="float32"
             ).reshape((-1, 5))[:, :3]
+            self.raw_obstacles = obstacles
             if len(self.position) != 0:
                 [x, y, z, rx, ry, rz, rw] = self.position
                 rot = R.from_quat([rx, ry, rz, rw]).inv()
@@ -139,6 +141,15 @@ class Operator:
         elif "position" == dora_input["id"]:
             # Add sensor transform
             self.position = np.frombuffer(dora_input["data"], np.float32)
+            if len(self.last_position) == 0:
+                self.last_position = self.position
+                self.last_time = time.time()
+                return DoraStatus.CONTINUE
+
+            self.current_speed = (
+                self.position[:2] - self.last_position[:2]
+            ) * 20
+            self.last_position = self.position
 
         elif "lidar_pc" == dora_input["id"]:
             point_cloud = np.frombuffer(dora_input["data"], dtype="float32")
@@ -223,7 +234,7 @@ class Operator:
                     -1,
                 )
 
-        for obstacle in self.obstacles:
+        for id, obstacle in enumerate(self.obstacles):
             [x, y, z] = obstacle
             # location = location_to_camera_view(
             # np.array([[x, y, z]]),
@@ -237,6 +248,17 @@ class Operator:
                 3,
                 (255, 255, 0),
                 -1,
+            )
+            [x, y, z] = self.raw_obstacles[id]
+            cv2.putText(
+                resized_image,
+                f"x: {x:.2f}, y: {y:.2f}",
+                (int(location[0]), int(location[1])),
+                font,
+                0.5,
+                (255, 140, 0),
+                2,
+                1,
             )
             # location = location_to_camera_view(
             # np.array([[x, y, 0]]),
@@ -274,9 +296,9 @@ class Operator:
             cv2.putText(
                 resized_image,
                 LABELS[label] + f", {confidence}%",
-                (int(max_x), int(max_y)),
+                (int(min_x), int(max_y)),
                 font,
-                0.75,
+                0.5,
                 (0, 255, 0),
                 2,
                 1,
@@ -337,10 +359,10 @@ class Operator:
                 lineType,
             )
 
-        if len(self.control) != 0:
+        if len(self.current_speed) != 0:
             cv2.putText(
                 resized_image,
-                f"""throttle: {self.control[0]:.2f}, brake: {self.control[2]:.2f}, steering: {np.degrees(self.control[1]):.2f} """,
+                f"""vx: {self.current_speed[0]:.2f}, vy: {self.current_speed[1]:.2f}""",
                 (10, 55),
                 font,
                 fontScale,
@@ -349,11 +371,22 @@ class Operator:
                 lineType,
             )
 
-        global latency
+        if len(self.control) != 0:
+            cv2.putText(
+                resized_image,
+                f"""throttle: {self.control[0]:.2f}, brake: {self.control[2]:.2f}, steering: {np.degrees(self.control[1]):.2f} """,
+                (10, 80),
+                font,
+                fontScale,
+                fontColor,
+                thickness,
+                lineType,
+            )
+
         # cv2.putText(
         # resized_image,
-        # f"""latency: {(time.time() - latency) * 1000:.2f} ms""",
-        # (10, 80),
+        # f"""latency: {(time.time() - self.last_time) * 1000:.2f} ms""",
+        # (10, 105),
         # font,
         # fontScale,
         # fontColor,
@@ -363,5 +396,5 @@ class Operator:
         writer.write(resized_image)
         cv2.imshow("image", resized_image)
         cv2.waitKey(1)
-        latency = time.time()
+        self.last_time = time.time()
         return DoraStatus.CONTINUE
