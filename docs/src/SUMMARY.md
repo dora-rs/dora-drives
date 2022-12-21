@@ -17,6 +17,7 @@
 - [Obstacle location](./obstacle_location.md)
 - [Planning](./planning.md)
 - [Control](./control.md)
+- [Leaderboard](./leaderboard.md)
 
 ---
 
