@@ -65,7 +65,7 @@ RUN sudo apt-get --fix-missing install -y cmake unzip libpng-dev libgeos-dev pyt
 
 # Install all the dependencies.
 ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies
-ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.10.1
+ENV CARLA_HOME /home/dora/workspace/dora_dependencies/dependencies/CARLA_0.9.13
 COPY .bashrc  /home/dora/.bashrc
 
 RUN mkdir -p /home/dora/workspace/dora_dependencies
@@ -116,8 +116,8 @@ RUN conda activate dora3.7 && python3 -c "import torch; torch.hub.load('ultralyt
 RUN conda activate dora3.7 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
 RUN conda activate dora3.7 && python3 -c "import yolov7_tt100k"
 
-RUN cd /bin && sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.1/dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo unzip dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo mv iceoryx/iox-roudi .
-#### RUN conda activate dora3.7 && python3 -m pip install dora-rs
+RUN sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.2-test-release/dora-v0.1.2-test-release-x86_64-Linux.zip && sudo unzip dora-v0.1.2-test-release-x86_64-Linux.zip -d /bin && sudo mv /bin/iceoryx/iox-roudi /bin
+RUN conda activate dora3.7 && python3 -m pip install dora-rs==0.1.1.post2 patchelf --upgrade
 
 WORKDIR /home/dora/workspace/dora-drives
 
@@ -125,5 +125,5 @@ COPY . .
 
 RUN sudo chown -R dora:dora .
 
-
+RUN sudo apt install vulkan-utils -y
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*

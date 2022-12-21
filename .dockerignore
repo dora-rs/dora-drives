@@ -1,2 +1,4 @@
 nodes/__pycache__
 docs
+**/*.avi
+**/*.pt
