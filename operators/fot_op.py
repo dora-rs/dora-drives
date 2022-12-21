@@ -6,16 +6,17 @@ from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
 )
 from dora_utils import DoraStatus, closest_vertex, pairwise_distances, LABELS
 from scipy.spatial.transform import Rotation as R
+from numpy import linalg as LA
 import os
 
 
 # Planning general
-TARGET_SPEED = 10
+TARGET_SPEED = 7
 NUM_WAYPOINTS_AHEAD = 10
 
-OBSTACLE_CLEARANCE = 10
-OBSTACLE_RADIUS = 3
-OBSTACLE_RADIUS_TANGENT = 3
+OBSTACLE_CLEARANCE = 1
+OBSTACLE_RADIUS = 2
+OBSTACLE_RADIUS_TANGENT = 4
 MAX_CURBATURE = np.pi / 4
 
 
@@ -42,14 +43,14 @@ def get_obstacle_list(position, obstacle_predictions, waypoints):
         if distance < OBSTACLE_CLEARANCE and diff_angle < MAX_CURBATURE:
             obstacle_size = np.array(
                 [
-                    x - OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
-                    y - OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
+                    x - OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
+                    y - OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
                     x
                     + OBSTACLE_RADIUS * np.cos(angle)
-                    + OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
+                    + OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
                     y
                     + OBSTACLE_RADIUS * np.sin(angle)
-                    + OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
+                    + OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
                 ]
             )
 
@@ -70,6 +71,7 @@ class Operator:
     def __init__(self):
         self.obstacles = np.array([])
         self.position = []
+        self.last_position = []
         self.waypoints = []
         self.gps_waypoints = []
         self.obstacle_metadata = {}
@@ -79,11 +81,11 @@ class Operator:
         self.outputs = []
         self.hyperparameters = {
             "max_speed": 25.0,
-            "max_accel": 15.0,
-            "max_curvature": 15.0,
-            "max_road_width_l": 0.2,
-            "max_road_width_r": 0.2,
-            "d_road_w": 0.2,
+            "max_accel": 25.0,
+            "max_curvature": 25.0,
+            "max_road_width_l": 0.1,
+            "max_road_width_r": 0.1,
+            "d_road_w": 0.1,
             "dt": 0.1,
             "maxt": 5.0,
             "mint": 2.0,
@@ -112,7 +114,10 @@ class Operator:
     ):
 
         if dora_input["id"] == "position":
+            self.last_position = self.position
             self.position = np.frombuffer(dora_input["data"], np.float32)
+            if len(self.last_position) == 0:
+                self.last_position = self.position
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "obstacles":
@@ -129,6 +134,7 @@ class Operator:
 
         if len(self.gps_waypoints) == 0:
             print("No waypoints")
+            send_output("waypoints", self.gps_waypoints.tobytes(), dora_input["metadata"])
             return DoraStatus.CONTINUE
 
         elif len(self.position) == 0:
@@ -148,7 +154,7 @@ class Operator:
             "ps": 0,
             "target_speed": self.conds["target_speed"],
             "pos": self.position[:2],
-            "vel": 10 * np.array([np.cos(yaw), np.sin(yaw)]),
+            "vel": TARGET_SPEED * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
             "obs": gps_obstacles,
         }

@@ -25,7 +25,8 @@ DEPTH_IMAGE_HEIGHT = 600
 DEPTH_FOV = 90
 SENSOR_POSITION = np.array([3, 0, 1])
 
-VELODYNE_MATRIX = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
+VELODYNE_MATRIX = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
+UNREAL_MATRIX = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
 INV_VELODYNE_MATRIX = np.linalg.inv(VELODYNE_MATRIX)
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
@@ -39,7 +40,7 @@ writer = cv2.VideoWriter(
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 bottomLeftCornerOfText = (10, 30)
-fontScale = 0.7
+fontScale = 0.6
 fontColor = (255, 0, 255)
 thickness = 2
 lineType = 2
@@ -122,8 +123,10 @@ class Operator:
                 [x, y, z, rx, ry, rz, rw] = self.position
                 rot = R.from_quat([rx, ry, rz, rw]).inv()
                 obstacles = rot.apply(obstacles - [x, y, z])
-                obstacles = np.dot(obstacles, VELODYNE_MATRIX)
-                obstacles = np.dot(INTRINSIC_MATRIX, obstacles.T).T
+                obstacles = np.dot(obstacles, UNREAL_MATRIX)
+                obstacles = local_points_to_camera_view(
+                    obstacles, INTRINSIC_MATRIX
+                ).T
                 self.obstacles = obstacles
 
         elif "lanes" == dora_input["id"]:
@@ -140,16 +143,15 @@ class Operator:
 
         elif "position" == dora_input["id"]:
             # Add sensor transform
+
+            self.last_position = self.position
             self.position = np.frombuffer(dora_input["data"], np.float32)
             if len(self.last_position) == 0:
-                self.last_position = self.position
-                self.last_time = time.time()
                 return DoraStatus.CONTINUE
 
             self.current_speed = (
                 self.position[:2] - self.last_position[:2]
             ) * 20
-            self.last_position = self.position
 
         elif "lidar_pc" == dora_input["id"]:
             point_cloud = np.frombuffer(dora_input["data"], dtype="float32")
@@ -158,7 +160,7 @@ class Operator:
             # The latest coordinate space is the unreal space.
             point_cloud = np.dot(
                 point_cloud,
-                np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]]),
+                UNREAL_MATRIX,
             )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
             point_cloud = local_points_to_camera_view(
@@ -177,7 +179,7 @@ class Operator:
                 -1,
             )
 
-        if "tick" != dora_input["id"] or isinstance(self.camera_frame, list):
+        if "image" != dora_input["id"] or isinstance(self.camera_frame, list):
             return DoraStatus.CONTINUE
 
         if len(self.position) != 0:
@@ -246,7 +248,11 @@ class Operator:
                 resized_image,
                 (int(location[0]), int(location[1])),
                 3,
-                (255, 255, 0),
+                (
+                    255,
+                    int(max(255 - location[2] * 100, 0)),
+                    int(min(location[2] * 10, 255)),
+                ),
                 -1,
             )
             [x, y, z] = self.raw_obstacles[id]
@@ -363,7 +369,7 @@ class Operator:
             cv2.putText(
                 resized_image,
                 f"""vx: {self.current_speed[0]:.2f}, vy: {self.current_speed[1]:.2f}""",
-                (10, 55),
+                (10, 50),
                 font,
                 fontScale,
                 fontColor,
@@ -375,7 +381,7 @@ class Operator:
             cv2.putText(
                 resized_image,
                 f"""throttle: {self.control[0]:.2f}, brake: {self.control[2]:.2f}, steering: {np.degrees(self.control[1]):.2f} """,
-                (10, 80),
+                (10, 70),
                 font,
                 fontScale,
                 fontColor,

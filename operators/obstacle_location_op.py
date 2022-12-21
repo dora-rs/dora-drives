@@ -25,7 +25,9 @@ INTRINSIC_MATRIX = get_intrinsic_matrix(
 )
 
 INV_INTRINSIC_MATRIX = np.linalg.inv(INTRINSIC_MATRIX)
-VELODYNE_MATRIX = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
+VELODYNE_MATRIX = np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]])
+UNREAL_MATRIX = np.array([[0, 0, 1], [-1, 0, 0], [0, -1, 0]])
+INV_UNREAL_MATRIX = np.linalg.inv(UNREAL_MATRIX)
 INV_VELODYNE_MATRIX = np.linalg.inv(VELODYNE_MATRIX)
 
 
@@ -65,15 +67,16 @@ class Operator:
 
             point_cloud = np.dot(
                 point_cloud,
-                np.array([[0, 0, 1], [1, 0, 0], [0, -1, 0]]),
+                VELODYNE_MATRIX,
             )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
-            point_cloud = local_points_to_camera_view(
+            camera_point_cloud = local_points_to_camera_view(
                 point_cloud, INTRINSIC_MATRIX
             )
 
             if len(point_cloud) != 0:
-                self.point_cloud = point_cloud.T
+                self.camera_point_cloud = camera_point_cloud.T
+                self.point_cloud = point_cloud
         elif "position" == dora_input["id"]:
             # Add sensor transform
             self.position = np.frombuffer(dora_input["data"], np.float32)
@@ -90,10 +93,10 @@ class Operator:
                 [min_x, max_x, min_y, max_y, confidence, label] = obstacle_bb
                 z_points = self.point_cloud[
                     np.where(
-                        (self.point_cloud[:, 0] > min_x)
-                        & (self.point_cloud[:, 0] < max_x)
-                        & (self.point_cloud[:, 1] > min_y)
-                        & (self.point_cloud[:, 1] < max_y)
+                        (self.camera_point_cloud[:, 0] > min_x)
+                        & (self.camera_point_cloud[:, 0] < max_x)
+                        & (self.camera_point_cloud[:, 1] > min_y)
+                        & (self.camera_point_cloud[:, 1] < max_y)
                     )
                 ]
                 if len(z_points) > 0:
@@ -103,13 +106,11 @@ class Operator:
                     obstacles_with_location.append(closest_point)
             if len(obstacles_with_location) > 0:
                 obstacles_with_location = np.array(obstacles_with_location)
-                obstacles_with_location = np.dot(
-                    INV_INTRINSIC_MATRIX, obstacles_with_location.T
-                ).T
 
                 obstacles_with_location = np.dot(
-                    obstacles_with_location, INV_VELODYNE_MATRIX
+                    obstacles_with_location, INV_UNREAL_MATRIX
                 )
+
                 [x, y, z, rx, ry, rz, rw] = self.position
                 rot = R.from_quat([rx, ry, rz, rw])
                 obstacles_with_location = rot.apply(obstacles_with_location) + [
