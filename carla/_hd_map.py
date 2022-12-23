@@ -131,7 +131,7 @@ class HDMap(object):
         return None
 
     def compute_waypoints(
-        self, source_loc: np.array, destination_loc: np.array
+        self, source_loc: np.array, destination_loc: np.array, route: int
     ):
         """Computes waypoints between two locations.
 
@@ -158,8 +158,6 @@ class HDMap(object):
         route = self._grp.trace_route(
             start_waypoint.transform.location, end_waypoint.transform.location
         )
-        # TODO(ionel): The planner returns several options in intersections.
-        # We always take the first one, but this is not correct.
         return np.array(
             [
                 [

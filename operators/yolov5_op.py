@@ -21,7 +21,7 @@ class Operator:
             "ultralytics/yolov5",
             "yolov5n",
         )
-        self.model.to(torch.device("cuda"))
+        self.model.to(torch.device("cpu"))
         self.model.eval()
 
     def on_input(

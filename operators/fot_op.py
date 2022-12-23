@@ -16,7 +16,7 @@ NUM_WAYPOINTS_AHEAD = 10
 
 OBSTACLE_CLEARANCE = 1
 OBSTACLE_RADIUS = 2
-OBSTACLE_RADIUS_TANGENT = 4
+OBSTACLE_RADIUS_TANGENT = 0.5
 MAX_CURBATURE = np.pi / 4
 
 
@@ -74,6 +74,7 @@ class Operator:
         self.last_position = []
         self.waypoints = []
         self.gps_waypoints = []
+        self.last_obstacles = np.array([])
         self.obstacle_metadata = {}
         self.gps_metadata = {}
         self.metadata = {}
@@ -81,8 +82,8 @@ class Operator:
         self.outputs = []
         self.hyperparameters = {
             "max_speed": 25.0,
-            "max_accel": 25.0,
-            "max_curvature": 25.0,
+            "max_accel": 45.0,
+            "max_curvature": 35.0,
             "max_road_width_l": 0.1,
             "max_road_width_r": 0.1,
             "d_road_w": 0.1,
@@ -124,7 +125,13 @@ class Operator:
             obstacles = np.frombuffer(
                 dora_input["data"], dtype="float32"
             ).reshape((-1, 5))
-            self.obstacles = obstacles
+            if len(self.last_obstacles) > 0:
+                self.obstacles = np.concatenate(
+                    [self.last_obstacles, obstacles]
+                )
+            else:
+                self.obstacles = obstacles
+            self.last_obstacles = obstacles
             return DoraStatus.CONTINUE
 
         elif "gps_waypoints" == dora_input["id"]:
@@ -134,7 +141,11 @@ class Operator:
 
         if len(self.gps_waypoints) == 0:
             print("No waypoints")
-            send_output("waypoints", self.gps_waypoints.tobytes(), dora_input["metadata"])
+            send_output(
+                "waypoints",
+                self.gps_waypoints.tobytes(),
+                dora_input["metadata"],
+            )
             return DoraStatus.CONTINUE
 
         elif len(self.position) == 0:
@@ -154,7 +165,8 @@ class Operator:
             "ps": 0,
             "target_speed": self.conds["target_speed"],
             "pos": self.position[:2],
-            "vel": TARGET_SPEED * np.array([np.cos(yaw), np.sin(yaw)]),
+            "vel": (np.clip(LA.norm(self.position - self.last_position), 4, 7))
+            * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
             "obs": gps_obstacles,
         }

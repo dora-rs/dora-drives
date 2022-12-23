@@ -48,23 +48,22 @@ bash build.sh
 
 ###### Clone the Prediction Repository #####
 echo "[x] Cloning the prediction code..."
-cd $DORA_DEP_HOME/pylot/prediction/
+cd $DORA_DEP_HOME/dependencies/
 git clone https://github.com/erdos-project/prediction.git
 
-. activate base
+. /opt/conda/etc/profile.d/conda.sh 
 conda activate dora3.7 
 
 ###### Download the Carla simulator ######
 echo "[x] Downloading the CARLA_Leaderboard_20 simulator..."
 cd $DORA_DEP_HOME/dependencies/
-if [ "$1" != 'challenge' ] && [ ! -d "CARLA_Leaderboard_20" ]; then
-    mkdir CARLA_0.9.13
-    cd CARLA_0.9.13
-    wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/Leaderboard/CARLA_Leaderboard_20.tar.gz
-    tar -xvf CARLA_Leaderboard_20.tar.gz
-    rm CARLA_Leaderboard_20.tar.gz
-    pip install CARLA_0.9.13/PythonAPI/carla/dist/carla-0.9.13-cp37-cp37m-manylinux_2_27_x86_64.whl
-fi
+
+mkdir CARLA_0.9.13
+cd CARLA_0.9.13
+wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/Leaderboard/CARLA_Leaderboard_20.tar.gz 
+tar -xvf CARLA_Leaderboard_20.tar.gz
+rm CARLA_Leaderboard_20.tar.gz
+pip install PythonAPI/carla/dist/carla-0.9.13-cp37-cp37m-manylinux_2_27_x86_64.whl
 
 
 ###### Install Carla Leaderboard ######

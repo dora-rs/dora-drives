@@ -78,6 +78,7 @@ You will need to have `/etc/docker/daemon.json` to be exactly:
 
 ```bash
 export DORA_DEP_HOME=<PATH TO A PARENT FOLDER> # Ex: $HOME/Documents
+export DORA_DEP_HOME=$HOME/Documents/CONTRIB
 export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.13
 export PYLOT_HOME=$DORA_DEP_HOME
 export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.13/PythonAPI/carla:$DORA_DEP_HOME/dependencies/leaderboard:$DORA_DEP_HOME/dependencies/scenario_runner
@@ -101,7 +102,7 @@ chmod +x ./scripts/*
 
 ## Installing dora
 
-sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.1/dora-v0.1.1-x86_64-ubuntu-20.04.zip && sudo unzip dora-v0.1.1-x86_64-ubuntu-20.04.zip -d ~/.local/bin && sudo mv ~/.local/bin/iceoryx/iox-roudi ~/.local/bin
+sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.2-test-release/dora-v0.1.2-test-release-x86_64-Linux.zip && sudo unzip dora-v0.1.2-test-release-x86_64-Linux.zip -d ~/.local/bin && sudo mv ~/.local/bin/iceoryx/iox-roudi ~/.local/bin
 ``` 
 
 ### Running the graph

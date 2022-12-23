@@ -13,11 +13,12 @@ nodes:
         - objective_waypoints
         - lidar_pc
      #   - opendrive
-      source: python
+      source: shell
       args: >
-        /home/peter/Documents/CONTRIB/dependencies/leaderboard/leaderboard/leaderboard_evaluator.py 
-        --routes /home/peter/Documents/CONTRIB/dependencies/leaderboard/data/routes_devtest.xml 
-        -a /home/peter/Documents/CONTRIB/dora-drives/carla/dora_agent.py
+        python
+        $DORA_DEP_HOME/dependencies/leaderboard/leaderboard/leaderboard_evaluator.py 
+        --routes $DORA_DEP_HOME/dependencies/leaderboard/data/routes_devtest.xml 
+        -a ../../carla/dora_agent.py
 
   - id: carla_gps_op
     operator:

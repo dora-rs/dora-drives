@@ -14,11 +14,17 @@ mutex = threading.Lock()
 
 # Planning general
 TARGET_SPEED = 7.0
-NUM_WAYPOINTS_AHEAD = 60
+NUM_WAYPOINTS_AHEAD = 120
 GOAL_LOCATION = [234, 59, 39]
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
 OBJECTIVE_MIN_DISTANCE = 20
+
+
+def filter_consecutive_duplicate(x):
+    return np.array(
+        [elem for i, elem in enumerate(x) if (elem - x[i - 1]).any()]
+    )
 
 
 class Operator:
@@ -36,8 +42,8 @@ class Operator:
         hd_map = HDMap(carla_world.get_map())
         self.position = []
         self.hd_map = hd_map
-        self.waypoints = []
-        self.target_speeds = []
+        self.waypoints = np.array([])
+        self.target_speeds = np.array([])
         self.objective_waypoints = []
         self.completed_waypoints = 0
         self.waypoints_array = np.array([])
@@ -99,38 +105,51 @@ class Operator:
             if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
 
                 [x, y, z, rx, ry, rz, rw] = self.position
-
-                waypoints = self.hd_map.compute_waypoints(
-                    [x, y, z], self._goal_location
-                )[:NUM_WAYPOINTS_AHEAD]
-
-                ## Verify that computed waypoints are not inverted
-                target_vector = waypoints[5] - self.position[:2]
-                angle = np.arctan2(target_vector[1], target_vector[0])
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
                     "xyz", degrees=False
                 )
-                diff_angle = (angle - yaw) % 2 * np.pi
-                if diff_angle > np.pi / 2:
-                    print("Error in computation of waypoints")
-                    send_output(
-                        "gps_waypoints",
-                        self.waypoints_array.tobytes(),
-                        dora_input["metadata"],
-                    )  # World coordinate
 
-                    return DoraStatus.CONTINUE
+                for route in range(3):
+                    waypoints = self.hd_map.compute_waypoints(
+                        [
+                            x + (route > 0) * (2 * np.random.random() - 1),
+                            y + (route > 0) * (2 * np.random.random() - 1),
+                            z,
+                        ],
+                        self._goal_location,
+                        route,
+                    )[:NUM_WAYPOINTS_AHEAD]
 
-                self.waypoints = waypoints
-                self.target_speeds = np.array([5.0] * len(waypoints))
+                    ## Verify that computed waypoints are not inverted
+                    target_vector = waypoints[5] - self.position[:2]
+                    angle = np.arctan2(target_vector[1], target_vector[0])
+                    diff_angle = np.abs(angle - yaw) % 2 * np.pi
+                    if diff_angle > np.pi * 1 / 2:
+                        print("Error in computation of waypoints")
+                        print(f"target waypoint: {waypoints[5]}")
+                    else:
+                        self.waypoints = waypoints
+                        self.target_speeds = np.array([5.0] * len(waypoints))
+                        break
+
+            if len(self.waypoints) == 0:
+                send_output(
+                    "gps_waypoints",
+                    self.waypoints.tobytes(),
+                    dora_input["metadata"],
+                )  # World coordinate
+                return DoraStatus.CONTINUE
 
             self.waypoints_array = np.concatenate(
-                [self.waypoints.T, self.target_speeds.reshape(1, -1)]
+                [
+                    self.waypoints.T,
+                    self.target_speeds.reshape(1, -1),
+                ]
             ).T.astype(np.float32)
 
             send_output(
                 "gps_waypoints",
-                self.waypoints_array.tobytes(),
+                filter_consecutive_duplicate(self.waypoints_array).tobytes(),
                 dora_input["metadata"],
             )  # World coordinate
 

@@ -167,9 +167,9 @@ class DoraAgent(AutonomousAgent):
         ### Position preprocessing
         [lat, lon, z] = input_data["GPS"][1]
         [x, y] = from_gps_to_world_coordinate(lat, lon)
-        yaw = (input_data["IMU"][1][-1] - np.pi / 2) % 2 * np.pi
-        roll = 0.
-        pitch = 0.
+        yaw = input_data["IMU"][1][-1] - np.pi / 2
+        roll = 0.0
+        pitch = 0.0
         [[qx, qy, qz, qw]] = R.from_euler(
             "xyz", [[roll, pitch, yaw]], degrees=False
         ).as_quat()
