@@ -61,7 +61,8 @@ RUN cd ~/ && ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa
 RUN mkdir -p /home/dora/workspace
 
 RUN sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y libcudnn8 ssh libqt5core5a libeigen3-dev cmake qtbase5-dev libpng16-16 libtiff5 python3-tk libgeos-dev vim build-essential libopenblas-dev libssl-dev 
-RUN sudo apt-get --fix-missing install -y cmake unzip libpng-dev libgeos-dev python3-opencv
+RUN sudo apt-get --fix-missing install -y cmake unzip libpng-dev libgeos-dev python3-opencv vulkan-utils
+COPY scripts/nvidia_icd.json /usr/share/vulkan/icd.d/nvidia_icd.json
 
 # Install all the dependencies.
 ENV DORA_DEP_HOME /home/dora/workspace/dora_dependencies
@@ -120,10 +121,7 @@ RUN sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.2-test-rele
 RUN conda activate dora3.7 && python3 -m pip install dora-rs==0.1.1.post2 patchelf --upgrade
 
 WORKDIR /home/dora/workspace/dora-drives
-
 COPY . .
 
 RUN sudo chown -R dora:dora .
-
-RUN sudo apt install vulkan-utils -y
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*
