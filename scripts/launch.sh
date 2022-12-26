@@ -22,12 +22,13 @@ if [ -e /dev/video0 ]; then
     echo "Webcam exists."
     docker run \
         --gpus all \
+        --runtime=nvidia \
         --env-file variables.env \
         --device=/dev/video0:/dev/video0 \
         --net=host \
         -itd \
         --shm-size=2g \
-        --memory=2g \
+        --memory=10g \
         --name dora \
         haixuantao/dora-drives /bin/bash
         
@@ -36,11 +37,12 @@ else
     echo "No webcam found."
     docker run \
         --gpus all \
+        --runtime=nvidia \
         --env-file variables.env \
         --net=host \
         -itd \
         --shm-size=2g \
-        --memory=2g \
+        --memory=10g \
         --name dora \
         haixuantao/dora-drives /bin/bash
 fi

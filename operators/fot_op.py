@@ -83,7 +83,7 @@ class Operator:
         self.hyperparameters = {
             "max_speed": 25.0,
             "max_accel": 45.0,
-            "max_curvature": 35.0,
+            "max_curvature": 45.0,
             "max_road_width_l": 0.1,
             "max_road_width_r": 0.1,
             "d_road_w": 0.1,
