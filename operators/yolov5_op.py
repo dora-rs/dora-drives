@@ -1,9 +1,12 @@
 from typing import Callable
 from enum import Enum
-
+import os
 import cv2
 import numpy as np
 import torch
+
+
+DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 
 
 class DoraStatus(Enum):
@@ -21,7 +24,7 @@ class Operator:
             "ultralytics/yolov5",
             "yolov5n",
         )
-        self.model.to(torch.device("cpu"))
+        self.model.to(torch.device(DEVICE))
         self.model.eval()
 
     def on_input(
