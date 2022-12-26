@@ -40,8 +40,8 @@ class Operator:
         carla_world = client.get_world()
         self.carla_world_id = carla_world.id
         hd_map = HDMap(carla_world.get_map())
-        self.position = []
         self.hd_map = hd_map
+        self.position = []
         self.waypoints = np.array([])
         self.target_speeds = np.array([])
         self.objective_waypoints = []
@@ -74,12 +74,12 @@ class Operator:
             # self.waypoints = []
             # self.target_speeds = []
             (index, closest_objective) = closest_vertex(
-                self.objective_waypoints,
-                np.array([self.position[:3]]),
+                self.objective_waypoints[:, :2],
+                np.array([self.position[:2]]),
             )
 
             if (
-                LA.norm(closest_objective - self.position[:3])
+                LA.norm(closest_objective - self.position[:2])
                 < OBJECTIVE_MIN_DISTANCE
             ):
                 self.completed_waypoints += 1
@@ -104,33 +104,39 @@ class Operator:
 
             if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
 
+                carla_world = self.client.get_world()
+                if self.carla_world_id != carla_world.id:
+                    hd_map = HDMap(carla_world.get_map())
+                    self.hd_map = hd_map
+                    self.carla_world_id = carla_world.id
+
                 [x, y, z, rx, ry, rz, rw] = self.position
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
                     "xyz", degrees=False
                 )
 
-                for route in range(3):
-                    waypoints = self.hd_map.compute_waypoints(
-                        [
-                            x + (route > 0) * (2 * np.random.random() - 1),
-                            y + (route > 0) * (2 * np.random.random() - 1),
-                            z,
-                        ],
-                        self._goal_location,
-                        route,
-                    )[:NUM_WAYPOINTS_AHEAD]
+                waypoints = self.hd_map.compute_waypoints(
+                    [
+                        x,
+                        y,
+                        self._goal_location[2],
+                    ],
+                    self._goal_location,
+                )[:NUM_WAYPOINTS_AHEAD]
 
-                    ## Verify that computed waypoints are not inverted
-                    target_vector = waypoints[5] - self.position[:2]
-                    angle = np.arctan2(target_vector[1], target_vector[0])
-                    diff_angle = np.abs(angle - yaw) % 2 * np.pi
-                    if diff_angle > np.pi * 1 / 2:
-                        print("Error in computation of waypoints")
-                        print(f"target waypoint: {waypoints[5]}")
-                    else:
-                        self.waypoints = waypoints
-                        self.target_speeds = np.array([5.0] * len(waypoints))
-                        break
+                ## Verify that computed waypoints are not inverted
+                target_vector = waypoints[0] - self.position[:2]
+                angle = np.arctan2(target_vector[1], target_vector[0])
+                diff_angle = np.abs(angle - yaw) % 2 * np.pi
+                if diff_angle > np.pi * 1 / 2:
+                    print("Error in computation of waypoints")
+                    print(f"target waypoint: {waypoints[0]}")
+                    print(f"position: {[x, y, z]}")
+                    print(f"goal location: {self._goal_location}")
+                    print(f"objective waypoints: {self.objective_waypoints}")
+                else:
+                    self.waypoints = waypoints
+                    self.target_speeds = np.array([5.0] * len(waypoints))
 
             if len(self.waypoints) == 0:
                 send_output(

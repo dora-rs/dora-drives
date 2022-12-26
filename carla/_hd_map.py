@@ -131,7 +131,7 @@ class HDMap(object):
         return None
 
     def compute_waypoints(
-        self, source_loc: np.array, destination_loc: np.array, route: int
+        self, source_loc: np.array, destination_loc: np.array
     ):
         """Computes waypoints between two locations.
 

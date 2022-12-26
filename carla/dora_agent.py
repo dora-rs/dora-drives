@@ -215,7 +215,7 @@ class DoraAgent(AutonomousAgent):
                     transform[0].location.z,
                 ]
                 for transform in self._global_plan_world_coord
-            ]
+            ], np.float32
         )
         # waypoints_xyv = np.hstack(
         # (waypoints_xy, 0.5 + np.zeros((waypoints_xy.shape[0], 1)))
