@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Carla simulator - dora-drives</title>
+        <title>Leaderboard - dora-drives</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html" class="active"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="chapter-item expanded "><a href="leaderboard.html"><strong aria-hidden="true">9.</strong> Leaderboard</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">10.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">11.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">12.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">13.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">14.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">15.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">16.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">17.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">18.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="chapter-item expanded "><a href="leaderboard.html" class="active"><strong aria-hidden="true">9.</strong> Leaderboard</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html"><strong aria-hidden="true">10.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">11.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">12.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">13.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">14.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">15.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">16.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">17.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">18.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,101 +143,24 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="carla-simulator"><a class="header" href="#carla-simulator">Carla simulator</a></h1>
-<p>Let's try to use a car simulator to not only do perception but also control.</p>
-<p>To launch the simulator all you have to do is add the <code>-s</code>flag in the <code>./script/launch.sh</code> command.</p>
-<p>We can then switch from the webcam to the simulator in our graph.</p>
-<pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
-    
-nodes:
-  - id: carla_source_node
-    custom:
-      inputs:
-        tick: dora/timer/millis/300
-      outputs:
-        - position
-        - depth_frame
-        - segmented_frame
-        - vehicle_id
-        - image
-        - lidar_pc
-      source: python
-      args: ../../carla/carla_source_node.py
-      env: 
-        SET_AUTOPILOT: true 
-
-  - id: yolov5
-    operator: 
-      outputs:
-        - bbox
-      inputs:
-        image: carla_source_node/image
-      python: ../../operators/yolov5_op.py
-
-  - id: yolop
-    operator: 
-      outputs:
-        - lanes
-        - drivable_area
-      inputs:
-        image: carla_source_node/image
-      python: ../../operators/yolop_op.py
-
-  ## Commented out as it takes a bit of GPU memory.
-  #- id: strong_sort
-    #operator: 
-      #outputs:
-        #- obstacles_id
-      #inputs:
-        #image: carla_source_node/image
-        #obstacles_bbox: yolov5/bbox
-      #python: ../../operators/strong_sort_op.py
-
-  - id: plot
-    operator:
-      python: ../../operators/plot.py
-      inputs:
-        image: carla_source_node/image
-        obstacles_bbox: yolov5/bbox
-        obstacles_id: strong_sort/obstacles_id
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        drivable_area: yolop/drivable_area
-        tick: dora/timer/millis/300
-        position: carla_source_node/position
+                        <h1 id="leaderboard"><a class="header" href="#leaderboard">Leaderboard</a></h1>
+<p>The leaderboard graphs connect dora to the leaderboard 2.0 to run the graph within the leaderboard environment.</p>
+<p>To use the leaderboard through docker</p>
+<pre><code class="language-bash">./scripts/launch.sh -b -s -g leaderboard/yolov5_agent.yaml
 </code></pre>
-<p>We can then tun it with the following command:</p>
-<pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_perception.yaml
+<p>To use the leaderboard natively:</p>
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/leaderboard/yolov5_agent.yaml
 </code></pre>
-<ul>
-<li>To run it without docker:</li>
-</ul>
-<pre><code class="language-bash">## Make sure your environment variable are well set.
-export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt; # Ex: $HOME/Documents
-export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1
-export PYLOT_HOME=$DORA_DEP_HOME
-export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/
-
-## First start the simulator if it is not started
-./scripts/run_simulator.sh &amp;
-
-dora-coordinator --run-dataflow graphs/tutorials/carla_perception.yaml
-</code></pre>
-<blockquote>
-<p>I have removed the traffic sign operator to reduce GPU memory consumption.</p>
-</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="webcam_full_nodes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="control.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="obstacle_location.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="carla_source_node.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -247,11 +170,11 @@ dora-coordinator --run-dataflow graphs/tutorials/carla_perception.yaml
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="webcam_full_nodes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="control.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="obstacle_location.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="carla_source_node.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
