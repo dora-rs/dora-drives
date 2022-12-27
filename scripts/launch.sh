@@ -22,11 +22,13 @@ if [ -e /dev/video0 ]; then
     echo "Webcam exists."
     docker run \
         --gpus all \
+        --runtime=nvidia \
         --env-file variables.env \
         --device=/dev/video0:/dev/video0 \
         --net=host \
         -itd \
         --shm-size=2g \
+        --memory=10g \
         --name dora \
         haixuantao/dora-drives /bin/bash
         
@@ -35,16 +37,18 @@ else
     echo "No webcam found."
     docker run \
         --gpus all \
+        --runtime=nvidia \
         --env-file variables.env \
         --net=host \
         -itd \
         --shm-size=2g \
+        --memory=10g \
         --name dora \
         haixuantao/dora-drives /bin/bash
 fi
 
 if [ ! -z ${sim+x} ]; then
-    docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
+    nvidia-docker exec -itd dora /home/dora/workspace/dora-drives/scripts/run_simulator.sh
 fi
 
 if [ ! -z ${tracing+x} ]; then
@@ -52,4 +56,4 @@ if [ ! -z ${tracing+x} ]; then
 fi
 
 sleep 5
-nvidia-docker  exec -it dora bash -c "dora up && cd /home/dora/workspace/dora-drives && dora-coordinator --run-dataflow graphs/$GRAPH"
+nvidia-docker  exec -it dora /bin/bash -c "dora up && cd /home/dora/workspace/dora-drives && source /opt/conda/etc/profile.d/conda.sh && conda activate dora3.7 && dora-coordinator --run-dataflow graphs/$GRAPH"

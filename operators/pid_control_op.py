@@ -16,11 +16,11 @@ COAST_FACTOR = 1.75
 pid_p = 1.0
 pid_d = 0.0
 pid_i = 0.05
-dt = 1.0 / 5
-pid_use_real_time = True
+dt = 1.0 / 10
+pid_use_real_time = False
 
 BRAKE_MAX = 1.0
-THROTTLE_MAX = 0.5
+THROTTLE_MAX = 1.0
 
 
 def get_angle(left, right) -> float:
@@ -164,9 +164,10 @@ class Operator:
                 self.previous_time = time.time()
                 return DoraStatus.CONTINUE
 
-            self.current_speed = (position[:3] - self.previous_position[:3]) / (
-                time.time() - self.previous_time
-            )
+            self.current_speed = (
+                position[:2] - self.previous_position[:2]
+            ) * 20
+
             self.previous_position = self.position
             self.previous_time = time.time()
 
@@ -181,6 +182,14 @@ class Operator:
             self.metadata = dora_input["metadata"]
 
         if len(self.position) == 0:
+            return DoraStatus.CONTINUE
+
+        if len(self.waypoints) == 0:
+            send_output(
+                "control",
+                np.array([0, 0, 1], np.float16).tobytes(),
+                self.metadata,
+            )
             return DoraStatus.CONTINUE
 
         [x, y, _, rx, ry, rz, rw] = self.position
@@ -218,7 +227,7 @@ class Operator:
 
         send_output(
             "control",
-            np.array([throttle, target_angle, brake]).tobytes(),
+            np.array([throttle, target_angle, brake], np.float16).tobytes(),
             self.metadata,
         )
         return DoraStatus.CONTINUE

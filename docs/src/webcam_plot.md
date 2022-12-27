@@ -66,7 +66,7 @@ communication:
 nodes:
   - id: op_1
     operator:
-      python: https://raw.githubusercontent.com/dora-rs/dora-drives/main/operators/webcam.py
+      python: https://raw.githubusercontent.com/dora-rs/dora-drives/main/operators/webcam_op.py
       inputs:
         tick: dora/timer/millis/100
       outputs:

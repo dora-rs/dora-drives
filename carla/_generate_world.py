@@ -178,7 +178,7 @@ def spawn_ego_vehicle(
     traffic_manager_port: int,
     spawn_point_index: int,
     auto_pilot: bool,
-    blueprint: str = "vehicle.lincoln.mkz2017",
+    blueprint: str = "vehicle.lincoln.mkz_2017",
 ):
     v_blueprint = world.get_blueprint_library().filter(blueprint)[0]
     ego_vehicle = None

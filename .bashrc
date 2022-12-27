@@ -16,4 +16,4 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-conda activate dora3.8
+conda activate dora3.7

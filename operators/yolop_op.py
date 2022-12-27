@@ -1,11 +1,14 @@
 from typing import Callable
 from enum import Enum
 
+import os
 import cv2
 import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
+
+DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 
 
 class DoraStatus(Enum):
@@ -270,7 +273,7 @@ class Operator:
 
     def __init__(self):
         self.model = torch.hub.load("hustvl/yolop", "yolop", pretrained=True)
-        self.model.to(torch.device("cuda"))
+        self.model.to(torch.device(DEVICE))
         self.model.eval()
 
     def on_input(
@@ -298,7 +301,7 @@ class Operator:
         img = torch.unsqueeze(transform(frame), dim=0)
         half = False  # half precision only supported on CUDA
         img = img.half() if half else img.float()  # uint8 to fp16/32
-        img = img.to(torch.device("cuda"))
+        img = img.to(torch.device(DEVICE))
         det_out, da_seg_out, ll_seg_out = self.model(img)
 
         # det_out = [pred.reshape((1, -1, 6)) for pred in det_out]

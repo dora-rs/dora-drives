@@ -11,8 +11,8 @@ fi
 # opencv requires.
 
 #### . activate base
-#### conda create -n dora3.8 python=3.8
-#### conda activate dora3.8
+#### conda create -n dora3.7 python=3.8
+#### conda activate dora3.7
 #### pip install -r install_requirements.txt
 
 
@@ -48,16 +48,29 @@ bash build.sh
 
 ###### Clone the Prediction Repository #####
 echo "[x] Cloning the prediction code..."
-cd $DORA_DEP_HOME/pylot/prediction/
+cd $DORA_DEP_HOME/dependencies/
 git clone https://github.com/erdos-project/prediction.git
 
+. /opt/conda/etc/profile.d/conda.sh 
+conda activate dora3.7 
+
 ###### Download the Carla simulator ######
-echo "[x] Downloading the CARLA 0.9.10.1 simulator..."
+echo "[x] Downloading the CARLA_Leaderboard_20 simulator..."
 cd $DORA_DEP_HOME/dependencies/
-if [ "$1" != 'challenge' ] && [ ! -d "CARLA_0.9.10.1" ]; then
-    mkdir CARLA_0.9.10.1
-    cd CARLA_0.9.10.1
-    wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.10.1.tar.gz
-    tar -xvf CARLA_0.9.10.1.tar.gz
-    rm CARLA_0.9.10.1.tar.gz
-fi
+
+mkdir CARLA_0.9.13
+cd CARLA_0.9.13
+wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/Leaderboard/CARLA_Leaderboard_20.tar.gz 
+tar -xvf CARLA_Leaderboard_20.tar.gz
+rm CARLA_Leaderboard_20.tar.gz
+pip install PythonAPI/carla/dist/carla-0.9.13-cp37-cp37m-manylinux_2_27_x86_64.whl
+
+
+###### Install Carla Leaderboard ######
+echo "[x] Installing Carla leaderboard..."
+cd $DORA_DEP_HOME/dependencies/
+git clone -b leaderboard-2.0 --single-branch https://github.com/carla-simulator/leaderboard.git
+python3 -m pip install -r leaderboard/requirements.txt
+
+git clone -b leaderboard-2.0 --single-branch https://github.com/carla-simulator/scenario_runner.git
+python3 -m pip install -r scenario_runner/requirements.txt

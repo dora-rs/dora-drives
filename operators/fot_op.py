@@ -4,24 +4,29 @@ import numpy as np
 from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
     fot_wrapper,
 )
-from dora_utils import DoraStatus, closest_vertex, pairwise_distances
+from dora_utils import DoraStatus, closest_vertex, pairwise_distances, LABELS
 from scipy.spatial.transform import Rotation as R
+from numpy import linalg as LA
 import os
 
 
 # Planning general
-TARGET_SPEED = 5
+TARGET_SPEED = 7
 NUM_WAYPOINTS_AHEAD = 10
-GOAL_WAYPOINTS = os.environ.get("GOAL_WAYPOINTS")
-if GOAL_WAYPOINTS:
-    GOAL_LOCATION = np.fromstring(GOAL_WAYPOINTS, dtype=float, sep=",")
-else:
-    GOAL_LOCATION = np.array([[0, 0], [0, 1.5], [3, 2.5]])
-OBSTACLE_CLEARANCE = 10
-OBSTACLE_RADIUS = 0.5
+
+OBSTACLE_CLEARANCE = 1
+OBSTACLE_RADIUS = 2
+OBSTACLE_RADIUS_TANGENT = 0.5
+MAX_CURBATURE = np.pi / 4
 
 
-def get_obstacle_list(obstacle_predictions, waypoints):
+def get_obstacle_list(position, obstacle_predictions, waypoints):
+
+    [x_ego, y_ego, z, rx, ry, rz, rw] = position
+    [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
+        "xyz", degrees=False
+    )
+
     if len(obstacle_predictions) == 0 or len(waypoints) == 0:
         return np.empty((0, 4))
     obstacle_list = []
@@ -31,14 +36,21 @@ def get_obstacle_list(obstacle_predictions, waypoints):
     )
     for distance, prediction in zip(distances, obstacle_predictions):
         # Use all prediction times as potential obstacles.
-        if distance < OBSTACLE_CLEARANCE:
-            [x, y, _, _confidence, _label] = prediction
+        [x, y, _, _confidence, _label] = prediction
+        angle = np.arctan2(y - y_ego, x - x_ego)
+        diff_angle = (yaw - angle) % 2 * np.pi
+
+        if distance < OBSTACLE_CLEARANCE and diff_angle < MAX_CURBATURE:
             obstacle_size = np.array(
                 [
-                    x,
-                    y,
-                    x + OBSTACLE_RADIUS,
-                    y + OBSTACLE_RADIUS,
+                    x - OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
+                    y - OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
+                    x
+                    + OBSTACLE_RADIUS * np.cos(angle)
+                    + OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
+                    y
+                    + OBSTACLE_RADIUS * np.sin(angle)
+                    + OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
                 ]
             )
 
@@ -59,8 +71,10 @@ class Operator:
     def __init__(self):
         self.obstacles = np.array([])
         self.position = []
+        self.last_position = []
         self.waypoints = []
         self.gps_waypoints = []
+        self.last_obstacles = np.array([])
         self.obstacle_metadata = {}
         self.gps_metadata = {}
         self.metadata = {}
@@ -68,15 +82,15 @@ class Operator:
         self.outputs = []
         self.hyperparameters = {
             "max_speed": 25.0,
-            "max_accel": 15.0,
-            "max_curvature": 15.0,
-            "max_road_width_l": 5.0,
-            "max_road_width_r": 5.0,
-            "d_road_w": 0.5,
-            "dt": 0.2,
+            "max_accel": 45.0,
+            "max_curvature": 45.0,
+            "max_road_width_l": 0.1,
+            "max_road_width_r": 0.1,
+            "d_road_w": 0.1,
+            "dt": 0.1,
             "maxt": 5.0,
             "mint": 2.0,
-            "d_t_s": 0.5,
+            "d_t_s": 5,
             "n_s_sample": 2.0,
             "obstacle_clearance": 0.1,
             "kd": 1.0,
@@ -101,23 +115,37 @@ class Operator:
     ):
 
         if dora_input["id"] == "position":
+            self.last_position = self.position
             self.position = np.frombuffer(dora_input["data"], np.float32)
+            if len(self.last_position) == 0:
+                self.last_position = self.position
+            return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "obstacles":
             obstacles = np.frombuffer(
                 dora_input["data"], dtype="float32"
             ).reshape((-1, 5))
-            self.obstacles = obstacles
+            if len(self.last_obstacles) > 0:
+                self.obstacles = np.concatenate(
+                    [self.last_obstacles, obstacles]
+                )
+            else:
+                self.obstacles = obstacles
+            self.last_obstacles = obstacles
             return DoraStatus.CONTINUE
 
-        if "gps_waypoints" == dora_input["id"]:
+        elif "gps_waypoints" == dora_input["id"]:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))[:, :2]
             self.gps_waypoints = waypoints
-            return DoraStatus.CONTINUE
 
         if len(self.gps_waypoints) == 0:
             print("No waypoints")
+            send_output(
+                "waypoints",
+                self.gps_waypoints.tobytes(),
+                dora_input["metadata"],
+            )
             return DoraStatus.CONTINUE
 
         elif len(self.position) == 0:
@@ -129,13 +157,16 @@ class Operator:
             "xyz", degrees=False
         )
 
-        gps_obstacles = get_obstacle_list(self.obstacles, self.gps_waypoints)
+        gps_obstacles = get_obstacle_list(
+            self.position, self.obstacles, self.gps_waypoints
+        )
 
         initial_conditions = {
             "ps": 0,
             "target_speed": self.conds["target_speed"],
             "pos": self.position[:2],
-            "vel": 0.5 * np.array([np.cos(yaw), np.sin(yaw)]),
+            "vel": (np.clip(LA.norm(self.position - self.last_position), 4, 7))
+            * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
             "obs": gps_obstacles,
         }
@@ -157,8 +188,14 @@ class Operator:
         ) = fot_wrapper.run_fot(initial_conditions, self.hyperparameters)
         if not success:
             print(f"fot failed. stopping with {initial_conditions}.")
-            send_output("waypoints", np.array([]).tobytes())
-            return DoraStatus.STOP
+            for obstacle in self.obstacles:
+                print(
+                    f"obstacles:{obstacle}, label: {LABELS[int(obstacle[-1])]}"
+                )
+            send_output(
+                "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
+            )
+            return DoraStatus.CONTINUE
 
         self.waypoints = np.concatenate([result_x, result_y]).reshape((2, -1)).T
 

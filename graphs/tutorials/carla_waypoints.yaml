@@ -69,4 +69,5 @@ nodes:
         gps_waypoints: carla_gps_op/gps_waypoints
         position: carla_source_node/position
         waypoints: fot_op/waypoints
+        obstacles: obstacle_location_op/obstacles
       #  lidar_pc: carla_source_node/lidar_pc
