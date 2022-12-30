@@ -173,6 +173,15 @@ class DoraAgent(AutonomousAgent):
         [[qx, qy, qz, qw]] = R.from_euler(
             "xyz", [[roll, pitch, yaw]], degrees=False
         ).as_quat()
+        if qx**2 + qy**2 + qz **2 + qw**2 == 0:
+            print("Error in quaternion.")
+            return carla.VehicleControl(
+                steer=0.0,
+                throttle=0.0,
+                brake=0.0,
+                hand_brake=False,
+            )
+
         self.previous_positions.append([x, y])
 
         if len(self.previous_positions) < AVERAGE_WINDOW:

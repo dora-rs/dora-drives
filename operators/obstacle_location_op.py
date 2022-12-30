@@ -1,18 +1,15 @@
 from dora_utils import (
-    LABELS,
     DoraStatus,
-    get_extrinsic_matrix,
     get_intrinsic_matrix,
-    get_projection_matrix,
-    location_to_camera_view,
+    get_extrinsic_matrix,
     local_points_to_camera_view,
-    to_world_coordinate,
+    get_projection_matrix,
 )
 
 import numpy as np
 from typing import Callable
 from scipy.spatial.transform import Rotation as R
-
+from sklearn.neighbors import KNeighborsRegressor
 
 CAMERA_WIDTH = 800
 CAMERA_HEIGHT = 600
@@ -53,8 +50,13 @@ class Operator:
 
     def __init__(self):
         self.point_cloud = []
+        self.camera_point_cloud = []
+        self.last_point_cloud = []
+        self.last_camera_point_cloud = []
         self.obstacles = []
+        self.obstacles_bbox = []
         self.position = []
+        self.lanes = []
 
     def on_input(
         self,
@@ -75,11 +77,52 @@ class Operator:
             )
 
             if len(point_cloud) != 0:
+                self.last_point_cloud = self.point_cloud
+                self.last_camera_point_cloud = self.camera_point_cloud
                 self.camera_point_cloud = camera_point_cloud.T
                 self.point_cloud = point_cloud
+                if len(self.last_point_cloud) > 0:
+                    self.point_cloud = np.concatenate(
+                        [self.last_point_cloud, self.point_cloud]
+                    )
+                    self.camera_point_cloud = np.concatenate(
+                        [self.last_camera_point_cloud, self.camera_point_cloud]
+                    )
+
         elif "position" == dora_input["id"]:
             # Add sensor transform
             self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.extrinsic_matrix = get_extrinsic_matrix(
+                get_projection_matrix(self.position)
+            )
+
+        elif "lanes" == dora_input["id"]:
+            lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
+                (-1, 60, 2)
+            )
+
+            knnr = KNeighborsRegressor(n_neighbors=4)
+            knnr.fit(self.camera_point_cloud[:, :2], self.point_cloud)
+
+            processed_lanes = []
+            for lane in lanes:
+                lane_location = knnr.predict(lane)
+                lane_location = np.array(lane_location)
+
+                lane_location = np.hstack(
+                    (
+                        lane_location,
+                        np.ones((lane_location.shape[0], 1)),
+                    )
+                )
+                lane_location = np.dot(lane_location, self.extrinsic_matrix.T)[
+                    :, :3
+                ]
+                processed_lanes.append(lane_location)
+            processed_lanes = np.array(processed_lanes, np.float32).tobytes()
+
+            send_output("global_lanes", processed_lanes, dora_input["metadata"])
+
         elif "obstacles_bbox" == dora_input["id"]:
             if len(self.position) == 0 or len(self.point_cloud) == 0:
                 return DoraStatus.CONTINUE
@@ -106,18 +149,16 @@ class Operator:
                     obstacles_with_location.append(closest_point)
             if len(obstacles_with_location) > 0:
                 obstacles_with_location = np.array(obstacles_with_location)
-
-                obstacles_with_location = np.dot(
-                    obstacles_with_location, INV_UNREAL_MATRIX
+                obstacles_with_location = np.hstack(
+                    (
+                        obstacles_with_location,
+                        np.ones((obstacles_with_location.shape[0], 1)),
+                    )
                 )
+                obstacles_with_location = np.dot(
+                    obstacles_with_location, self.extrinsic_matrix.T
+                )[:, :3]
 
-                [x, y, z, rx, ry, rz, rw] = self.position
-                rot = R.from_quat([rx, ry, rz, rw])
-                obstacles_with_location = rot.apply(obstacles_with_location) + [
-                    x,
-                    y,
-                    z,
-                ]
                 predictions = get_predictions(
                     self.obstacles_bbox, obstacles_with_location
                 )

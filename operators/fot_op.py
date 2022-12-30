@@ -14,10 +14,25 @@ import os
 TARGET_SPEED = 7
 NUM_WAYPOINTS_AHEAD = 10
 
-OBSTACLE_CLEARANCE = 1
+OBSTACLE_CLEARANCE = 3
 OBSTACLE_RADIUS = 2
-OBSTACLE_RADIUS_TANGENT = 0.5
+OBSTACLE_RADIUS_TANGENT = 2
 MAX_CURBATURE = np.pi / 4
+
+
+def get_lane_list(position, lanes, waypoints):
+
+    lane_list = []
+
+    lanes_xy = lanes[:, :, :2]
+
+    for lane in lanes_xy:
+        lane_list.append(np.concatenate([lane - 0.1, lane + 0.1], axis=1))
+
+    if len(lane_list) > 0:
+        return np.concatenate(lane_list)
+    else:
+        return np.array([])
 
 
 def get_obstacle_list(position, obstacle_predictions, waypoints):
@@ -38,9 +53,9 @@ def get_obstacle_list(position, obstacle_predictions, waypoints):
         # Use all prediction times as potential obstacles.
         [x, y, _, _confidence, _label] = prediction
         angle = np.arctan2(y - y_ego, x - x_ego)
-        diff_angle = (yaw - angle) % 2 * np.pi
+        diff_angle = np.arctan2(np.sin(angle - yaw), np.cos(angle - yaw))
 
-        if distance < OBSTACLE_CLEARANCE and diff_angle < MAX_CURBATURE:
+        if distance < OBSTACLE_CLEARANCE and np.abs(diff_angle) < MAX_CURBATURE:
             obstacle_size = np.array(
                 [
                     x - OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
@@ -70,6 +85,7 @@ class Operator:
 
     def __init__(self):
         self.obstacles = np.array([])
+        self.lanes = np.array([])
         self.position = []
         self.last_position = []
         self.waypoints = []
@@ -86,8 +102,8 @@ class Operator:
             "max_curvature": 45.0,
             "max_road_width_l": 0.1,
             "max_road_width_r": 0.1,
-            "d_road_w": 0.1,
-            "dt": 0.1,
+            "d_road_w": 0.5,
+            "dt": 0.5,
             "maxt": 5.0,
             "mint": 2.0,
             "d_t_s": 5,
@@ -123,7 +139,7 @@ class Operator:
 
         elif dora_input["id"] == "obstacles":
             obstacles = np.frombuffer(
-                dora_input["data"], dtype="float32"
+                dora_input["data"], dtype=np.float32
             ).reshape((-1, 5))
             if len(self.last_obstacles) > 0:
                 self.obstacles = np.concatenate(
@@ -131,7 +147,13 @@ class Operator:
                 )
             else:
                 self.obstacles = obstacles
-            self.last_obstacles = obstacles
+            return DoraStatus.CONTINUE
+
+        elif dora_input["id"] == "global_lanes":
+            lanes = np.frombuffer(dora_input["data"], dtype=np.float32).reshape(
+                (-1, 60, 3)
+            )
+            self.lanes = lanes
             return DoraStatus.CONTINUE
 
         elif "gps_waypoints" == dora_input["id"]:
@@ -161,6 +183,11 @@ class Operator:
             self.position, self.obstacles, self.gps_waypoints
         )
 
+        if len(self.lanes) > 0:
+            lanes = get_lane_list(self.position, self.lanes, self.gps_waypoints)
+            obstacles = np.concatenate([gps_obstacles, lanes])
+        else:
+            obstacles = gps_obstacles
         initial_conditions = {
             "ps": 0,
             "target_speed": self.conds["target_speed"],
@@ -168,7 +195,7 @@ class Operator:
             "vel": (np.clip(LA.norm(self.position - self.last_position), 4, 7))
             * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
-            "obs": gps_obstacles,
+            "obs": obstacles,
         }
 
         (

@@ -125,3 +125,5 @@ COPY . .
 
 RUN sudo chown -R dora:dora .
 RUN sudo chmod +x /home/dora/workspace/dora-drives/scripts/*
+
+CMD /home/dora/workspace/dora-drives/scripts/launch_in_container.sh

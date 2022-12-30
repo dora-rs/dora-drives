@@ -24,6 +24,7 @@ if [ -e /dev/video0 ]; then
         --gpus all \
         --runtime=nvidia \
         --env-file variables.env \
+        --env GRAPH=leaderboard/full_agent.yaml \
         --device=/dev/video0:/dev/video0 \
         --net=host \
         -itd \
@@ -39,6 +40,7 @@ else
         --gpus all \
         --runtime=nvidia \
         --env-file variables.env \
+        --env GRAPH=leaderboard/full_agent.yaml \
         --net=host \
         -itd \
         --shm-size=2g \

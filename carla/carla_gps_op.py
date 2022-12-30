@@ -35,7 +35,7 @@ class Operator:
     def __init__(self):
         self._goal_location = GOAL_LOCATION
         client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
-        client.set_timeout(30.0)  # seconds
+        client.set_timeout(50.0)  # seconds
         self.client = client
         carla_world = client.get_world()
         self.carla_world_id = carla_world.id

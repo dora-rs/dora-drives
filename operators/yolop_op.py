@@ -35,8 +35,8 @@ def xywh2xyxy(x):
 
 def non_max_suppression(
     prediction,
-    conf_thres=0.65,
-    iou_thres=0.25,
+    conf_thres=0.85,
+    iou_thres=0.15,
 ):
     """Performs Non-Maximum Suppression (NMS) on inference results
     Returns:
@@ -117,9 +117,9 @@ def fitlane(mask, sel_labels, labels, stats):
         #     for m in range(len(label_group)-1):
         #         labels[labels == label_group[m+1]] = label_group[0]
         t = label_group[0]
-        # samples_y = np.linspace(y, H-1, 30)
+        # samples_y = np.linspace(y, H-1, 60)
         # else:
-        samples_y = np.linspace(y, y + h - 1, 30)
+        samples_y = np.linspace(y, y + h - 1, 60)
 
         samples_x = [
             np.where(labels[int(sample_y)] == t)[0] for sample_y in samples_y
@@ -138,16 +138,16 @@ def fitlane(mask, sel_labels, labels, stats):
             x_limits = np.polyval(func, H - 1)
             # if (y_max + h - 1) >= 720:
 
-            draw_y = np.linspace(y, y + h - 1, 30)
+            draw_y = np.linspace(y, y + h - 1, 60)
             draw_x = np.polyval(func, draw_y)
             # draw_y = draw_y[draw_x < W]
             # draw_x = draw_x[draw_x < W]
             lanes.append((np.asarray([draw_x, draw_y]).T).astype(np.int32))
         else:
             # if ( + w - 1) >= 1280:
-            samples_x = np.linspace(x, W - 1, 30)
+            samples_x = np.linspace(x, W - 1, 60)
             # else:
-            #     samples_x = np.linspace(x, x_max+w-1, 30)
+            #     samples_x = np.linspace(x, x_max+w-1, 60)
             samples_y = [
                 np.where(labels[:, int(sample_x)] == t)[0]
                 for sample_x in samples_x
@@ -169,7 +169,7 @@ def fitlane(mask, sel_labels, labels, stats):
             # if (x + w - 1) >= 1280:
             #     draw_x = np.linspace(x, 1280-1, 1280-x)
             # else:
-            draw_x = np.linspace(x, x + w - 1, 30)
+            draw_x = np.linspace(x, x + w - 1, 60)
             draw_y = np.polyval(func, draw_x)
             lanes.append((np.asarray([draw_x, draw_y]).T).astype(np.int32))
             # cv2.polylines(mask, [draw_points], False, 1, thickness=3)
