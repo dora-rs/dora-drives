@@ -146,7 +146,18 @@
                         <h1 id="leaderboard"><a class="header" href="#leaderboard">Leaderboard</a></h1>
 <p>The leaderboard graphs connect dora to the leaderboard 2.0 to run the graph within the leaderboard environment.</p>
 <p>To use the leaderboard through docker</p>
-<pre><code class="language-bash">./scripts/launch.sh -b -s -g leaderboard/yolov5_agent.yaml
+<pre><code class="language-bash">docker build . -t haixuantao/dora-drives
+docker run \
+    --gpus all \
+    --runtime=nvidia \
+    --env-file variables.env \
+    --env GRAPH=leaderboard/full_agent.yaml \
+    --net=host \
+    -it \
+    --shm-size=2g \
+    --memory=10g \
+    --name dora \
+    haixuantao/dora-drives
 </code></pre>
 <p>To use the leaderboard natively:</p>
 <pre><code class="language-bash">dora-coordinator --run-dataflow graphs/leaderboard/yolov5_agent.yaml
