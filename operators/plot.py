@@ -59,6 +59,7 @@ class Operator:
         self.obstacles_bbox = []
         self.obstacles_id = []
         self.lanes = []
+        self.global_lanes = []
         self.drivable_area = []
         self.last_timestamp = time.time()
         self.position = []
@@ -118,22 +119,19 @@ class Operator:
             obstacles = np.frombuffer(
                 dora_input["data"], dtype="float32"
             ).reshape((-1, 5))[:, :3]
-            self.raw_obstacles = obstacles
-            if len(self.position) != 0:
-                [x, y, z, rx, ry, rz, rw] = self.position
-                rot = R.from_quat([rx, ry, rz, rw]).inv()
-                obstacles = rot.apply(obstacles - [x, y, z])
-                obstacles = np.dot(obstacles, UNREAL_MATRIX)
-                obstacles = local_points_to_camera_view(
-                    obstacles, INTRINSIC_MATRIX
-                ).T
-                self.obstacles = obstacles
+            self.obstacles = obstacles
 
         elif "lanes" == dora_input["id"]:
             lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
                 (-1, 30, 2)
             )
             self.lanes = lanes
+
+        elif "global_lanes" == dora_input["id"]:
+            global_lanes = np.frombuffer(
+                dora_input["data"], dtype=np.float32
+            ).reshape((-1, 3))
+            self.global_lanes = global_lanes
 
         elif "drivable_area" == dora_input["id"]:
             drivable_area = np.frombuffer(
@@ -160,7 +158,7 @@ class Operator:
             # The latest coordinate space is the unreal space.
             point_cloud = np.dot(
                 point_cloud,
-                UNREAL_MATRIX,
+                VELODYNE_MATRIX,
             )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
             point_cloud = local_points_to_camera_view(
@@ -199,7 +197,7 @@ class Operator:
                 self.waypoints, INTRINSIC_MATRIX, inv_extrinsic_matrix
             ).T
             waypoints = np.clip(waypoints, 0, 1_000_000)
-            for waypoint in waypoints:
+            for id, waypoint in enumerate(waypoints):
                 if np.isnan(waypoint).any():
                     break
 
@@ -213,6 +211,21 @@ class Operator:
                         255,
                     ),
                     -1,
+                )
+                [x, y, z] = self.waypoints[id]
+                cv2.putText(
+                    resized_image,
+                    f"x: {x:.2f}, y: {y:.2f}",
+                    (int(waypoint[0]), int(waypoint[1])),
+                    font,
+                    0.5,
+                    (
+                        int(np.clip(255 - waypoint[2] * 100, 0, 255)),
+                        int(np.clip(waypoint[2], 0, 255)),
+                        255,
+                    ),
+                    2,
+                    1,
                 )
 
         ## Drawing gps waypoints on frame
@@ -236,48 +249,75 @@ class Operator:
                     -1,
                 )
 
-        for id, obstacle in enumerate(self.obstacles):
-            [x, y, z] = obstacle
-            # location = location_to_camera_view(
-            # np.array([[x, y, z]]),
-            # INTRINSIC_MATRIX,
-            # inv_extrinsic_matrix,
-            # )
-            location = [x, y, z]
-            cv2.circle(
-                resized_image,
-                (int(location[0]), int(location[1])),
-                3,
-                (
-                    255,
-                    int(max(255 - location[2] * 100, 0)),
-                    int(min(location[2] * 10, 255)),
-                ),
-                -1,
-            )
-            [x, y, z] = self.raw_obstacles[id]
-            cv2.putText(
-                resized_image,
-                f"x: {x:.2f}, y: {y:.2f}",
-                (int(location[0]), int(location[1])),
-                font,
-                0.5,
-                (255, 140, 0),
-                2,
-                1,
-            )
-            # location = location_to_camera_view(
-            # np.array([[x, y, 0]]),
-            # INTRINSIC_MATRIX,
-            # inv_extrinsic_matrix,
-            # )
-            # cv2.circle(
-            # resized_image,
-            # (int(location[0]), int(location[1])),
-            # 3,
-            # (150, 150, 0),
-            # -1,
-            # )
+        ## Drawing lanes on frame
+        if inv_extrinsic_matrix is not None:
+            lanes = location_to_camera_view(
+                self.global_lanes, INTRINSIC_MATRIX, inv_extrinsic_matrix
+            ).T
+
+            for lane_dot in lanes:
+                if np.isnan(lane_dot).any():
+                    break
+                cv2.circle(
+                    resized_image,
+                    (int(lane_dot[0]), int(lane_dot[1])),
+                    3,
+                    (
+                        100,
+                        100,
+                        100,
+                    ),
+                    -1,
+                )
+
+        ## Draw obstacle dot
+        if inv_extrinsic_matrix is not None:
+            obstacles = location_to_camera_view(
+                self.obstacles, INTRINSIC_MATRIX, inv_extrinsic_matrix
+            ).T
+
+            for id, obstacle in enumerate(obstacles):
+                [x, y, z] = obstacle
+                # location = location_to_camera_view(
+                # np.array([[x, y, z]]),
+                # INTRINSIC_MATRIX,
+                # inv_extrinsic_matrix,
+                # )
+                location = [x, y, z]
+                cv2.circle(
+                    resized_image,
+                    (int(location[0]), int(location[1])),
+                    3,
+                    (
+                        0,
+                        200,
+                        0,
+                    ),
+                    -1,
+                )
+                [x, y, z] = self.obstacles[id]
+                cv2.putText(
+                    resized_image,
+                    f"x: {x:.2f}, y: {y:.2f}",
+                    (int(location[0]), int(location[1])),
+                    font,
+                    0.5,
+                    (0, 200, 0),
+                    2,
+                    1,
+                )
+                # location = location_to_camera_view(
+                # np.array([[x, y, 0]]),
+                # INTRINSIC_MATRIX,
+                # inv_extrinsic_matrix,
+                # )
+                # cv2.circle(
+                # resized_image,
+                # (int(location[0]), int(location[1])),
+                # 3,
+                # (150, 150, 0),
+                # -1,
+                # )
 
         for point in self.point_cloud:
             cv2.circle(
@@ -335,8 +375,8 @@ class Operator:
                 1,
             )
 
-        for lane in self.lanes:
-            cv2.polylines(resized_image, [lane], False, (0, 0, 255), 3)
+        # for lane in self.lanes:
+        # cv2.polylines(resized_image, [lane], False, (0, 0, 255), 3)
 
         for contour in self.drivable_area:
             if len(contour) != 0:

@@ -75,7 +75,7 @@ def to_world_coordinate(points: np.array, matrix: np.array) -> np.array:
     """
     # Needed format: [[X0,..Xn],[Y0,..Yn],[Z0,..Zn]].
     # So let's transpose the point matrix.
-    points = points.transpose()
+    points = points.T
 
     # Add 1s row: [[X0..,Xn],[Y0..,Yn],[Z0..,Zn],[1,..1]]
     points = np.append(points, np.ones((1, points.shape[1])), axis=0)
@@ -84,7 +84,7 @@ def to_world_coordinate(points: np.array, matrix: np.array) -> np.array:
     points = np.dot(matrix, points)
 
     # Get all but the last row in array form.
-    points = np.asarray(points[0:3].transpose()).astype(np.float32)
+    points = np.asarray(points[0:3].T).astype(np.float32)
 
     return points
 
