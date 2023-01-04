@@ -16,7 +16,7 @@ COAST_FACTOR = 1.75
 pid_p = 1.0
 pid_d = 0.0
 pid_i = 0.05
-dt = 1.0 / 10
+dt = 1.0 / 5
 pid_use_real_time = False
 
 BRAKE_MAX = 1.0

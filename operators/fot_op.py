@@ -14,10 +14,10 @@ import os
 TARGET_SPEED = 7
 NUM_WAYPOINTS_AHEAD = 10
 
-OBSTACLE_CLEARANCE = 3
-OBSTACLE_RADIUS = 2
-OBSTACLE_RADIUS_TANGENT = 2
-MAX_CURBATURE = np.pi / 4
+OBSTACLE_CLEARANCE = 2
+OBSTACLE_RADIUS = 1
+OBSTACLE_RADIUS_TANGENT = 1
+MAX_CURBATURE = np.pi / 6
 
 
 def get_lane_list(position, lanes, waypoints):
@@ -58,13 +58,17 @@ def get_obstacle_list(position, obstacle_predictions, waypoints):
         if distance < OBSTACLE_CLEARANCE and np.abs(diff_angle) < MAX_CURBATURE:
             obstacle_size = np.array(
                 [
-                    x - OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
-                    y - OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
                     x
-                    + OBSTACLE_RADIUS * np.cos(angle)
+                    - OBSTACLE_RADIUS * np.cos(angle) / 2
+                    - OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
+                    y
+                    - OBSTACLE_RADIUS * np.sin(angle) / 2
+                    - OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
+                    x
+                    + OBSTACLE_RADIUS * np.cos(angle) / 2
                     + OBSTACLE_RADIUS_TANGENT * np.sin(angle) / 2,
                     y
-                    + OBSTACLE_RADIUS * np.sin(angle)
+                    + OBSTACLE_RADIUS * np.sin(angle) / 2
                     + OBSTACLE_RADIUS_TANGENT * np.cos(angle) / 2,
                 ]
             )
@@ -99,7 +103,7 @@ class Operator:
         self.hyperparameters = {
             "max_speed": 25.0,
             "max_accel": 45.0,
-            "max_curvature": 45.0,
+            "max_curvature": 55.0,
             "max_road_width_l": 0.1,
             "max_road_width_r": 0.1,
             "d_road_w": 0.5,

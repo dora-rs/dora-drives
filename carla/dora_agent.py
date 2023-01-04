@@ -173,7 +173,9 @@ class DoraAgent(AutonomousAgent):
         [[qx, qy, qz, qw]] = R.from_euler(
             "xyz", [[roll, pitch, yaw]], degrees=False
         ).as_quat()
-        if qx**2 + qy**2 + qz **2 + qw**2 == 0:
+        try:
+            R.from_quat([qx, qy, qz, qw])
+        except:
             print("Error in quaternion.")
             return carla.VehicleControl(
                 steer=0.0,
@@ -191,12 +193,13 @@ class DoraAgent(AutonomousAgent):
                 brake=0.0,
                 hand_brake=False,
             )
+        self.previous_positions = self.previous_positions[-AVERAGE_WINDOW:]
 
         ## Average last 5 position
         [avg_x, avg_y] = np.array(
-            self.previous_positions[-AVERAGE_WINDOW:]
+            self.previous_positions
         ).mean(axis=0)
-        position = np.array([avg_x, avg_y, 0, qx, qy, qz, qw], np.float32)
+        position = np.array([avg_x, avg_y, 0.0, qx, qy, qz, qw], np.float32)
 
         ### Camera preprocessing
         frame_raw_data = input_data["camera.center"][1]
@@ -224,7 +227,8 @@ class DoraAgent(AutonomousAgent):
                     transform[0].location.z,
                 ]
                 for transform in self._global_plan_world_coord
-            ], np.float32
+            ],
+            np.float32,
         )
         # waypoints_xyv = np.hstack(
         # (waypoints_xy, 0.5 + np.zeros((waypoints_xy.shape[0], 1)))

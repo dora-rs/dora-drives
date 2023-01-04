@@ -127,8 +127,10 @@ class Operator:
                 ## Verify that computed waypoints are not inverted
                 target_vector = waypoints[0] - self.position[:2]
                 angle = np.arctan2(target_vector[1], target_vector[0])
-                diff_angle = np.abs(angle - yaw) % 2 * np.pi
-                if diff_angle > np.pi * 1 / 2:
+                diff_angle = np.arctan2(
+                    np.sin(angle - yaw), np.cos(angle - yaw)
+                )
+                if np.abs(diff_angle) > np.pi * 2 / 3:
                     print("Error in computation of waypoints")
                     print(f"target waypoint: {waypoints[0]}")
                     print(f"position: {[x, y, z]}")
