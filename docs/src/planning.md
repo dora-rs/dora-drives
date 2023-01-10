@@ -18,9 +18,12 @@ To get the gps waypoint with a preset target location. All we have to do is add:
         - gps_waypoints
       inputs:
         position: carla_source_node/position
+        objective_waypoints: carla_source_node/objective_waypoints
 ```
 
-It will compute waypoints from the input location to go to the preset target location. 
+It will compute waypoints from the input location to go to follow the objective waypoints. 
+
+By default, the first message is: `[[234, 59, 39]]`.
 
 The waypoints are defined as a an array of `x, y, speed` as `float32` waypoints, with global coordinate.
 
