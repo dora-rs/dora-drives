@@ -615,6 +615,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
+        - objective_waypoints
       source: python
       args: ../../carla/carla_source_node.py
       env: 
@@ -646,6 +647,18 @@ nodes:
         #image: carla_source_node/image
         #obstacles_bbox: yolov5/bbox
       #python: ../../operators/strong_sort_op.py
+  
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+        - global_lanes
+      inputs:
+        lidar_pc: carla_source_node/lidar_pc
+        obstacles_bbox: yolov5/bbox
+        position: carla_source_node/position
+        lanes: yolop/lanes
+      python: ../../operators/obstacle_location_op.py
 
   - id: plot
     operator:
@@ -653,12 +666,17 @@ nodes:
       inputs:
         image: carla_source_node/image
         obstacles_bbox: yolov5/bbox
-        obstacles_id: strong_sort/obstacles_id
+        obstacles: obstacle_location_op/obstacles
         traffic_sign_bbox: traffic_sign/bbox
         lanes: yolop/lanes
+        global_lanes: obstacle_location_op/global_lanes
         drivable_area: yolop/drivable_area
-        tick: dora/timer/millis/300
+        obstacles_id: strong_sort/obstacles_id
+        tick: dora/timer/millis/400
+        gps_waypoints: carla_gps_op/gps_waypoints
         position: carla_source_node/position
+        waypoints: fot_op/waypoints
+        control: pid_control_op/control
 </code></pre>
 <p>We can then tun it with the following command:</p>
 <pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_perception.yaml
@@ -719,8 +737,10 @@ dora-coordinator --run-dataflow graphs/tutorials/carla_perception.yaml
         - gps_waypoints
       inputs:
         position: carla_source_node/position
+        objective_waypoints: carla_source_node/objective_waypoints
 </code></pre>
-<p>It will compute waypoints from the input location to go to the preset target location. </p>
+<p>It will compute waypoints from the input location to go to follow the objective waypoints. </p>
+<p>By default, the first message is: <code>[[234, 59, 39]]</code>.</p>
 <p>The waypoints are defined as a an array of <code>x, y, speed</code> as <code>float32</code> waypoints, with global coordinate.</p>
 <h2 id="planner"><a class="header" href="#planner">Planner</a></h2>
 <p>The GPS waypoints does not take into account obstacles. To avoid collision, we can implement a motion planner that can avoid obstacles. </p>
@@ -747,7 +767,7 @@ dora-coordinator --run-dataflow graphs/tutorials/carla_perception.yaml
 <p>Car can simplistically be controlled in general using 3 variables: <code>throttle, steering, brake</code>. We're going to focus on those 3 for the moment.</p>
 <p>To send a control to a Carla car, we can use <code>carla_control_op.py</code> that takes an array of 3 variables: <code>throttle, steering, brake</code> and apply it to our car.</p>
 <p>To translate out waypoints to those control, we're using a PID controller that is able to adjust the steering according to the response of the steering, and we're going to pipe this response to the CARLA API so that the car can move. The PID controller code is in <code>pid_control_op.py</code>.</p>
-<p>The full graph look as follows</p>
+<p>The full graph look as follows:</p>
 <pre><code class="language-yaml">communication:
   iceoryx:
     app_name_prefix: dora-iceoryx-example
@@ -756,7 +776,7 @@ nodes:
   - id: carla_source_node
     custom:
       inputs:
-        tick: dora/timer/millis/300
+        tick: dora/timer/millis/500
       outputs:
         - position
         #- depth_frame
@@ -764,48 +784,65 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
+        - objective_waypoints
       source: python
       args: ../../carla/carla_source_node.py
 
-
-  #- id: yolov5
-    #operator: 
-      #outputs:
-        #- bbox
-      #inputs:
-        #image: carla_source_node/image
-      #python: ../../operators/yolov5_op.py
-  
-  #- id: obstacle_location_op
-    #operator: 
-      #outputs:
-        #- obstacles
-      #inputs:
-        ## depth_frame: carla_source_node/depth_frame
-        #lidar_pc: carla_source_node/lidar_pc
-        #obstacles_bbox: yolov5/bbox
-        #position: carla_source_node/position
-      #python: ../../operators/obstacle_location_op.py
-      
   - id: carla_gps_op
     operator:
       python: ../../carla/carla_gps_op.py
       outputs:
         - gps_waypoints
       inputs:
+        # opendrive: carla_source_node/opendrive
+        objective_waypoints: carla_source_node/objective_waypoints
         position: carla_source_node/position
-        tick: dora/timer/millis/5000
 
-  #- id: fot_op
-    #operator:
-      #python: ../../operators/fot_op.py
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: carla_source_node/image
+      python: ../../operators/yolov5_op.py
+    env:
+     # CUDA_VISIBLE_DEVICES: &quot;&quot;
+      PYTORCH_DEVICE: cuda
+
+  #- id: yolop
+    #operator: 
       #outputs:
-        #- waypoints
+        #- lanes
+        #- drivable_area
       #inputs:
-        #position: carla_source_node/position
-        #obstacles: obstacle_location_op/obstacles
-        #gps_waypoints: carla_gps_op/gps_waypoints
+        #image: carla_source_node/image
+      #python: ../../operators/yolop_op.py
+    #env:
+      # CUDA_VISIBLE_DEVICES: &quot;&quot;
 
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+        - global_lanes
+      inputs:
+        lidar_pc: carla_source_node/lidar_pc
+        obstacles_bbox: yolov5/bbox
+        position: carla_source_node/position
+        lanes: yolop/lanes
+      python: ../../operators/obstacle_location_op.py
+
+  - id: fot_op
+    operator:
+      python: ../../operators/fot_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: carla_source_node/position
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+        global_lanes: obstacle_location_op/global_lanes
+ 
   - id: pid_control_op
     operator:
       python: ../../operators/pid_control_op.py
@@ -813,7 +850,26 @@ nodes:
         - control
       inputs:
         position: carla_source_node/position
-        waypoints: carla_gps_op/gps_waypoints
+        waypoints: fot_op/waypoints
+
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
+        image: carla_source_node/image
+        obstacles_bbox: yolov5/bbox
+        obstacles: obstacle_location_op/obstacles
+        traffic_sign_bbox: traffic_sign/bbox
+        lanes: yolop/lanes
+        global_lanes: obstacle_location_op/global_lanes
+        drivable_area: yolop/drivable_area
+        obstacles_id: strong_sort/obstacles_id
+        tick: dora/timer/millis/400
+        gps_waypoints: carla_gps_op/gps_waypoints
+        position: carla_source_node/position
+        waypoints: fot_op/waypoints
+        control: pid_control_op/control
+      #  lidar_pc: carla_source_node/lidar_pc
 
   - id: carla_control_op
     operator:
@@ -823,64 +879,68 @@ nodes:
       inputs:
         control: pid_control_op/control
         vehicle_id: carla_source_node/vehicle_id
-
-  - id: plot
-    operator:
-      python: ../../operators/plot.py
-      inputs:
-        image: carla_source_node/image
-        obstacles_bbox: yolov5/bbox
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        drivable_area: yolop/drivable_area
-        obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/50
-        gps_waypoints: carla_gps_op/gps_waypoints
-        position: carla_source_node/position
-        waypoints: fot_op/waypoints
-        control: pid_control_op/control
-      #  lidar_pc: carla_source_node/lidar_pc
 </code></pre>
-<pre><code class="language-mermaid">flowchart TB
-  carla_source_node[\carla_source_node/]
+<p>You can visualize your graph with:</p>
+<pre><code class="language-bash">dora graph graphs/tutorials/carla_full.yaml --open                 
+</code></pre>
+<pre><code class="language-mermaid">        flowchart TB
+  carla_source_node
+subgraph carla_gps_op
+  carla_gps_op/op[op]
+end
 subgraph yolov5
   yolov5/op[op]
 end
 subgraph obstacle_location_op
   obstacle_location_op/op[op]
 end
-subgraph carla_gps_op
-  carla_gps_op/op[op]
-end
-subgraph hybrid_astar_op
-  hybrid_astar_op/op[op]
+subgraph fot_op
+  fot_op/op[op]
 end
 subgraph pid_control_op
   pid_control_op/op[op]
 end
+subgraph plot
+  plot/op[/op\]
+end
 subgraph carla_control_op
   carla_control_op/op[op]
 end
-subgraph plot_op
-  plot_op/op[/op\]
+subgraph ___dora___ [dora]
+  subgraph ___timer_timer___ [timer]
+    dora/timer/millis/400[\millis/400/]
+    dora/timer/millis/500[\millis/500/]
+  end
 end
+  dora/timer/millis/500 -- tick --&gt; carla_source_node
+  carla_source_node -- objective_waypoints --&gt; carla_gps_op/op
+  carla_source_node -- position --&gt; carla_gps_op/op
   carla_source_node -- image --&gt; yolov5/op
+  missing&gt;missing] -- lanes --&gt; obstacle_location_op/op
   carla_source_node -- lidar_pc --&gt; obstacle_location_op/op
   yolov5/op -- bbox as obstacles_bbox --&gt; obstacle_location_op/op
   carla_source_node -- position --&gt; obstacle_location_op/op
-  carla_source_node -- position --&gt; carla_gps_op/op
-  carla_gps_op/op -- gps_waypoints --&gt; hybrid_astar_op/op
-  obstacle_location_op/op -- obstacles --&gt; hybrid_astar_op/op
-  carla_source_node -- position --&gt; hybrid_astar_op/op
+  obstacle_location_op/op -- global_lanes --&gt; fot_op/op
+  carla_gps_op/op -- gps_waypoints --&gt; fot_op/op
+  obstacle_location_op/op -- obstacles --&gt; fot_op/op
+  carla_source_node -- position --&gt; fot_op/op
   carla_source_node -- position --&gt; pid_control_op/op
-  hybrid_astar_op/op -- waypoints --&gt; pid_control_op/op
+  fot_op/op -- waypoints --&gt; pid_control_op/op
+  pid_control_op/op -- control --&gt; plot/op
+  missing&gt;missing] -- drivable_area --&gt; plot/op
+  obstacle_location_op/op -- global_lanes --&gt; plot/op
+  carla_gps_op/op -- gps_waypoints --&gt; plot/op
+  carla_source_node -- image --&gt; plot/op
+  missing&gt;missing] -- lanes --&gt; plot/op
+  obstacle_location_op/op -- obstacles --&gt; plot/op
+  yolov5/op -- bbox as obstacles_bbox --&gt; plot/op
+  missing&gt;missing] -- obstacles_id --&gt; plot/op
+  carla_source_node -- position --&gt; plot/op
+  dora/timer/millis/400 -- tick --&gt; plot/op
+  missing&gt;missing] -- traffic_sign_bbox --&gt; plot/op
+  fot_op/op -- waypoints --&gt; plot/op
   pid_control_op/op -- control --&gt; carla_control_op/op
   carla_source_node -- vehicle_id --&gt; carla_control_op/op
-  carla_source_node -- image --&gt; plot_op/op
-  obstacle_location_op/op -- obstacles --&gt; plot_op/op
-  yolov5/op -- bbox as obstacles_bbox --&gt; plot_op/op
-  carla_source_node -- position --&gt; plot_op/op
-  hybrid_astar_op/op -- waypoints --&gt; plot_op/op
 </code></pre>
 <p>To test it out:</p>
 <pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
@@ -892,10 +952,17 @@ end
 </code></pre>
 <p>😎 We now have a working autonomous car!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="leaderboard"><a class="header" href="#leaderboard">Leaderboard</a></h1>
+<p>The CARLA Leaderboard enables you to test out your agent on predefined scenarios. It will generates KPI that can be used to compare agent between them. </p>
+<p>You can use the CARLA leaderboard without changing your graph by simply changing the input source. The new source is <code>carla/dora_agent</code>.</p>
 <p>The leaderboard graphs connect dora to the leaderboard 2.0 to run the graph within the leaderboard environment.</p>
-<p>To use the leaderboard through docker</p>
+<p>To use the leaderboard through docker, first build it with:</p>
 <pre><code class="language-bash">docker build . -t haixuantao/dora-drives
-docker run \
+</code></pre>
+<p>or pull it from dockerhub:</p>
+<pre><code class="language-bash">docker pull haixuantao/dora-drives
+</code></pre>
+<p>Then run it within docker with:</p>
+<pre><code class="language-bash">docker run \
     --gpus all \
     --runtime=nvidia \
     --env-file variables.env \
@@ -907,8 +974,8 @@ docker run \
     --name dora \
     haixuantao/dora-drives
 </code></pre>
-<p>To use the leaderboard natively:</p>
-<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/leaderboard/yolov5_agent.yaml
+<p>Or use the leaderboard natively:</p>
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/leaderboard/full_agent.yaml
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="carla-source-node"><a class="header" href="#carla-source-node">Carla Source Node</a></h1>
 <p>Carla source node generates pedestrians, vehicles, as well as an <code>ego</code> vehicle with camera and sensors attached to it.</p>

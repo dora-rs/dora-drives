@@ -156,8 +156,10 @@
         - gps_waypoints
       inputs:
         position: carla_source_node/position
+        objective_waypoints: carla_source_node/objective_waypoints
 </code></pre>
-<p>It will compute waypoints from the input location to go to the preset target location. </p>
+<p>It will compute waypoints from the input location to go to follow the objective waypoints. </p>
+<p>By default, the first message is: <code>[[234, 59, 39]]</code>.</p>
 <p>The waypoints are defined as a an array of <code>x, y, speed</code> as <code>float32</code> waypoints, with global coordinate.</p>
 <h2 id="planner"><a class="header" href="#planner">Planner</a></h2>
 <p>The GPS waypoints does not take into account obstacles. To avoid collision, we can implement a motion planner that can avoid obstacles. </p>
