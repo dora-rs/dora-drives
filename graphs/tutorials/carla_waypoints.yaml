@@ -14,6 +14,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
+        - objective_waypoints
       source: python
       args: ../../carla/carla_source_node.py
       env: 
@@ -44,6 +45,7 @@ nodes:
         - gps_waypoints
       inputs:
         position: carla_source_node/position
+        objective_waypoints: carla_source_node/objective_waypoints
 
   - id: fot_op
     operator:

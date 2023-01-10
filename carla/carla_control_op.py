@@ -59,18 +59,19 @@ class Operator:
         if "control" != dora_input["id"]:
             return DoraStatus.CONTINUE
 
-        control = np.frombuffer(dora_input["data"])
-
-        steer = radians_to_steer(control[2], STEER_GAIN)
-        vec_control = VehicleControl(
-            throttle=control[0],
-            steer=control[1],
-            brake=steer,
-            hand_brake=False,
-            reverse=False,
+        [throttle, target_angle, brake] = np.frombuffer(
+            dora_input["data"], np.float16
         )
 
-        client.apply_batch_sync(
+        steer = radians_to_steer(target_angle, STEER_GAIN)
+        vec_control = VehicleControl(
+            steer=float(steer),
+            throttle=float(throttle),
+            brake=float(brake),
+            hand_brake=False,
+        )
+
+        client.apply_batch(
             [command.ApplyVehicleControl(self.vehicle_id, vec_control)]
         )
         return DoraStatus.CONTINUE
