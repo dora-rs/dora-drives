@@ -75,6 +75,7 @@ CARLA_SIMULATOR_PORT = "2000"
 LABELS = "image"
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
+OBJECTIVE_WAYPOINTS = np.array([[234, 59, 39]], np.float32)
 
 lidar_pc = None
 depth_frame = None
@@ -190,6 +191,7 @@ def main():
     metadata = {"open_telemetry_context": serialize_context(output)}
     node.send_output("position", position.tobytes(), metadata)
     node.send_output("image", camera_frame, metadata)
+    node.send_output("objective_waypoints", OBJECTIVE_WAYPOINTS.tobytes(), metadata)
     # node.send_output("depth_frame", depth_frame, metadata)
     # node.send_output("segmented_frame", segmented_frame, metadata)
     node.send_output("lidar_pc", lidar_pc, metadata)

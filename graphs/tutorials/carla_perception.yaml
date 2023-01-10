@@ -14,6 +14,7 @@ nodes:
         - vehicle_id
         - image
         - lidar_pc
+        - objective_waypoints
       source: python
       args: ../../carla/carla_source_node.py
       env: 
@@ -45,6 +46,18 @@ nodes:
         #image: carla_source_node/image
         #obstacles_bbox: yolov5/bbox
       #python: ../../operators/strong_sort_op.py
+  
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+        - global_lanes
+      inputs:
+        lidar_pc: carla_source_node/lidar_pc
+        obstacles_bbox: yolov5/bbox
+        position: carla_source_node/position
+        lanes: yolop/lanes
+      python: ../../operators/obstacle_location_op.py
 
   - id: plot
     operator:
@@ -52,9 +65,14 @@ nodes:
       inputs:
         image: carla_source_node/image
         obstacles_bbox: yolov5/bbox
-        obstacles_id: strong_sort/obstacles_id
+        obstacles: obstacle_location_op/obstacles
         traffic_sign_bbox: traffic_sign/bbox
         lanes: yolop/lanes
+        global_lanes: obstacle_location_op/global_lanes
         drivable_area: yolop/drivable_area
-        tick: dora/timer/millis/300
+        obstacles_id: strong_sort/obstacles_id
+        tick: dora/timer/millis/400
+        gps_waypoints: carla_gps_op/gps_waypoints
         position: carla_source_node/position
+        waypoints: fot_op/waypoints
+        control: pid_control_op/control
