@@ -6,11 +6,16 @@ To send a control to a Carla car, we can use `carla_control_op.py` that takes an
 
 To translate out waypoints to those control, we're using a PID controller that is able to adjust the steering according to the response of the steering, and we're going to pipe this response to the CARLA API so that the car can move. The PID controller code is in `pid_control_op.py`.
 
-The full graph look as follows
+The full graph look as follows:
 
 ```yaml
 {{#include ../../graphs/tutorials/carla_full.yaml}}
 ```
+
+You can visualize your graph with:
+```bash
+dora graph graphs/tutorials/carla_full.yaml --open                 
+ ```
 
 ```mermaid
         flowchart TB
