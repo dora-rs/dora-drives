@@ -279,10 +279,11 @@ You will need to have <code>/etc/docker/daemon.json</code> to be exactly:</p>
 <h3 id="environments-2"><a class="header" href="#environments-2">Environments</a></h3>
 <h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
 <pre><code class="language-bash">export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt; # Ex: $HOME/Documents
-export DORA_DEP_HOME=$HOME/Documents/CONTRIB
+export DORA_DEP_HOME=$HOME/Documents
 export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.13
 export PYLOT_HOME=$DORA_DEP_HOME
 export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.13/PythonAPI/carla:$DORA_DEP_HOME/dependencies/leaderboard:$DORA_DEP_HOME/dependencies/scenario_runner
+
 
 ## Add missing linux dependencies
 sudo apt-get -y update 
