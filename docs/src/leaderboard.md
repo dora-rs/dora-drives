@@ -36,3 +36,14 @@ Or use the leaderboard natively:
 ```bash
 dora-coordinator --run-dataflow graphs/leaderboard/full_agent.yaml
 ```
+
+
+To download the results from the docker container, you can use:
+```bash
+## For the camera feed
+docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/output.avi .
+## For the leaderboard `simulation_results.json` use:
+docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/simulation_results.json .
+```
+
+Otherwise you will be able to find the results in the `graphs/leaderboard/` folder.
