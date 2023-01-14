@@ -978,6 +978,13 @@ end
 <p>Or use the leaderboard natively:</p>
 <pre><code class="language-bash">dora-coordinator --run-dataflow graphs/leaderboard/full_agent.yaml
 </code></pre>
+<p>To download the results from the docker container, you can use:</p>
+<pre><code class="language-bash">## For the camera feed
+docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/output.avi .
+## For the leaderboard `simulation_results.json` use:
+docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/simulation_results.json .
+</code></pre>
+<p>Otherwise you will be able to find the results in the <code>graphs/leaderboard/</code> folder.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="carla-source-node"><a class="header" href="#carla-source-node">Carla Source Node</a></h1>
 <p>Carla source node generates pedestrians, vehicles, as well as an <code>ego</code> vehicle with camera and sensors attached to it.</p>
 <h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
