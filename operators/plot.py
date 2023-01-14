@@ -31,6 +31,10 @@ INV_VELODYNE_MATRIX = np.linalg.inv(VELODYNE_MATRIX)
 INTRINSIC_MATRIX = get_intrinsic_matrix(
     DEPTH_IMAGE_WIDTH, DEPTH_IMAGE_HEIGHT, DEPTH_FOV
 )
+
+VERBOSE = True
+NO_DISPLAY = True
+
 writer = cv2.VideoWriter(
     "output.avi",
     cv2.VideoWriter_fourcc(*"MJPG"),
@@ -74,7 +78,7 @@ class Operator:
     def on_input(
         self,
         dora_input: dict,
-        _send_output: Callable[[str, bytes], None],
+        send_output: Callable[[str, bytes], None],
     ):
 
         if "waypoints" == dora_input["id"]:
@@ -212,21 +216,22 @@ class Operator:
                     ),
                     -1,
                 )
-                [x, y, z] = self.waypoints[id]
-                cv2.putText(
-                    resized_image,
-                    f"x: {x:.2f}, y: {y:.2f}",
-                    (int(waypoint[0]), int(waypoint[1])),
-                    font,
-                    0.5,
-                    (
-                        int(np.clip(255 - waypoint[2] * 100, 0, 255)),
-                        int(np.clip(waypoint[2], 0, 255)),
-                        255,
-                    ),
-                    2,
-                    1,
-                )
+                if VERBOSE:
+                    [x, y, z] = self.waypoints[id]
+                    cv2.putText(
+                        resized_image,
+                        f"x: {x:.2f}, y: {y:.2f}",
+                        (int(waypoint[0]), int(waypoint[1])),
+                        font,
+                        0.5,
+                        (
+                            int(np.clip(255 - waypoint[2] * 100, 0, 255)),
+                            int(np.clip(waypoint[2], 0, 255)),
+                            255,
+                        ),
+                        2,
+                        1,
+                    )
 
         ## Drawing gps waypoints on frame
         if inv_extrinsic_matrix is not None:
@@ -295,17 +300,19 @@ class Operator:
                     ),
                     -1,
                 )
-                [x, y, z] = self.obstacles[id]
-                cv2.putText(
-                    resized_image,
-                    f"x: {x:.2f}, y: {y:.2f}",
-                    (int(location[0]), int(location[1])),
-                    font,
-                    0.5,
-                    (0, 200, 0),
-                    2,
-                    1,
-                )
+
+                if VERBOSE:
+                    [x, y, z] = self.obstacles[id]
+                    cv2.putText(
+                        resized_image,
+                        f"x: {x:.2f}, y: {y:.2f}",
+                        (int(location[0]), int(location[1])),
+                        font,
+                        0.5,
+                        (0, 200, 0),
+                        2,
+                        1,
+                    )
                 # location = location_to_camera_view(
                 # np.array([[x, y, 0]]),
                 # INTRINSIC_MATRIX,
@@ -338,17 +345,18 @@ class Operator:
             start = (int(min_x), int(min_y))
             end = (int(max_x), int(max_y))
             cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
+            if VERBOSE:
 
-            cv2.putText(
-                resized_image,
-                LABELS[label] + f", {confidence}%",
-                (int(min_x), int(max_y)),
-                font,
-                0.5,
-                (0, 255, 0),
-                2,
-                1,
-            )
+                cv2.putText(
+                    resized_image,
+                    LABELS[label] + f", {confidence}%",
+                    (int(min_x), int(max_y)),
+                    font,
+                    0.5,
+                    (0, 255, 0),
+                    2,
+                    1,
+                )
 
         for obstacle_id in self.obstacles_id:
             [
@@ -440,7 +448,9 @@ class Operator:
         # lineType,
         # )
         writer.write(resized_image)
-        cv2.imshow("image", resized_image)
-        cv2.waitKey(1)
+        if not NO_DISPLAY:
+            cv2.imshow("image", resized_image)
+            cv2.waitKey(1)
         self.last_time = time.time()
+        ## send_output("plot_status", b"")
         return DoraStatus.CONTINUE
