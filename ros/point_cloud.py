@@ -5,10 +5,12 @@ from sensor_msgs.msg import PointCloud2
 import numpy as np
 from dora import Node
 import time
+
 node = Node()
 
 
 start = time.time()
+
 
 def callback(data):
     global start
@@ -26,7 +28,7 @@ def callback(data):
     # inds0 = np.random.choice(point_cloud.shape[0], min(1500, point_cloud.shape[0]), replace=False)
     # point_cloud = point_cloud[inds0]
 
-    if ( time.time() - start > 1 ) and len(point_cloud) > 0:
+    if (time.time() - start > 1) and len(point_cloud) > 0:
         node.send_output("lidar_pc", point_cloud.tobytes())
         start = time.time()
 

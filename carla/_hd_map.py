@@ -28,8 +28,8 @@ class HDMap(object):
         self._map = simulator_map
         # Setup global planner.
         self._grp = GlobalRoutePlanner(
-            self._map, 1.0  # Distance between waypoints
-        )
+            self._map, 1.0
+        )  # Distance between waypoints
 
     # self._grp.setup()
 

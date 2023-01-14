@@ -196,9 +196,7 @@ class DoraAgent(AutonomousAgent):
         self.previous_positions = self.previous_positions[-AVERAGE_WINDOW:]
 
         ## Average last 5 position
-        [avg_x, avg_y] = np.array(
-            self.previous_positions
-        ).mean(axis=0)
+        [avg_x, avg_y] = np.array(self.previous_positions).mean(axis=0)
         position = np.array([avg_x, avg_y, 0.0, qx, qy, qz, qw], np.float32)
 
         ### Camera preprocessing

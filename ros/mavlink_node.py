@@ -22,7 +22,9 @@ async def run():
 
         [vx, vy, vz, yaw] = np.frombuffer(value)
         print(f"vel: {vx, vy, vz, yaw}")
-        await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.1, 0.1, 0, 45))
+        await drone.offboard.set_velocity_body(
+            VelocityBodyYawspeed(0.1, 0.1, 0, 45)
+        )
         print("awaited!")
         # await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0, 0, 0.0, 0.0))
         # await asyncio.sleep(0.5)

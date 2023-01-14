@@ -135,7 +135,6 @@ class Operator:
                     print(f"target waypoint: {waypoints[0]}")
                     print(f"position: {[x, y, z]}")
                     print(f"goal location: {self._goal_location}")
-                    print(f"objective waypoints: {self.objective_waypoints}")
                 else:
                     self.waypoints = waypoints
                     self.target_speeds = np.array([5.0] * len(waypoints))

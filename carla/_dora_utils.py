@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.metrics import pairwise_distances
 from typing import Tuple
 
+
 def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:
     return np.linalg.norm(left_vertix[:3] - right_vertix[:3])
 

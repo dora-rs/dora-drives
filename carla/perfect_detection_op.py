@@ -356,7 +356,8 @@ class Operator:
 
             if (
                 distance_points(
-                    np.array([obs_x, obs_y, obs_z]), np.array(self.position[:3])
+                    np.array([obs_x, obs_y, obs_z]),
+                    np.array(self.position[:3]),
                 )
                 <= DYNAMIC_OBSTACLE_DISTANCE_THRESHOLD
             ):
