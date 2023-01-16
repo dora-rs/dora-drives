@@ -94,6 +94,7 @@ sudo apt-get -y --fix-missing update && sudo apt-get install --fix-missing -y li
 conda create -n dora3.7 python=3.7 -y
 conda activate dora3.7
 conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch -y
+pip install --upgrade pip
 pip install -r install_requirements.txt
 pip install -r requirements.txt
 
