@@ -118,7 +118,7 @@ RUN conda activate dora3.7 && python3 -c "from strong_sort import StrongSORT; im
 RUN conda activate dora3.7 && python3 -c "import yolov7_tt100k"
 
 RUN sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.2-test-release/dora-v0.1.2-test-release-x86_64-Linux.zip && sudo unzip dora-v0.1.2-test-release-x86_64-Linux.zip -d /bin && sudo mv /bin/iceoryx/iox-roudi /bin
-RUN conda activate dora3.7 && python3 -m pip install dora-rs==0.1.1.post2 patchelf --upgrade
+RUN conda activate dora3.7 && python3 -m pip install dora-rs patchelf --upgrade
 
 WORKDIR /home/dora/workspace/dora-drives
 COPY . .
