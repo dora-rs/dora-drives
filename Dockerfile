@@ -110,12 +110,12 @@ RUN sudo chown -R dora:dora .
 # RUN conda activate dora3.7 && python3 -c "from imfnet import get_model; get_model()"
 #### RUN conda activate dora3.7 && pip install --upgrade pip
 #### RUN conda activate dora3.7 && conda install pytorch=1.11.0 torchvision cudatoolkit=11.3 -c pytorch 
-RUN conda activate dora3.7 && python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA seems to not be available on build, Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626'" 
-# RUN conda activate dora3.7 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
-RUN conda activate dora3.7 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
-RUN conda activate dora3.7 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
-RUN conda activate dora3.7 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
-RUN conda activate dora3.7 && python3 -c "import yolov7_tt100k"
+# RUN conda activate dora3.7 && python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA seems to not be available on build, Check out :https://github.com/pytorch/extension-cpp/issues/71#issuecomment-1061880626'" 
+# # RUN conda activate dora3.7 && MAX_JOBS=4 python3 -m pip install -U git+https://github.com/NVIDIA/MinkowskiEngine -v --no-deps --install-option="--blas_include_dirs=${CONDA_PREFIX}/include" --install-option="--blas=openblas" --install-option="--force_cuda"
+# RUN conda activate dora3.7 && python3 -c "import torch; torch.hub.load('hustvl/yolop', 'yolop', pretrained=True)"
+# RUN conda activate dora3.7 && python3 -c "import torch; torch.hub.load('ultralytics/yolov5', 'yolov5n')"
+# RUN conda activate dora3.7 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
+# RUN conda activate dora3.7 && python3 -c "import yolov7_tt100k"
 
 RUN sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.2-test-release/dora-v0.1.2-test-release-x86_64-Linux.zip && sudo unzip dora-v0.1.2-test-release-x86_64-Linux.zip -d /bin && sudo mv /bin/iceoryx/iox-roudi /bin
 RUN conda activate dora3.7 && python3 -m pip install dora-rs patchelf --upgrade

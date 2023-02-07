@@ -23,7 +23,7 @@ docker run \
     --gpus all \
     --runtime=nvidia \
     --env-file variables.env \
-    --env GRAPH=leaderboard/full_agent.yaml \
+    --env GRAPH=leaderboard/oasis_agent.yaml \
     --net=host \
     -it \
     --shm-size=2g \

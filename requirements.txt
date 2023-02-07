@@ -4,7 +4,6 @@
 # Base ----------------------------------------
 matplotlib>=3.2.2
 numpy>=1.18.5
-opencv-python>=4.1.1
 Pillow>=7.1.2
 PyYAML>=5.3.1
 requests>=2.23.0
@@ -72,7 +71,6 @@ einops==0.3.2
 joblib==1.2.0
 nibabel==3.2.1
 open3d
-opencv_contrib_python==4.5.2.52
 pyflann==1.6.14
 pyflann_py3==0.1.0
 tensorboardX==2.5.1
