@@ -2,12 +2,12 @@ import threading
 from typing import Callable
 
 import numpy as np
-
 from _dora_utils import DoraStatus, closest_vertex
 from _hd_map import HDMap
-from carla import Client, Map
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
+
+from carla import Client, Map
 
 mutex = threading.Lock()
 
@@ -18,7 +18,7 @@ NUM_WAYPOINTS_AHEAD = 120
 GOAL_LOCATION = [234, 59, 39]
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
-OBJECTIVE_MIN_DISTANCE = 20
+OBJECTIVE_MIN_DISTANCE = 0
 
 
 def filter_consecutive_duplicate(x):
