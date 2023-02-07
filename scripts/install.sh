@@ -55,22 +55,24 @@ git clone https://github.com/erdos-project/prediction.git
 conda activate dora3.7 
 
 ###### Download the Carla simulator ######
-echo "[x] Downloading the CARLA_Leaderboard_20 simulator..."
+echo "[x] Downloading the CARLA_0.9.13 simulator..."
 cd $DORA_DEP_HOME/dependencies/
 
 mkdir CARLA_0.9.13
 cd CARLA_0.9.13
-wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/Leaderboard/CARLA_Leaderboard_20.tar.gz 
-tar -xvf CARLA_Leaderboard_20.tar.gz
-rm CARLA_Leaderboard_20.tar.gz
-pip install PythonAPI/carla/dist/carla-0.9.13-cp37-cp37m-manylinux_2_27_x86_64.whl
-
+wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz 
+tar -xvf CARLA_0.9.13.tar.gz
+rm CARLA_0.9.13.tar.gz
+pip install carla==0.9.13
 
 ###### Install Carla Leaderboard ######
 echo "[x] Installing Carla leaderboard..."
 cd $DORA_DEP_HOME/dependencies/
-git clone -b leaderboard-2.0 --single-branch https://github.com/carla-simulator/leaderboard.git
-python3 -m pip install -r leaderboard/requirements.txt
+# git clone  --single-branch https://github.com/carla-simulator/leaderboard.git
+# python3 -m pip install -r leaderboard/requirements.txt
 
-git clone -b leaderboard-2.0 --single-branch https://github.com/carla-simulator/scenario_runner.git
-python3 -m pip install -r scenario_runner/requirements.txt
+# git clone -b v0.9.13 --single-branch https://github.com/carla-simulator/scenario_runner.git
+# python3 -m pip install -r scenario_runner/requirements.txt
+
+git clone https://github.com/littlerants/Carsmos.git
+python3 -m pip install -r Carsmos/requirements.txt
