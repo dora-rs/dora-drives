@@ -1,9 +1,8 @@
 import math
-from enum import Enum
+from typing import Tuple
 
 import numpy as np
 from sklearn.metrics import pairwise_distances
-from typing import Tuple
 
 
 def distance_vertex(left_vertix: np.array, right_vertix: np.array) -> np.array:
@@ -178,11 +177,6 @@ def location_to_camera_view(
         ]
     )
     return location_2D
-
-
-class DoraStatus(Enum):
-    CONTINUE = 0
-    STOP = 1
 
 
 LABELS = [

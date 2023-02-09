@@ -1,14 +1,8 @@
-import os
-from enum import Enum
 from typing import Callable
 
 import cv2
 import numpy as np
-
-
-class DoraStatus(Enum):
-    CONTINUE = 0
-    STOP = 1
+from dora import DoraStatus
 
 
 class Operator:

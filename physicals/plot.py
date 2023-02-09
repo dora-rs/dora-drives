@@ -1,9 +1,9 @@
 import time
 from typing import Callable
-from enum import Enum
 
 import cv2
 import numpy as np
+from dora import DoraStatus
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 bottomLeftCornerOfText = (10, 500)
@@ -96,9 +96,6 @@ LABELS = [
 ]
 
 
-class DoraStatus(Enum):
-    CONTINUE = 0
-    STOP = 1
 
 
 class Operator:

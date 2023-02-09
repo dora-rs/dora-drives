@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import open3d as o3d
 import torch
+from dora import DoraStatus
 from imfnet import (
     extract_features,
     get_model,
@@ -14,8 +15,6 @@ from imfnet import (
     make_open3d_point_cloud,
     process_image,
 )
-
-from dora_utils import DoraStatus
 
 VOXEL_SIZE = 2.5
 

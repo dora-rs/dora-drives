@@ -3,9 +3,8 @@ from typing import Callable
 import cv2
 import numpy as np
 import torch
+from dora import DoraStatus
 from strong_sort import StrongSORT
-
-from dora_utils import DoraStatus
 
 
 def xxyy2xywh(x):

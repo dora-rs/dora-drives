@@ -7,9 +7,9 @@ import cv2
 import numpy as np
 
 sys.path.append(os.getcwd())
+from dora import DoraStatus
 from dora_utils import (
     LABELS,
-    DoraStatus,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,

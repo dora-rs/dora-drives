@@ -1,14 +1,15 @@
-from typing import Callable
+import os
 import time
+from typing import Callable
+
 import numpy as np
+from dora import DoraStatus
+from dora_utils import LABELS, pairwise_distances
 from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
     fot_wrapper,
 )
-from dora_utils import DoraStatus, closest_vertex, pairwise_distances, LABELS
-from scipy.spatial.transform import Rotation as R
 from numpy import linalg as LA
-import os
-
+from scipy.spatial.transform import Rotation as R
 
 # Planning general
 TARGET_SPEED = 7

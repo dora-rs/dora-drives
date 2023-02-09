@@ -5,11 +5,10 @@ from collections import deque
 from typing import Callable
 
 import numpy as np
-from sklearn.metrics import pairwise_distances
-
-from dora_utils import DoraStatus
-from scipy.spatial.transform import Rotation as R
+from dora import DoraStatus
 from numpy import linalg as LA
+from scipy.spatial.transform import Rotation as R
+from sklearn.metrics import pairwise_distances
 
 MIN_PID_WAYPOINT_DISTANCE = 5
 COAST_FACTOR = 1.75

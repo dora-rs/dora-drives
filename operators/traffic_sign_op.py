@@ -3,15 +3,8 @@ from typing import Callable
 import cv2
 import numpy as np
 import torch
-
-from dora_utils import DoraStatus
-from yolov7_tt100k import (
-    WEIGHTS,
-    letterbox,
-    non_max_suppression,
-    plot_one_box,
-    scale_coords,
-)
+from dora import DoraStatus
+from yolov7_tt100k import WEIGHTS, letterbox, non_max_suppression, scale_coords
 
 
 class Operator:

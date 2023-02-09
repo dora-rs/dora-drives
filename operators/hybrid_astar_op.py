@@ -3,11 +3,11 @@ import time
 from typing import Callable
 
 import numpy as np
+from dora import DoraStatus
+from dora_utils import closest_vertex, pairwise_distances
 from hybrid_astar_planner.HybridAStar.hybrid_astar_wrapper import (
     apply_hybrid_astar,
 )
-
-from dora_utils import DoraStatus, closest_vertex, pairwise_distances
 
 mutex = threading.Lock()
 

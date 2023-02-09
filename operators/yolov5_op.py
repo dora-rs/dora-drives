@@ -1,17 +1,14 @@
-from typing import Callable
-from enum import Enum
 import os
+from typing import Callable
+
 import cv2
 import numpy as np
 import torch
-
+from dora import DoraStatus
 
 DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 
 
-class DoraStatus(Enum):
-    CONTINUE = 0
-    STOP = 1
 
 
 class Operator:

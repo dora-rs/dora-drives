@@ -1,6 +1,4 @@
 import math
-import xml.etree.ElementTree as ET
-from enum import Enum
 
 import cv2
 import numpy as np
