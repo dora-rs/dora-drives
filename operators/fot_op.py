@@ -1,13 +1,10 @@
-import os
-import time
 from typing import Callable
 
 import numpy as np
 from dora import DoraStatus
 from dora_utils import LABELS, pairwise_distances
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
-    fot_wrapper,
-)
+from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import \
+    fot_wrapper
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 

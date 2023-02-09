@@ -7,7 +7,7 @@ from dora import DoraStatus
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 
-from carla import Client, Map
+from carla import Client
 
 # Planning general
 TARGET_SPEED = 7.0

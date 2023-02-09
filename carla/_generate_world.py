@@ -2,7 +2,7 @@ import os
 import random
 import time
 
-from carla import Client, Location, Rotation, Transform, command
+from carla import command
 
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600

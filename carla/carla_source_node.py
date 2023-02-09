@@ -1,13 +1,20 @@
 #!/usr/bin/env python
 
 import logging
-import time
+import typing
 import zlib
 
 import cv2
 import numpy as np
+from _generate_world import (
+    add_camera,
+    add_depth_camera,
+    add_lidar,
+    add_segmented_camera,
+    spawn_actors,
+    spawn_driving_vehicle,
+)
 from dora import Node
-import typing
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
@@ -18,14 +25,6 @@ from opentelemetry.trace.propagation.tracecontext import (
 )
 from scipy.spatial.transform import Rotation as R
 
-from _generate_world import (
-    add_camera,
-    add_depth_camera,
-    add_lidar,
-    add_segmented_camera,
-    spawn_actors,
-    spawn_driving_vehicle,
-)
 from carla import Client, Location, Rotation, Transform
 
 

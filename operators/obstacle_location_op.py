@@ -2,9 +2,12 @@ from typing import Callable
 
 import numpy as np
 from dora import DoraStatus
-from dora_utils import (get_extrinsic_matrix, get_intrinsic_matrix,
-                        get_projection_matrix, local_points_to_camera_view)
-from scipy.spatial.transform import Rotation as R
+from dora_utils import (
+    get_extrinsic_matrix,
+    get_intrinsic_matrix,
+    get_projection_matrix,
+    local_points_to_camera_view,
+)
 from sklearn.neighbors import KNeighborsRegressor
 
 CAMERA_WIDTH = 800

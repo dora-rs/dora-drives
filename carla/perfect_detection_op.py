@@ -3,8 +3,6 @@ from typing import Callable
 
 import cv2
 import numpy as np
-from shapely.geometry import LineString
-
 from _dora_utils import (
     DoraStatus,
     distance_points,
@@ -15,7 +13,9 @@ from _dora_utils import (
     location_to_camera_view,
     to_world_coordinate,
 )
-from carla import Client, Vehicle, Walker
+from shapely.geometry import LineString
+
+from carla import Client, Vehicle
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
