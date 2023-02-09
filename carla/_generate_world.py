@@ -206,7 +206,7 @@ def spawn_people(client, world, num_people: int, logger):
     Args:
         num_people: The number of people to spawn.
     """
-    from carla import Transform, command
+    from carla import Transform
 
     p_blueprints = world.get_blueprint_library().filter("walker.pedestrian.*")
     unique_locs = set([])
@@ -275,7 +275,6 @@ def spawn_vehicles(
     Args:
         num_vehicles: The number of vehicles to spawn.
     """
-    from carla import command
 
     logger.debug("Trying to spawn {} vehicles.".format(num_vehicles))
     # Get the spawn points and ensure that the number of vehicles

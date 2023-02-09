@@ -163,11 +163,6 @@ node.send_output("vehicle_id", vehicle_id.to_bytes(2, "big"))
 
 def main():
 
-    global camera_frame
-    # global segmented_frame
-    # global depth_frame
-    global lidar_pc
-
     if camera_frame is None or segmented_frame is None or depth_frame is None:
         return {}
 

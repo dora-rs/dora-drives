@@ -3,16 +3,11 @@ from typing import Callable
 
 import cv2
 import numpy as np
-from _dora_utils import (
-    DoraStatus,
-    distance_points,
-    distance_vertex,
-    get_extrinsic_matrix,
-    get_intrinsic_matrix,
-    get_projection_matrix,
-    location_to_camera_view,
-    to_world_coordinate,
-)
+from _dora_utils import (distance_points, distance_vertex,
+                         get_extrinsic_matrix, get_intrinsic_matrix,
+                         get_projection_matrix, location_to_camera_view,
+                         to_world_coordinate)
+from dora import DoraStatus
 from shapely.geometry import LineString
 
 from carla import Client, Vehicle

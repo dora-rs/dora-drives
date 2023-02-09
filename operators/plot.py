@@ -1,12 +1,8 @@
-import os
-import sys
 import time
 from typing import Callable
 
 import cv2
 import numpy as np
-
-sys.path.append(os.getcwd())
 from dora import DoraStatus
 from dora_utils import (
     LABELS,

@@ -28,7 +28,6 @@ node = Node()
 
 
 def from_gps_to_world_coordinate(lat, lon):
-    global lat_ref, lon_ref
 
     EARTH_RADIUS_EQUA = 6378137.0  # pylint: disable=invalid-name
     scale = math.cos(lat_ref * math.pi / 180.0)

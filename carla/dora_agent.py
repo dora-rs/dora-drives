@@ -6,7 +6,6 @@ import numpy as np
 from dora import Node
 from leaderboard.autoagents.autonomous_agent import AutonomousAgent
 from scipy.spatial.transform import Rotation as R
-from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
 from srunner.tools.route_manipulation import _get_latlon_ref
 
 import carla
@@ -31,7 +30,6 @@ lat_ref, lon_ref = _get_latlon_ref(world)
 
 
 def from_gps_to_world_coordinate(lat, lon):
-    global lat_ref, lon_ref
 
     EARTH_RADIUS_EQUA = 6378137.0  # pylint: disable=invalid-name
     scale = math.cos(lat_ref * math.pi / 180.0)
