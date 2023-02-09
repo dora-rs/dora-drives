@@ -2,8 +2,9 @@ import threading
 from typing import Callable
 
 import numpy as np
-from _dora_utils import DoraStatus, closest_vertex
+from _dora_utils import closest_vertex
 from _hd_map import HDMap
+from dora import DoraStatus
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 
@@ -83,6 +84,12 @@ class Operator:
                 < OBJECTIVE_MIN_DISTANCE
             ):
                 self.completed_waypoints += 1
+
+                # Oasis leaderboard has only one waypoint
+                # to complete so we are stopping the datasflow
+                # after the first completed waypoint.
+                print("Completed destination. Stopping.")
+                return DoraStatus.STOP_ALL
 
             self.objective_waypoints = self.objective_waypoints[
                 index : index + NUM_WAYPOINTS_AHEAD

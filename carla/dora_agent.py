@@ -1,18 +1,17 @@
+import math
+import xml.etree.ElementTree as ET
 from enum import Enum
 
-import carla
-from carla import Client
-
+import cv2
+import numpy as np
+from dora import Node
 from leaderboard.autoagents.autonomous_agent import AutonomousAgent
+from scipy.spatial.transform import Rotation as R
 from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
 from srunner.tools.route_manipulation import _get_latlon_ref
 
-import numpy as np
-from scipy.spatial.transform import Rotation as R
-from dora import Node
-import cv2
-import math
-import xml.etree.ElementTree as ET
+import carla
+from carla import Client
 
 # node = Node()
 IMAGE_WIDTH = 800

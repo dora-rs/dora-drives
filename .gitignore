@@ -10,6 +10,7 @@ hub
 # Removing images.
 *.jpg
 *.png
+*.csv
 
 *.pt
 *.avi

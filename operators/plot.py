@@ -1,22 +1,22 @@
+import os
+import sys
 import time
 from typing import Callable
 
 import cv2
 import numpy as np
-import os
-import sys
 
 sys.path.append(os.getcwd())
-from scipy.spatial.transform import Rotation as R
 from dora_utils import (
     LABELS,
     DoraStatus,
     get_extrinsic_matrix,
     get_intrinsic_matrix,
     get_projection_matrix,
-    location_to_camera_view,
     local_points_to_camera_view,
+    location_to_camera_view,
 )
+from scipy.spatial.transform import Rotation as R
 
 CAMERA_WIDTH = 800
 CAMERA_HEIGHT = 600
@@ -80,7 +80,6 @@ class Operator:
         dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
-
         if "waypoints" == dora_input["id"]:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))
