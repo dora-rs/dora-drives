@@ -1,4 +1,3 @@
-import threading
 import time
 from typing import Callable
 
@@ -8,9 +7,6 @@ from dora_utils import closest_vertex, pairwise_distances
 from hybrid_astar_planner.HybridAStar.hybrid_astar_wrapper import (
     apply_hybrid_astar,
 )
-
-mutex = threading.Lock()
-
 
 # Hybrid ASTAR
 STEP_SIZE_HYBRID_ASTAR = 3.0

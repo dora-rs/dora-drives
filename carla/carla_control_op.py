@@ -1,4 +1,3 @@
-import threading
 from typing import Callable
 
 import numpy as np
@@ -12,7 +11,6 @@ STEER_GAIN = 0.7
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)
 
-mutex = threading.Lock()
 
 
 def radians_to_steer(rad: float, steer_gain: float):

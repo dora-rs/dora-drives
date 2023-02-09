@@ -18,14 +18,13 @@ CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
 AVERAGE_WINDOW = 10
 
+## Get World latitude and longitude reference
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)  # seconds
 world = client.get_world()
+lat_ref, lon_ref = _get_latlon_ref(world)
 
 node = Node()
-
-
-lat_ref, lon_ref = _get_latlon_ref(world)
 
 
 def from_gps_to_world_coordinate(lat, lon):
@@ -173,6 +172,7 @@ class DoraAgent(AutonomousAgent):
 
         self.previous_positions.append([x, y])
 
+        ## Accumulate previous position until having window size average.
         if len(self.previous_positions) < AVERAGE_WINDOW:
             return carla.VehicleControl(
                 steer=0.0,
@@ -199,10 +199,6 @@ class DoraAgent(AutonomousAgent):
         point_cloud = point_cloud[:, :3]
         lidar_pc = point_cloud.tobytes()
 
-        ### Opendrive processing
-        # opendrive = input_data["OpenDRIVE"][1]
-        # node.send_output("opendrive", opendrive.encode())
-
         ### Waypoints preprocessing
         waypoints_xyz = np.array(
             [
@@ -214,9 +210,6 @@ class DoraAgent(AutonomousAgent):
             ],
             np.float32,
         )
-        # waypoints_xyv = np.hstack(
-        # (waypoints_xy, 0.5 + np.zeros((waypoints_xy.shape[0], 1)))
-        # ).astype(np.float32)
 
         ## Sending data into the dataflow
         node.send_output("position", position.tobytes())

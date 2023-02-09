@@ -9,8 +9,6 @@ from dora import DoraStatus
 DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 
 
-
-
 class Operator:
     """
     Infering object from images

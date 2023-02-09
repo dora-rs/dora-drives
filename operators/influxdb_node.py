@@ -2,7 +2,6 @@
 
 import os
 import random
-import threading
 from datetime import datetime
 
 import numpy as np
@@ -16,7 +15,6 @@ token = os.getenv("INFLUX_TOKEN")
 token = "iit96Hkq0sYco2sHIuFCM5cU4I5srivYQafgbZgoGmG92gReT9Kao3rNH8b3KFlgPskStVvOOaOU5-LZY94dfA=="
 org = "shavtao@gmail.com"
 bucket = "DORA Test Bucket"
-mutex = threading.Lock()
 goal_location = pylot.utils.Location(234, 59, 39)
 
 summary_id = random.randint(0, 1000000)
@@ -39,10 +37,8 @@ def write_to_influxdb(points):
 def dora_run(inputs):
     if "control_status" not in inputs.keys():
         return {}
-    global mutex
     global points
     global counter
-    mutex.acquire()
 
     current_time = datetime.utcnow()
     if "position" in inputs.keys():
@@ -86,5 +82,4 @@ def dora_run(inputs):
     if counter % 5000:
         write_to_influxdb(points)
 
-    mutex.release()
     return {}

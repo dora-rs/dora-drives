@@ -1,4 +1,3 @@
-import threading
 from typing import Callable
 
 import numpy as np
@@ -9,9 +8,6 @@ from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 
 from carla import Client, Map
-
-mutex = threading.Lock()
-
 
 # Planning general
 TARGET_SPEED = 7.0
