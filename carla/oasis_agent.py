@@ -216,8 +216,20 @@ class DoraAgent(AutonomousAgent):
         node.send_output("lidar_pc", lidar_pc)
         node.send_output("objective_waypoints", waypoints_xyz.tobytes())
 
-        ## Receiving back control information
-        input_id, value, metadata = node.next()
+        # Receiving back control information
+        ## Using tick to avoid deadlock due to unreceived input.
+        for iteration in range(5):
+            input_id, value, metadata = node.next()
+
+            if input_id == "tick" and iteration > 0:
+                print(f"Did not receive control after {iteration} ticks...")
+            elif input_id == "tick" and iteration == 4:
+                print(
+                    f"Sending null control after waiting {iteration} ticks..."
+                )
+                value = np.array([0.0, 0.0, 0.0], np.float16)
+            elif input_id == "control":
+                break
 
         [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
 

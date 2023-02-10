@@ -278,11 +278,6 @@ class Operator:
 
             for id, obstacle in enumerate(obstacles):
                 [x, y, z] = obstacle
-                # location = location_to_camera_view(
-                # np.array([[x, y, z]]),
-                # INTRINSIC_MATRIX,
-                # inv_extrinsic_matrix,
-                # )
                 location = [x, y, z]
                 cv2.circle(
                     resized_image,
@@ -308,18 +303,6 @@ class Operator:
                         2,
                         1,
                     )
-                # location = location_to_camera_view(
-                # np.array([[x, y, 0]]),
-                # INTRINSIC_MATRIX,
-                # inv_extrinsic_matrix,
-                # )
-                # cv2.circle(
-                # resized_image,
-                # (int(location[0]), int(location[1])),
-                # 3,
-                # (150, 150, 0),
-                # -1,
-                # )
 
         for point in self.point_cloud:
             cv2.circle(
