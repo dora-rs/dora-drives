@@ -1,10 +1,8 @@
 # Leaderboard
 
-The CARLA Leaderboard enables you to test out your agent on predefined scenarios. It will generates KPI that can be used to compare agent between them. 
+The OASIS Leaderboard enables you to test out your agent on predefined scenarios. It will generates KPI that can be used to compare agent between them. 
 
-You can use the CARLA leaderboard without changing your graph by simply changing the input source. The new source is `carla/dora_agent`.
-
-The leaderboard graphs connect dora to the leaderboard 2.0 to run the graph within the leaderboard environment.
+You can use the OASIS leaderboard without changing your graph by simply changing the input source. The new source is `carla/oasis_agent`.
 
 To use the leaderboard through docker, first build it with:
 ```bash
@@ -34,16 +32,32 @@ docker run \
 
 Or use the leaderboard natively:
 ```bash
-dora-coordinator --run-dataflow graphs/leaderboard/full_agent.yaml
+dora-coordinator --run-dataflow graphs/leaderboard/oasis_agent.yaml
 ```
 
+To have a more fined-grained control over starting and stopping your agent,
+you can use `start/stop` command from the cli:
 
-To download the results from the docker container, you can use:
+
+
 ```bash
-## For the camera feed
-docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/output.avi .
-## For the leaderboard `simulation_results.json` use:
-docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/simulation_results.json .
+# In a dedicated terminal
+dora up
+
+# In a client terminal
+dora start graphs/leaderboard/oasis_agent.yaml
+
+# ...
+dora stop
 ```
 
-Otherwise you will be able to find the results in the `graphs/leaderboard/` folder.
+You can name your dataflow as such:
+```bash
+# In a client terminal
+dora start graphs/leaderboard/oasis_agent.yaml --name oasis-agent-demo
+
+# ...
+dora stop --name oasis-agent-demo
+```
+
+You will be able to find the results in the `graphs/leaderboard/` folder.
