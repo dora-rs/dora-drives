@@ -96,7 +96,6 @@ nodes:
         global_lanes: obstacle_location_op/global_lanes
         drivable_area: yolop/drivable_area
         obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/100
         gps_waypoints: carla_gps_op/gps_waypoints
         position: oasis_agent/position
         waypoints: fot_op/waypoints
