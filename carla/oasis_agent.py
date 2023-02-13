@@ -221,7 +221,7 @@ class DoraAgent(AutonomousAgent):
         for iteration in range(5):
             input_id, value, metadata = node.next()
 
-            if input_id == "tick" and iteration > 0:
+            if input_id == "tick" and iteration > 0 and iteration < 4:
                 print(f"Did not receive control after {iteration} ticks...")
             elif input_id == "tick" and iteration == 4:
                 print(
