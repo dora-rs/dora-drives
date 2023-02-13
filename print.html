@@ -949,9 +949,8 @@ end
 </code></pre>
 <p>😎 We now have a working autonomous car!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="leaderboard"><a class="header" href="#leaderboard">Leaderboard</a></h1>
-<p>The CARLA Leaderboard enables you to test out your agent on predefined scenarios. It will generates KPI that can be used to compare agent between them. </p>
-<p>You can use the CARLA leaderboard without changing your graph by simply changing the input source. The new source is <code>carla/dora_agent</code>.</p>
-<p>The leaderboard graphs connect dora to the leaderboard 2.0 to run the graph within the leaderboard environment.</p>
+<p>The OASIS Leaderboard enables you to test out your agent on predefined scenarios. It will generates KPI that can be used to compare agent between them. </p>
+<p>You can use the OASIS leaderboard without changing your graph by simply changing the input source. The new source is <code>carla/oasis_agent</code>.</p>
 <p>To use the leaderboard through docker, first build it with:</p>
 <pre><code class="language-bash">docker build . -t haixuantao/dora-drives
 </code></pre>
@@ -972,15 +971,27 @@ end
     haixuantao/dora-drives
 </code></pre>
 <p>Or use the leaderboard natively:</p>
-<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/leaderboard/full_agent.yaml
+<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/leaderboard/oasis_agent.yaml
 </code></pre>
-<p>To download the results from the docker container, you can use:</p>
-<pre><code class="language-bash">## For the camera feed
-docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/output.avi .
-## For the leaderboard `simulation_results.json` use:
-docker cp dora:/home/dora/workspace/dora-drives/graphs/leaderboard/simulation_results.json .
+<p>To have a more fined-grained control over starting and stopping your agent,
+you can use <code>start/stop</code> command from the cli:</p>
+<pre><code class="language-bash"># In a dedicated terminal
+dora up
+
+# In a client terminal
+dora start graphs/leaderboard/oasis_agent.yaml
+
+# ...
+dora stop
 </code></pre>
-<p>Otherwise you will be able to find the results in the <code>graphs/leaderboard/</code> folder.</p>
+<p>You can name your dataflow as such:</p>
+<pre><code class="language-bash"># In a client terminal
+dora start graphs/leaderboard/oasis_agent.yaml --name oasis-agent-demo
+
+# ...
+dora stop --name oasis-agent-demo
+</code></pre>
+<p>You will be able to find the results in the <code>graphs/leaderboard/</code> folder.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="carla-source-node"><a class="header" href="#carla-source-node">Carla Source Node</a></h1>
 <p>Carla source node generates pedestrians, vehicles, as well as an <code>ego</code> vehicle with camera and sensors attached to it.</p>
 <h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
