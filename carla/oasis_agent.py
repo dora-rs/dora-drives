@@ -77,6 +77,16 @@ class DoraAgent(AutonomousAgent):
         self.previous_positions = []
         self.destination = destination
 
+        ## Check for node readiness
+        node.send_output("yolov5_check", b"")
+        ## Using tick to avoid deadlock due to unreceived input.
+        while True:
+            input_id, _value, _metadata = node.next()
+            if input_id == "tick":
+                print("Waiting for yolov5...")
+            elif input_id == "yolov5_ready":
+                break
+
     def sensors(self):  # pylint: disable=no-self-use
         """
         Define the sensor suite required by the agent

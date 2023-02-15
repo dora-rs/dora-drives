@@ -33,22 +33,26 @@ class Operator:
             dora_input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
+        if dora_input["id"] == "check":
+            send_output("ready", b"")
+            return DoraStatus.CONTINUE
 
-        frame = cv2.imdecode(
-            np.frombuffer(
-                dora_input["data"],
-                dtype="uint8",
-            ),
-            -1,
-        )
-        frame = frame[:, :, :3]
+        else:
+            frame = cv2.imdecode(
+                np.frombuffer(
+                    dora_input["data"],
+                    dtype="uint8",
+                ),
+                -1,
+            )
+            frame = frame[:, :, :3]
 
-        results = self.model(frame)  # includes NMS
-        arrays = np.array(results.xyxy[0].cpu())[
-            :, [0, 2, 1, 3, 4, 5]
-        ]  # xyxy -> xxyy
-        arrays[:, 4] *= 100
-        arrays = arrays.astype(np.int32)
-        arrays = arrays.tobytes()
-        send_output("bbox", arrays, dora_input["metadata"])
-        return DoraStatus.CONTINUE
+            results = self.model(frame)  # includes NMS
+            arrays = np.array(results.xyxy[0].cpu())[
+                :, [0, 2, 1, 3, 4, 5]
+            ]  # xyxy -> xxyy
+            arrays[:, 4] *= 100
+            arrays = arrays.astype(np.int32)
+            arrays = arrays.tobytes()
+            send_output("bbox", arrays, dora_input["metadata"])
+            return DoraStatus.CONTINUE

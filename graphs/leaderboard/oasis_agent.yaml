@@ -8,11 +8,13 @@ nodes:
       inputs:
         control: pid_control_op/control
         tick: dora/timer/secs/1
+        yolov5_ready: yolov5/ready
       outputs:
         - position
         - image
         - objective_waypoints
         - lidar_pc
+        - yolov5_check
      #   - opendrive
       source: shell
       args: >
@@ -34,8 +36,10 @@ nodes:
     operator: 
       outputs:
         - bbox
+        - ready
       inputs:
         image: oasis_agent/image
+        check: oasis_agent/yolov5_check
       python: ../../operators/yolov5_op.py
     env:
       CUDA_VISIBLE_DEVICES: ""
