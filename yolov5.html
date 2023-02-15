@@ -162,10 +162,21 @@ class Operator:
     &quot;&quot;&quot;
 
     def __init__(self):
-        self.model = torch.hub.load(
-            &quot;ultralytics/yolov5&quot;,
-            &quot;yolov5n&quot;,
-        )
+        if os.environ.get(&quot;YOLOV5_PATH&quot;) == &quot;&quot;:
+            # With internet
+            self.model = torch.hub.load(
+                &quot;ultralytics/yolov5&quot;,
+                &quot;yolov5n&quot;,
+            )
+        else:
+            # Without internet
+            self.model = torch.hub.load(
+                os.environ.get(&quot;YOLOV5_PATH&quot;),
+                &quot;custom&quot;,
+                path=os.environ.get(&quot;YOLOV5_WEIGHT_PATH&quot;),
+                source=&quot;local&quot;,
+            )
+
         self.model.to(torch.device(DEVICE))
         self.model.eval()
 
