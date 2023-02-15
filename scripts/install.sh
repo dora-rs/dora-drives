@@ -76,3 +76,8 @@ cd $DORA_DEP_HOME/dependencies/
 
 git clone https://github.com/littlerants/Carsmos.git
 python3 -m pip install -r Carsmos/requirements.txt
+
+
+git clone --depth 1 https://github.com/ultralytics/yolov5
+cd yolov5
+wget https://github.com/ultralytics/yolov5/releases/download/v6.1/yolov5n.pt

@@ -44,6 +44,8 @@ nodes:
     env:
       CUDA_VISIBLE_DEVICES: ""
       # PYTORCH_DEVICE: cuda
+      YOLOV5_PATH: /home/peter/Documents/dependencies/yolov5
+      YOLOV5_WEIGHT_PATH: /home/peter/Documents/dependencies/yolov5/yolov5n.pt
 
   # - id: yolop
     # operator: 

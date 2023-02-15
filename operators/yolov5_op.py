@@ -15,10 +15,21 @@ class Operator:
     """
 
     def __init__(self):
-        self.model = torch.hub.load(
-            "ultralytics/yolov5",
-            "yolov5n",
-        )
+        if os.environ.get("YOLOV5_PATH") == "":
+            # With internet
+            self.model = torch.hub.load(
+                "ultralytics/yolov5",
+                "yolov5n",
+            )
+        else:
+            # Without internet
+            self.model = torch.hub.load(
+                os.environ.get("YOLOV5_PATH"),
+                "custom",
+                path=os.environ.get("YOLOV5_WEIGHT_PATH"),
+                source="local",
+            )
+
         self.model.to(torch.device(DEVICE))
         self.model.eval()
 
