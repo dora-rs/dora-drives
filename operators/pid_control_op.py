@@ -170,7 +170,11 @@ class Operator:
             self.previous_time = time.time()
 
             return DoraStatus.CONTINUE
-            # Vehicle speed in m/s.
+
+        elif dora_input["id"] == "check":
+            send_output("ready", b"")
+            return DoraStatus.CONTINUE
+
         elif "waypoints" == dora_input["id"]:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))

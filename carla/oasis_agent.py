@@ -78,14 +78,25 @@ class DoraAgent(AutonomousAgent):
         self.destination = destination
 
         ## Check for node readiness
-        node.send_output("yolov5_check", b"")
+        check_nodes = [
+            "carla_gps",
+            "yolov5",
+            "obstacle_location",
+            "fot",
+            "pid_control",
+        ]
+        node.send_output("check", b"")
+
         ## Using tick to avoid deadlock due to unreceived input.
         while True:
             input_id, _value, _metadata = node.next()
             if input_id == "tick":
-                print("Waiting for yolov5...")
-            elif input_id == "yolov5_ready":
-                break
+                print("Waiting for nodes to be ready...")
+            elif "_ready" in input_id:
+                ready_node = input_id.replace("_ready", "")
+                check_nodes.remove(ready_node)
+                if len(check_nodes) == 0:
+                    break
 
     def sensors(self):  # pylint: disable=no-self-use
         """

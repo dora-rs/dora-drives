@@ -139,6 +139,10 @@ class Operator:
                 self.last_position = self.position
             return DoraStatus.CONTINUE
 
+        elif dora_input["id"] == "check":
+            send_output("ready", b"")
+            return DoraStatus.CONTINUE
+            
         elif dora_input["id"] == "obstacles":
             obstacles = np.frombuffer(
                 dora_input["data"], dtype=np.float32

@@ -56,6 +56,9 @@ class Operator:
 
             return DoraStatus.CONTINUE
 
+        elif dora_input["id"] == "check":
+            send_output("ready", b"")
+            return DoraStatus.CONTINUE
         # if "opendrive" == dora_input["id"]:
         # opendrive = dora_input["data"].decode()
         # self.hd_map = HDMap(Map("map", opendrive))
