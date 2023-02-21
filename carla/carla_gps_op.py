@@ -88,7 +88,7 @@ class Operator:
                 # to complete so we are stopping the datasflow
                 # after the first completed waypoint.
                 print("Completed destination. Stopping.")
-                return DoraStatus.STOP_ALL
+                return DoraStatus.CONTINUE
 
             self.objective_waypoints = self.objective_waypoints[
                 index : index + NUM_WAYPOINTS_AHEAD

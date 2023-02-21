@@ -109,11 +109,11 @@ nodes:
         image: oasis_agent/image
         obstacles_bbox: yolov5/bbox
         obstacles: obstacle_location_op/obstacles
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        global_lanes: obstacle_location_op/global_lanes
-        drivable_area: yolop/drivable_area
-        obstacles_id: strong_sort/obstacles_id
+        # traffic_sign_bbox: traffic_sign/bbox
+        # lanes: yolop/lanes
+        # global_lanes: obstacle_location_op/global_lanes
+        # drivable_area: yolop/drivable_area
+        # obstacles_id: strong_sort/obstacles_id
         gps_waypoints: carla_gps_op/gps_waypoints
         position: oasis_agent/position
         waypoints: fot_op/waypoints
