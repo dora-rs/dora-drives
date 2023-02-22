@@ -163,10 +163,10 @@
 <p>The waypoints are defined as a an array of <code>x, y, speed</code> as <code>float32</code> waypoints, with global coordinate.</p>
 <h2 id="planner"><a class="header" href="#planner">Planner</a></h2>
 <p>The GPS waypoints does not take into account obstacles. To avoid collision, we can implement a motion planner that can avoid obstacles. </p>
-<p>We're going to reuse a model called <code>hybrid_astar</code> as a black box, that take as input a starting location and a goal location, as well as a list of obstacles and he will be able to solve the best waypoints on its own.</p>
-<pre><code class="language-yaml">  - id: hybrid_astar_op
+<p>We're going to reuse a model called <code>fot</code> (Frenet Optimal Trajectory) as a black box, that take as input a starting location and a goal location, as well as a list of obstacles and he will be able to solve the best waypoints on its own.</p>
+<pre><code class="language-yaml">  - id: fot_op
     operator:
-      python: operators/hybrid_astar_op.py
+      python: operators/fot_op.py
       outputs:
         - waypoints
       inputs:
