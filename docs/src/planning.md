@@ -31,12 +31,12 @@ The waypoints are defined as a an array of `x, y, speed` as `float32` waypoints,
 
 The GPS waypoints does not take into account obstacles. To avoid collision, we can implement a motion planner that can avoid obstacles. 
 
-We're going to reuse a model called `hybrid_astar` as a black box, that take as input a starting location and a goal location, as well as a list of obstacles and he will be able to solve the best waypoints on its own.
+We're going to reuse a model called `fot` (Frenet Optimal Trajectory) as a black box, that take as input a starting location and a goal location, as well as a list of obstacles and he will be able to solve the best waypoints on its own.
 
 ```yaml
-  - id: hybrid_astar_op
+  - id: fot_op
     operator:
-      python: operators/hybrid_astar_op.py
+      python: operators/fot_op.py
       outputs:
         - waypoints
       inputs:
