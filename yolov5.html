@@ -162,7 +162,7 @@ class Operator:
     &quot;&quot;&quot;
 
     def __init__(self):
-        if os.environ.get(&quot;YOLOV5_PATH&quot;) == &quot;&quot;:
+        if os.environ.get(&quot;YOLOV5_PATH&quot;) is None:
             # With internet
             self.model = torch.hub.load(
                 &quot;ultralytics/yolov5&quot;,
