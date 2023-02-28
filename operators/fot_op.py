@@ -3,8 +3,9 @@ from typing import Callable
 import numpy as np
 from dora import DoraStatus
 from dora_utils import LABELS, pairwise_distances
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import \
-    fot_wrapper
+from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
+    fot_wrapper,
+)
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 
@@ -126,6 +127,15 @@ class Operator:
             "target_speed": TARGET_SPEED,
         }  # paste output from debug log
 
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
+
     def on_input(
         self,
         dora_input: dict,
@@ -142,7 +152,7 @@ class Operator:
         elif dora_input["id"] == "check":
             send_output("ready", b"")
             return DoraStatus.CONTINUE
-            
+
         elif dora_input["id"] == "obstacles":
             obstacles = np.frombuffer(
                 dora_input["data"], dtype=np.float32

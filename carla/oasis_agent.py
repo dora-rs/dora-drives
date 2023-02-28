@@ -105,14 +105,17 @@ class DoraAgent(AutonomousAgent):
 
         ## Using tick to avoid deadlock due to unreceived input.
         while True:
-            input_id, _value, _metadata = node.next()
-            if input_id == "tick":
-                print("Waiting for nodes to be ready...")
-            elif "_ready" in input_id:
-                ready_node = input_id.replace("_ready", "")
-                check_nodes.remove(ready_node)
-                if len(check_nodes) == 0:
-                    break
+            event = node.next()
+            if event["type"] == "INPUT":
+                input_id = event["id"]
+                value = event["data"]
+                if input_id == "tick":
+                    print("Waiting for nodes to be ready...")
+                elif "_ready" in input_id:
+                    ready_node = input_id.replace("_ready", "")
+                    check_nodes.remove(ready_node)
+                    if len(check_nodes) == 0:
+                        break
 
     def sensors(self):  # pylint: disable=no-self-use
         """
@@ -272,17 +275,20 @@ class DoraAgent(AutonomousAgent):
         # Receiving back control information
         ## Using tick to avoid deadlock due to unreceived input.
         for iteration in range(5):
-            input_id, value, metadata = node.next()
+            event = node.next()
+            if event["type"] == "INPUT":
+                input_id = event["id"]
+                value = event["data"]
 
-            if input_id == "tick" and iteration > 0 and iteration < 4:
-                print(f"Did not receive control after {iteration} ticks...")
-            elif input_id == "tick" and iteration == 4:
-                print(
-                    f"Sending null control after waiting {iteration} ticks..."
-                )
-                value = np.array([0.0, 0.0, 0.0], np.float16)
-            elif input_id == "control":
-                break
+                if input_id == "tick" and iteration > 0 and iteration < 4:
+                    print(f"Did not receive control after {iteration} ticks...")
+                elif input_id == "tick" and iteration == 4:
+                    print(
+                        f"Sending null control after waiting {iteration} ticks..."
+                    )
+                    value = np.array([0.0, 0.0, 0.0], np.float16)
+                elif input_id == "control":
+                    break
 
         [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
 

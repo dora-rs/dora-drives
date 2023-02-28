@@ -96,8 +96,6 @@ LABELS = [
 ]
 
 
-
-
 class Operator:
     """
     Compute a `control` based on the position and the waypoints of the car.
@@ -111,6 +109,15 @@ class Operator:
         self.last_timestamp = time.time()
         self.camera_frame = []
         self.traffic_sign_bbox = []
+
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
 
     def on_input(
         self,

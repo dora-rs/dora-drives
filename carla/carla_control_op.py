@@ -12,7 +12,6 @@ client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)
 
 
-
 def radians_to_steer(rad: float, steer_gain: float):
     """Converts radians to steer input.
 
@@ -34,6 +33,15 @@ class Operator:
 
     def __init__(self):
         self.vehicle_id = None
+
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
 
     def on_input(
         self,
