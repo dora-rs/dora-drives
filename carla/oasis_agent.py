@@ -1,33 +1,47 @@
 import math
+import xml.etree.ElementTree as ET
 
 import cv2
 import numpy as np
 from autoagents.autonomous_agent import AutonomousAgent
 from dora import Node
 from scipy.spatial.transform import Rotation as R
-from srunner.tools.route_manipulation import _get_latlon_ref
 
-import carla
-from carla import Client
+from carla import VehicleControl
 
-# node = Node()
 IMAGE_WIDTH = 800
 IMAGE_HEIGHT = 600
 STEER_GAIN = 0.7
-CARLA_SIMULATOR_HOST = "localhost"
-CARLA_SIMULATOR_PORT = "2000"
 AVERAGE_WINDOW = 10
-
-## Get World latitude and longitude reference
-client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
-client.set_timeout(30.0)  # seconds
-world = client.get_world()
-lat_ref, lon_ref = _get_latlon_ref(world)
 
 node = Node()
 
 
-def from_gps_to_world_coordinate(lat, lon):
+def _get_latlon_ref(xodr):
+    """
+    Convert from waypoints world coordinates to CARLA GPS coordinates
+    :return: tuple with lat and lon coordinates
+    """
+    tree = ET.ElementTree(ET.fromstring(xodr))
+
+    # default reference
+    lat_ref = 42.0
+    lon_ref = 2.0
+
+    for opendrive in tree.iter("OpenDRIVE"):
+        for header in opendrive.iter("header"):
+            for georef in header.iter("geoReference"):
+                if georef.text:
+                    str_list = georef.text.split(" ")
+                    for item in str_list:
+                        if "+lat_0" in item:
+                            lat_ref = float(item.split("=")[1])
+                        if "+lon_0" in item:
+                            lon_ref = float(item.split("=")[1])
+    return lat_ref, lon_ref
+
+
+def from_gps_to_world_coordinate(lat, lon, lat_ref, lon_ref):
 
     EARTH_RADIUS_EQUA = 6378137.0  # pylint: disable=invalid-name
     scale = math.cos(lat_ref * math.pi / 180.0)
@@ -76,6 +90,8 @@ class DoraAgent(AutonomousAgent):
         """
         self.previous_positions = []
         self.destination = destination
+        self.lat_ref = None
+        self.lon_ref = None
 
         ## Check for node readiness
         check_nodes = [
@@ -154,11 +170,11 @@ class DoraAgent(AutonomousAgent):
                 "pitch": 0.0,
                 "yaw": 0.0,
             },
-            # {
-            # "type": "sensor.opendrive_map",
-            # "id": "OpenDRIVE",
-            # "reading_frequency": 1,
-            # },
+            {
+                "type": "sensor.opendrive_map",
+                "id": "OpenDRIVE",
+                "reading_frequency": 1,
+            },
             # {"type": "sensor.speedometer", "id": "Speed"},
         ]
 
@@ -170,9 +186,25 @@ class DoraAgent(AutonomousAgent):
         :return: control
         """
 
+        ### Opendrive preprocessing
+        if "OpenDRIVE" in input_data.keys():
+            opendrive_map = input_data["OpenDRIVE"][1]["opendrive"]
+            self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
+            node.send_output("opendrive", opendrive_map.encode())
+
+        if self.lat_ref is None:
+            return VehicleControl(
+                steer=0.0,
+                throttle=0.0,
+                brake=0.0,
+                hand_brake=False,
+            )
+
         ### Position preprocessing
         [lat, lon, z] = input_data["GPS"][1]
-        [x, y] = from_gps_to_world_coordinate(lat, lon)
+        [x, y] = from_gps_to_world_coordinate(
+            lat, lon, self.lat_ref, self.lon_ref
+        )
         yaw = input_data["IMU"][1][-1] - np.pi / 2
         roll = 0.0
         pitch = 0.0
@@ -183,7 +215,7 @@ class DoraAgent(AutonomousAgent):
             R.from_quat([qx, qy, qz, qw])
         except:
             print("Error in quaternion.")
-            return carla.VehicleControl(
+            return VehicleControl(
                 steer=0.0,
                 throttle=0.0,
                 brake=0.0,
@@ -194,7 +226,7 @@ class DoraAgent(AutonomousAgent):
 
         ## Accumulate previous position until having window size average.
         if len(self.previous_positions) < AVERAGE_WINDOW:
-            return carla.VehicleControl(
+            return VehicleControl(
                 steer=0.0,
                 throttle=0.0,
                 brake=0.0,
@@ -255,7 +287,7 @@ class DoraAgent(AutonomousAgent):
         [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
 
         steer = radians_to_steer(target_angle, STEER_GAIN)
-        vec_control = carla.VehicleControl(
+        vec_control = VehicleControl(
             steer=float(steer),
             throttle=float(throttle),
             brake=float(brake),

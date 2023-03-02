@@ -19,7 +19,7 @@ nodes:
         - objective_waypoints
         - lidar_pc
         - check
-     #   - opendrive
+        - opendrive
       source: shell
       args: >
         python3 $DORA_DEP_HOME/dependencies/Carsmos/simulate_py37/simulate.py 
@@ -33,7 +33,7 @@ nodes:
         - gps_waypoints
         - ready
       inputs:
-        # opendrive: oasis_agent/opendrive
+        opendrive: oasis_agent/opendrive
         objective_waypoints: oasis_agent/objective_waypoints
         position: oasis_agent/position
         check: oasis_agent/check
@@ -48,7 +48,7 @@ nodes:
         check: oasis_agent/check
       python: ../../operators/yolov5_op.py
     env:
-      CUDA_VISIBLE_DEVICES: ""
+      # CUDA_VISIBLE_DEVICES: ""
       # PYTORCH_DEVICE: cuda
       YOLOV5_PATH: $DORA_DEP_HOME/dependencies/yolov5
       YOLOV5_WEIGHT_PATH: $DORA_DEP_HOME/dependencies/yolov5/yolov5n.pt

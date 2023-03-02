@@ -7,14 +7,12 @@ from dora import DoraStatus
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 
-from carla import Client
+from carla import Map
 
 # Planning general
 TARGET_SPEED = 7.0
 NUM_WAYPOINTS_AHEAD = 120
 GOAL_LOCATION = [234, 59, 39]
-CARLA_SIMULATOR_HOST = "localhost"
-CARLA_SIMULATOR_PORT = "2000"
 OBJECTIVE_MIN_DISTANCE = 0
 
 
@@ -31,13 +29,7 @@ class Operator:
 
     def __init__(self):
         self._goal_location = GOAL_LOCATION
-        client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
-        client.set_timeout(50.0)  # seconds
-        self.client = client
-        carla_world = client.get_world()
-        self.carla_world_id = carla_world.id
-        hd_map = HDMap(carla_world.get_map())
-        self.hd_map = hd_map
+        self.hd_map = None
         self.position = []
         self.waypoints = np.array([])
         self.target_speeds = np.array([])
@@ -59,20 +51,19 @@ class Operator:
         elif dora_input["id"] == "check":
             send_output("ready", b"")
             return DoraStatus.CONTINUE
-        # if "opendrive" == dora_input["id"]:
-        # opendrive = dora_input["data"].decode()
-        # self.hd_map = HDMap(Map("map", opendrive))
+        if "opendrive" == dora_input["id"]:
+            opendrive = dora_input["data"].decode()
+            self.hd_map = HDMap(Map("map", opendrive))
 
         if "objective_waypoints" == dora_input["id"]:
             self.objective_waypoints = np.frombuffer(
                 dora_input["data"], np.float32
             ).reshape((-1, 3))[self.completed_waypoints :]
-            # carla_world = self.client.get_world()
-            # if self.carla_world_id != carla_world.id:
-            # hd_map = HDMap(carla_world.get_map())
-            # self.hd_map = hd_map
-            # self.waypoints = []
-            # self.target_speeds = []
+
+            if self.hd_map is None:
+                print("No map within the gps")
+                return DoraStatus.CONTINUE
+
             (index, closest_objective) = closest_vertex(
                 self.objective_waypoints[:, :2],
                 np.array([self.position[:2]]),
@@ -109,12 +100,6 @@ class Operator:
                 ]
 
             if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
-
-                carla_world = self.client.get_world()
-                if self.carla_world_id != carla_world.id:
-                    hd_map = HDMap(carla_world.get_map())
-                    self.hd_map = hd_map
-                    self.carla_world_id = carla_world.id
 
                 [x, y, z, rx, ry, rz, rw] = self.position
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
