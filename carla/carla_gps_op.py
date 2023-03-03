@@ -10,7 +10,6 @@ from scipy.spatial.transform import Rotation as R
 from carla import Map
 
 # Planning general
-TARGET_SPEED = 7.0
 NUM_WAYPOINTS_AHEAD = 120
 GOAL_LOCATION = [234, 59, 39]
 OBJECTIVE_MIN_DISTANCE = 0
@@ -128,7 +127,7 @@ class Operator:
                     print(f"goal location: {self._goal_location}")
                 else:
                     self.waypoints = waypoints
-                    self.target_speeds = np.array([5.0] * len(waypoints))
+                    self.target_speeds = np.array([0.0] * len(waypoints))
 
             if len(self.waypoints) == 0:
                 send_output(
