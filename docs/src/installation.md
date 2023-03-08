@@ -104,7 +104,7 @@ chmod +x ./scripts/*
 
 ## Installing dora
 
-sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.3/dora-v0.1.3-x86_64-Linux.zip && sudo unzip dora-v0.1.3-x86_64-Linux.zip -d ~/.local/bin && sudo mv ~/.local/bin/iceoryx/iox-roudi ~/.local/bin
+sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.3/dora-v0.1.3-x86_64-Linux.zip && sudo unzip dora-v0.1.3-x86_64-Linux.zip -d ~/.local/bin 
 ``` 
 
 ### Running the graph
