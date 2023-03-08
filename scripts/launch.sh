@@ -58,4 +58,4 @@ if [ ! -z ${tracing+x} ]; then
 fi
 
 sleep 5
-nvidia-docker  exec -it dora /bin/bash -c "dora up && cd /home/dora/workspace/dora-drives && source /opt/conda/etc/profile.d/conda.sh && conda activate dora3.7 && dora-daemon --run-dataflow graphs/$GRAPH"
+nvidia-docker  exec -it dora /bin/bash -c "cd /home/dora/workspace/dora-drives && source /opt/conda/etc/profile.d/conda.sh && conda activate dora3.7 && dora-daemon --run-dataflow graphs/$GRAPH"

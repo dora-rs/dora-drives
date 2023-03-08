@@ -117,7 +117,7 @@ export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/depende
 ## Running the simulation
 chmod +x ./scripts/run_simulator.sh
 ./scripts/run_simulator.sh &
-dora up
+
 
 ## Spawn the dataflow
 dora-daemon --run-dataflow graphs/tutorials/carla_waypoints.yaml
