@@ -25,7 +25,7 @@ nodes:
         python3 /home/peter/Documents/dependencies/Carsmos/simulate_py37/simulate.py 
         --openscenario /home/peter/Documents/dependencies/Carsmos/simulate_py37/srunner/examples/LaneChangeSimple.xosc 
         --agent ../../carla/oasis_agent.py
-        
+
   - id: carla_gps_op
     operator:
       python: ../../carla/carla_gps_op.py
