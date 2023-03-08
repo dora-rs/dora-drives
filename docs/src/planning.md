@@ -54,5 +54,5 @@ To test waypoints algorithms, launch:
 - To run it without docker:
 
 ```bash
-dora-coordinator --run-dataflow graphs/tutorials/carla_waypoints.yaml
+dora-daemon --run-dataflow graphs/tutorials/carla_waypoints.yaml
 ```

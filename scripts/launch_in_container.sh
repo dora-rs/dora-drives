@@ -4,4 +4,4 @@ dora up # Up Iceoryx
 cd /home/dora/workspace/dora-drives
 source /opt/conda/etc/profile.d/conda.sh
 conda activate dora3.7
-dora-coordinator --run-dataflow graphs/$GRAPH
+dora-daemon --run-dataflow graphs/$GRAPH

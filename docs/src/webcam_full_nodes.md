@@ -20,7 +20,7 @@ Run it with docker:
 - To run it without docker:
 
 ```bash
-dora-coordinator --run-dataflow graphs/tutorials/webcam_full.yaml
+dora-daemon --run-dataflow graphs/tutorials/webcam_full.yaml
 ```
 
 Nice 🥳 As you can see, the value of `dora` comes from the idea that you can compose different algorithm really quickly.

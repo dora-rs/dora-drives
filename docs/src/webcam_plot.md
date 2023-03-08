@@ -21,7 +21,7 @@ This creates the following `abc_project` directory
     └── op_2.py
 ```
 
-3. Start `dora-coordinator` in a separate terminal window
+3. Start `dora-daemon` in a separate terminal window
 ```bash
 # New terminal window
 dora up 
@@ -35,7 +35,7 @@ dora start dataflow.yml
 ```
 The output is the unique ID of the dataflow instance, which can be used to control it through the `dora` CLI.
 
-5. You will see in your `dora-coordinator` window operators receiving ticks.
+5. You will see in your `dora-daemon` window operators receiving ticks.
 ```bash
 Received input tick, with data: b''
 Received input tick, with data: b''

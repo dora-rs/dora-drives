@@ -32,7 +32,7 @@ docker run \
 
 Or use the leaderboard natively:
 ```bash
-dora-coordinator --run-dataflow graphs/leaderboard/oasis_agent.yaml
+dora-daemon --run-dataflow graphs/leaderboard/oasis_agent.yaml
 ```
 
 To have a more fined-grained control over starting and stopping your agent,
