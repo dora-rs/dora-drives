@@ -11,7 +11,6 @@ from scipy.spatial.transform import Rotation as R
 
 # Planning general
 TARGET_SPEED = 7
-NUM_WAYPOINTS_AHEAD = 10
 
 OBSTACLE_CLEARANCE = 3
 OBSTACLE_RADIUS = 1
@@ -208,7 +207,9 @@ class Operator:
             "ps": 0,
             "target_speed": self.conds["target_speed"],
             "pos": self.position[:2],
-            "vel": (np.clip(LA.norm(self.position - self.last_position), 4, 7))
+            "vel": (
+                np.clip(LA.norm(self.position - self.last_position), 0.5, 7)
+            )
             * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
             "obs": obstacles,
