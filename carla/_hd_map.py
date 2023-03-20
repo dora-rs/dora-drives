@@ -9,6 +9,7 @@ import numpy as np
 
 # Import Planner from CARLA codebase
 from agents.navigation.global_route_planner import GlobalRoutePlanner
+
 from carla import LaneType, Location
 
 
@@ -28,7 +29,7 @@ class HDMap(object):
         self._map = simulator_map
         # Setup global planner.
         self._grp = GlobalRoutePlanner(
-            self._map, 1.0
+            self._map, 0.1
         )  # Distance between waypoints
 
     # self._grp.setup()
