@@ -9,16 +9,16 @@ from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
 
-MIN_PID_WAYPOINT_DISTANCE = 5
-COAST_FACTOR = 1.75
-pid_p = 1.0
+
+MIN_PID_WAYPOINT_DISTANCE = 1
+pid_p = 0.1
 pid_d = 0.0
 pid_i = 0.05
-dt = 1.0 / 5
+dt = 1.0 / 20
 pid_use_real_time = False
 
 BRAKE_MAX = 1.0
-THROTTLE_MAX = 1.0
+THROTTLE_MAX = 0.5
 
 
 def get_angle(left, right) -> float:
@@ -138,6 +138,7 @@ class Operator:
         self.target_speeds = []
         self.metadata = {}
         self.position = []
+        self.speed = []
         self.previous_position = []
         self.current_speed = []
         self.previous_time = time.time()
@@ -162,13 +163,13 @@ class Operator:
                 self.previous_time = time.time()
                 return DoraStatus.CONTINUE
 
-            self.current_speed = (
-                position[:2] - self.previous_position[:2]
-            ) * 20
-
             self.previous_position = self.position
             self.previous_time = time.time()
 
+            return DoraStatus.CONTINUE
+
+        elif dora_input["id"] == "speed":
+            self.speed = np.frombuffer(dora_input["data"], np.float32)
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "check":
@@ -184,6 +185,9 @@ class Operator:
             self.metadata = dora_input["metadata"]
 
         if len(self.position) == 0:
+            return DoraStatus.CONTINUE
+
+        if len(self.speed) == 0:
             return DoraStatus.CONTINUE
 
         if len(self.waypoints) == 0:
@@ -224,7 +228,7 @@ class Operator:
             )
 
         throttle, brake = compute_throttle_and_brake(
-            pid, LA.norm(self.current_speed), target_speed
+            pid, LA.norm(self.speed), target_speed
         )
 
         send_output(
