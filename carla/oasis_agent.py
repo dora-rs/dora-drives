@@ -1,4 +1,5 @@
 import math
+import os.path
 import xml.etree.ElementTree as ET
 
 import cv2
@@ -9,8 +10,8 @@ from scipy.spatial.transform import Rotation as R
 
 from carla import VehicleControl
 
-IMAGE_WIDTH = 800
-IMAGE_HEIGHT = 600
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
 STEER_GAIN = 0.7
 AVERAGE_WINDOW = 10
 
@@ -172,13 +173,23 @@ class DoraAgent(AutonomousAgent):
             },
             {
                 "type": "sensor.opendrive_map",
-                "id": "OpenDRIVE",
+                "id": "高精地图传感器",
                 "reading_frequency": 1,
             },
-            # {"type": "sensor.speedometer", "id": "Speed"},
+            {"type": "sensor.speedometer", "id": "速度传感器"},
         ]
 
         return sensors
+
+    def save_input_data(self,keys,inputdata):
+        import json
+        data = {keys:inputdata}
+        opendrive_file = '/home/dora/workspace/simulate/inputdata_log.txt'
+        if os.path.exists(opendrive_file):
+            os.remove(opendrive_file)
+        with open(opendrive_file, 'w') as f:
+            f.write(json.dumps(data))
+            f.close()
 
     def run_step(self, input_data, timestamp):
         """
@@ -192,6 +203,15 @@ class DoraAgent(AutonomousAgent):
             self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
             node.send_output("opendrive", opendrive_map.encode())
 
+        ### Opendrive preprocessing
+        if "高精地图传感器" in input_data.keys():
+            self.save_input_data("高精地图传感器",input_data["高精地图传感器"])
+            opendrive_map = input_data["高精地图传感器"][1]["opendrive"]
+            self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
+            node.send_output("opendrive", opendrive_map.encode())
+        if "速度传感器" in input_data.keys():
+            node.send_output("speed", np.array(input_data["速度传感器"][1]["speed"], np.float32).tobytes())
+        
         if self.lat_ref is None:
             return VehicleControl(
                 steer=0.0,

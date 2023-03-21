@@ -14,10 +14,10 @@ from dora_utils import (
 )
 from scipy.spatial.transform import Rotation as R
 
-CAMERA_WIDTH = 800
-CAMERA_HEIGHT = 600
-DEPTH_IMAGE_WIDTH = 800
-DEPTH_IMAGE_HEIGHT = 600
+CAMERA_WIDTH = 1920
+CAMERA_HEIGHT = 1080
+DEPTH_IMAGE_WIDTH = 1920
+DEPTH_IMAGE_HEIGHT = 1080
 DEPTH_FOV = 90
 SENSOR_POSITION = np.array([3, 0, 1])
 
@@ -426,6 +426,7 @@ class Operator:
         # lineType,
         # )
         writer.write(resized_image)
+        resized_image = cv2.resize(resized_image, (800, 600))
         if not NO_DISPLAY:
             cv2.imshow("image", resized_image)
             cv2.waitKey(1)
