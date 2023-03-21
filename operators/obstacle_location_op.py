@@ -10,10 +10,8 @@ from dora_utils import (
 )
 from sklearn.neighbors import KNeighborsRegressor
 
-CAMERA_WIDTH = 800
-CAMERA_HEIGHT = 600
-DEPTH_IMAGE_WIDTH = 800
-DEPTH_IMAGE_HEIGHT = 600
+DEPTH_IMAGE_WIDTH = 1920
+DEPTH_IMAGE_HEIGHT = 1080
 DEPTH_FOV = 90
 SENSOR_POSITION = np.array([3, 0, 1, 0, 0, 0])
 INTRINSIC_MATRIX = get_intrinsic_matrix(

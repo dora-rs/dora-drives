@@ -10,7 +10,6 @@ from scipy.spatial.transform import Rotation as R
 from carla import Map
 
 # Planning general
-TARGET_SPEED = 7.0
 NUM_WAYPOINTS_AHEAD = 120
 GOAL_LOCATION = [234, 59, 39]
 OBJECTIVE_MIN_DISTANCE = 0
