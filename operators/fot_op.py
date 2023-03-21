@@ -18,9 +18,6 @@ OBSTACLE_RADIUS = 1
 OBSTACLE_RADIUS_TANGENT = 1.5
 MAX_CURBATURE = np.pi / 6
 
-MAX_FAIL_DURATION = 10
-OVERRIDE_DURATION = 10
-
 def get_lane_list(position, lanes, waypoints):
 
     lane_list = []
@@ -125,32 +122,6 @@ class Operator:
             "klon": 1.0,
             "num_threads": 0,  # set 0 to avoid using threaded algorithm
         }
-        self.override_hyperparameters = {
-            "max_speed": 25.0,
-            "max_accel": 45.0,
-            "max_curvature": 55.0,
-            "max_road_width_l": 5.0,
-            "max_road_width_r": 0.1,
-            "d_road_w": 0.5,
-            "dt": 0.5,
-            "maxt": 5.0,
-            "mint": 2.0,
-            "d_t_s": 5,
-            "n_s_sample": 2.0,
-            "obstacle_clearance": 0.1,
-            "kd": 1.0,
-            "kv": 0.1,
-            "ka": 0.1,
-            "kj": 0.1,
-            "kt": 0.1,
-            "ko": 0.1,
-            "klat": 1.0,
-            "klon": 1.0,
-            "num_threads": 0,  # set 0 to avoid using threaded algorithm
-        }
-        self.fail_start = 0
-        self.override_start = 0
-        self.override = False
         self.conds = {
             "s0": 0,
             "target_speed": TARGET_SPEED,
@@ -241,45 +212,23 @@ class Operator:
             "obs": obstacles,
         }
 
-        if not self.override:
-            (
-                result_x,
-                result_y,
-                speeds,
-                ix,
-                iy,
-                iyaw,
-                d,
-                s,
-                speeds_x,
-                speeds_y,
-                misc,
-                costs,
-                success,
-            ) = fot_wrapper.run_fot(initial_conditions, self.hyperparameters)
-        else:
-            (
-                result_x,
-                result_y,
-                speeds,
-                ix,
-                iy,
-                iyaw,
-                d,
-                s,
-                speeds_x,
-                speeds_y,
-                misc,
-                costs,
-                success,
-            ) = fot_wrapper.run_fot(initial_conditions, self.override_hyperparameters)
-        if not success:
-            if not self.override and self.fail_start == 0:
-                self.fail_start = time.time()
-            elif time.time() - self.fail_start > MAX_FAIL_DURATION:
-                self.override = True
-                self.override_start = time.time()
+        (
+            result_x,
+            result_y,
+            speeds,
+            ix,
+            iy,
+            iyaw,
+            d,
+            s,
+            speeds_x,
+            speeds_y,
+            misc,
+            costs,
+            success,
+        ) = fot_wrapper.run_fot(initial_conditions, self.hyperparameters)
 
+        if not success:          
             initial_conditions["wp"] = initial_conditions["wp"][:5]
             print(f"fot failed. stopping with {initial_conditions}.")
             for obstacle in self.obstacles:
@@ -290,11 +239,6 @@ class Operator:
                 "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
             )
             return DoraStatus.CONTINUE
-        else:
-            self.fail_start = 0
-            if time.time() - self.override_start > OVERRIDE_DURATION:
-                self.override = False
-                self.override_start = 0
 
         self.waypoints = np.concatenate([result_x, result_y]).reshape((2, -1)).T
 
