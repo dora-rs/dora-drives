@@ -12,7 +12,7 @@ from carla import VehicleControl
 
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-STEER_GAIN = 0.7
+STEER_GAIN = 1
 AVERAGE_WINDOW = 10
 
 node = Node()
