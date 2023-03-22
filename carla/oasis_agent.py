@@ -1,7 +1,7 @@
 import math
 import os.path
 import xml.etree.ElementTree as ET
-
+import time
 import cv2
 import numpy as np
 from autoagents.autonomous_agent import AutonomousAgent
@@ -93,6 +93,7 @@ class DoraAgent(AutonomousAgent):
         self.destination = destination
         self.lat_ref = None
         self.lon_ref = None
+        self.opendrive_map = None
 
         ## Check for node readiness
         check_nodes = [
@@ -201,17 +202,15 @@ class DoraAgent(AutonomousAgent):
         """
 
         ### Opendrive preprocessing
-        if "OpenDRIVE" in input_data.keys():
-            opendrive_map = input_data["OpenDRIVE"][1]["opendrive"]
-            self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
-            node.send_output("opendrive", opendrive_map.encode())
-
-        ### Opendrive preprocessing
         if "高精地图传感器" in input_data.keys():
-            self.save_input_data("高精地图传感器",input_data["高精地图传感器"])
-            opendrive_map = input_data["高精地图传感器"][1]["opendrive"]
-            self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
-            node.send_output("opendrive", opendrive_map.encode())
+            
+            if self.opendrive_map is None: 
+                opendrive_map = input_data["高精地图传感器"][1]["opendrive"]
+                self.save_input_data("高精地图传感器",input_data["高精地图传感器"])
+            
+                self.opendrive_map = opendrive_map
+                self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
+                node.send_output("opendrive", opendrive_map.encode())
         if "速度传感器" in input_data.keys():
             node.send_output("speed", np.array(input_data["速度传感器"][1]["speed"], np.float32).tobytes())
         
@@ -263,9 +262,9 @@ class DoraAgent(AutonomousAgent):
 
         ### Camera preprocessing
         frame_raw_data = input_data["camera.center"][1]
-        frame = np.frombuffer(frame_raw_data, dtype=np.dtype("uint8"))
-        frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-        camera_frame = cv2.imencode(".jpg", frame)[1].tobytes()
+        ## frame = np.frombuffer(frame_raw_data, dtype=np.dtype("uint8"))
+        ## frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+        camera_frame = frame_raw_data.tobytes()
 
         ### LIDAR preprocessing
         frame_raw_data = input_data["LIDAR"][1]
