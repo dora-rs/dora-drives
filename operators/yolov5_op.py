@@ -9,6 +9,9 @@ from dora import DoraStatus
 DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
+DEVICE= "cuda"
+YOLOV5_PATH="/home/dora/workspace/simulate/team_code/dependencies/yolov5"
+YOLOV5_WEIGHT_PATH="/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt"
 
 
 class Operator:
@@ -17,7 +20,7 @@ class Operator:
     """
 
     def __init__(self):
-        if os.environ.get("YOLOV5_PATH") is None:
+        if YOLOV5_PATH is None:
             # With internet
             self.model = torch.hub.load(
                 "ultralytics/yolov5",
@@ -26,9 +29,9 @@ class Operator:
         else:
             # Without internet
             self.model = torch.hub.load(
-                os.environ.get("YOLOV5_PATH"),
+            YOLOV5_PATH,
                 "custom",
-                path=os.environ.get("YOLOV5_WEIGHT_PATH"),
+                path=YOLOV5_WEIGHT_PATH,
                 source="local",
             )
 
