@@ -1,4 +1,4 @@
 #! /bin/bash
 # export DESTINATION=`cat $DEST`
 
-dora-coordinator --run-dataflow $TEAM_YAML
+dora-daemon --run-dataflow $TEAM_YAML
