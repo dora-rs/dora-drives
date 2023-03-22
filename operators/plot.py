@@ -32,7 +32,7 @@ VERBOSE = True
 NO_DISPLAY = True
 
 writer = cv2.VideoWriter(
-    "output.avi",
+    "output01.avi",
     cv2.VideoWriter_fourcc(*"MJPG"),
     30,
     (CAMERA_WIDTH, CAMERA_HEIGHT),
