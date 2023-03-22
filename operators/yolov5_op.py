@@ -7,6 +7,8 @@ import torch
 from dora import DoraStatus
 
 DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
 
 
 class Operator:
@@ -49,13 +51,10 @@ class Operator:
             return DoraStatus.CONTINUE
 
         else:
-            frame = cv2.imdecode(
-                np.frombuffer(
+            frame = np.frombuffer(
                     dora_input["data"],
                     dtype="uint8",
-                ),
-                -1,
-            )
+                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
             results = self.model(frame)  # includes NMS

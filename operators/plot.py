@@ -168,14 +168,11 @@ class Operator:
                 self.point_cloud = point_cloud.T
 
         elif "image" == dora_input["id"]:
-            self.camera_frame = cv2.imdecode(
-                np.frombuffer(
+            self.camera_frame = np.frombuffer(
                     dora_input["data"],
                     dtype="uint8",
-                ),
-                -1,
-            )
-
+                ).reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
+            
         if "image" != dora_input["id"] or isinstance(self.camera_frame, list):
             return DoraStatus.CONTINUE
 
