@@ -107,7 +107,7 @@ class Operator:
                     index : index + NUM_WAYPOINTS_AHEAD
                 ]
 
-            if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
+            if len(self.waypoints) == 0:
 
                 [x, y, z, rx, ry, rz, rw] = self.position
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
