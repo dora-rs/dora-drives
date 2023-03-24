@@ -73,11 +73,20 @@ class Operator:
             point_cloud = np.frombuffer(dora_input["data"], dtype=np.float32)
             point_cloud = point_cloud.reshape((-1, 3))
 
+            # From Velodyne axis to Camera axis 
+            # from Velodyne axis: 
+            # x -> forward, y -> right, z -> bottom
+            # to Camera axis:
+            # x -> right, y -> top, z -> forward
             point_cloud = np.dot(
                 point_cloud,
                 VELODYNE_MATRIX,
             )
+
+            # Forward points only ( forward = z > 0.1 )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
+
+            # 3D array -> 2D array with index_x -> pixel x, index_y -> pixel_y, value -> z 
             camera_point_cloud = local_points_to_camera_view(
                 point_cloud, INTRINSIC_MATRIX
             )
