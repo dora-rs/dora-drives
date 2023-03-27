@@ -162,7 +162,7 @@ cd abc_project
     └── op_2.py
 </code></pre>
 <ol start="3">
-<li>Start <code>dora-coordinator</code> in a separate terminal window</li>
+<li>Start <code>dora-daemon</code> in a separate terminal window</li>
 </ol>
 <pre><code class="language-bash"># New terminal window
 dora up 
@@ -176,7 +176,7 @@ dora start dataflow.yml
 </code></pre>
 <p>The output is the unique ID of the dataflow instance, which can be used to control it through the <code>dora</code> CLI.</p>
 <ol start="5">
-<li>You will see in your <code>dora-coordinator</code> window operators receiving ticks.</li>
+<li>You will see in your <code>dora-daemon</code> window operators receiving ticks.</li>
 </ol>
 <pre><code class="language-bash">Received input tick, with data: b''
 Received input tick, with data: b''

@@ -154,6 +154,11 @@ import torch
 from dora import DoraStatus
 
 DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
+DEVICE= &quot;cuda&quot;
+YOLOV5_PATH=&quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5&quot;
+YOLOV5_WEIGHT_PATH=&quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt&quot;
 
 
 class Operator:
@@ -162,7 +167,7 @@ class Operator:
     &quot;&quot;&quot;
 
     def __init__(self):
-        if os.environ.get(&quot;YOLOV5_PATH&quot;) is None:
+        if YOLOV5_PATH is None:
             # With internet
             self.model = torch.hub.load(
                 &quot;ultralytics/yolov5&quot;,
@@ -171,14 +176,23 @@ class Operator:
         else:
             # Without internet
             self.model = torch.hub.load(
-                os.environ.get(&quot;YOLOV5_PATH&quot;),
+            YOLOV5_PATH,
                 &quot;custom&quot;,
-                path=os.environ.get(&quot;YOLOV5_WEIGHT_PATH&quot;),
+                path=YOLOV5_WEIGHT_PATH,
                 source=&quot;local&quot;,
             )
 
         self.model.to(torch.device(DEVICE))
         self.model.eval()
+
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -&gt; DoraStatus:
+        if dora_event[&quot;type&quot;] == &quot;INPUT&quot;:
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
 
     def on_input(
         self,
@@ -196,13 +210,10 @@ class Operator:
             return DoraStatus.CONTINUE
 
         else:
-            frame = cv2.imdecode(
-                np.frombuffer(
+            frame = np.frombuffer(
                     dora_input[&quot;data&quot;],
                     dtype=&quot;uint8&quot;,
-                ),
-                -1,
-            )
+                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
             results = self.model(frame)  # includes NMS
@@ -260,7 +271,7 @@ nodes:
 <ul>
 <li>To run it without docker:</li>
 </ul>
-<pre><code class="language-bash">dora-coordinator --run-dataflow graphs/tutorials/webcam_yolov5.yaml
+<pre><code class="language-bash">dora-daemon --run-dataflow graphs/tutorials/webcam_yolov5.yaml
 </code></pre>
 
                     </main>
