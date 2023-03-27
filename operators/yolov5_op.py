@@ -7,6 +7,11 @@ import torch
 from dora import DoraStatus
 
 DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
+DEVICE= "cuda"
+YOLOV5_PATH="/home/dora/workspace/simulate/team_code/dependencies/yolov5"
+YOLOV5_WEIGHT_PATH="/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt"
 
 
 class Operator:
@@ -15,7 +20,7 @@ class Operator:
     """
 
     def __init__(self):
-        if os.environ.get("YOLOV5_PATH") is None:
+        if YOLOV5_PATH is None:
             # With internet
             self.model = torch.hub.load(
                 "ultralytics/yolov5",
@@ -24,9 +29,9 @@ class Operator:
         else:
             # Without internet
             self.model = torch.hub.load(
-                os.environ.get("YOLOV5_PATH"),
+            YOLOV5_PATH,
                 "custom",
-                path=os.environ.get("YOLOV5_WEIGHT_PATH"),
+                path=YOLOV5_WEIGHT_PATH,
                 source="local",
             )
 
@@ -58,13 +63,10 @@ class Operator:
             return DoraStatus.CONTINUE
 
         else:
-            frame = cv2.imdecode(
-                np.frombuffer(
+            frame = np.frombuffer(
                     dora_input["data"],
                     dtype="uint8",
-                ),
-                -1,
-            )
+                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
             results = self.model(frame)  # includes NMS

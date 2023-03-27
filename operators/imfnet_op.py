@@ -17,6 +17,8 @@ from imfnet import (
 )
 
 VOXEL_SIZE = 2.5
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
 
 
 def run_ransac(xyz0, xyz1, feat0, feat1, voxel_size, ransac_n=4):
@@ -105,13 +107,10 @@ class Operator:
             self.point_cloud = point_cloud
 
         if dora_input["id"] == "image":
-            frame = cv2.imdecode(
-                np.frombuffer(
+            frame = np.frombuffer(
                     dora_input["data"],
                     dtype="uint8",
-                ),
-                -1,
-            )
+                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             # if len(self.frame) != 0:
             # cv2.imwrite("previous_image.jpg", self.frame)
             # cv2.imwrite("current_image.jpg", frame)
