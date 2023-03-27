@@ -14,10 +14,10 @@ from dora_utils import (
 )
 from scipy.spatial.transform import Rotation as R
 
-CAMERA_WIDTH = 800
-CAMERA_HEIGHT = 600
-DEPTH_IMAGE_WIDTH = 800
-DEPTH_IMAGE_HEIGHT = 600
+CAMERA_WIDTH = 1920
+CAMERA_HEIGHT = 1080
+DEPTH_IMAGE_WIDTH = 1920
+DEPTH_IMAGE_HEIGHT = 1080
 DEPTH_FOV = 90
 SENSOR_POSITION = np.array([3, 0, 1])
 
@@ -32,7 +32,7 @@ VERBOSE = True
 NO_DISPLAY = True
 
 writer = cv2.VideoWriter(
-    "output.avi",
+    "output01.avi",
     cv2.VideoWriter_fourcc(*"MJPG"),
     30,
     (CAMERA_WIDTH, CAMERA_HEIGHT),
@@ -70,6 +70,15 @@ class Operator:
         self.control = []
         self.last_time = time.time()
         self.current_speed = []
+
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
 
     def on_input(
         self,
@@ -168,14 +177,11 @@ class Operator:
                 self.point_cloud = point_cloud.T
 
         elif "image" == dora_input["id"]:
-            self.camera_frame = cv2.imdecode(
-                np.frombuffer(
+            self.camera_frame = np.frombuffer(
                     dora_input["data"],
                     dtype="uint8",
-                ),
-                -1,
-            )
-
+                ).reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
+            
         if "image" != dora_input["id"] or isinstance(self.camera_frame, list):
             return DoraStatus.CONTINUE
 
@@ -426,6 +432,7 @@ class Operator:
         # lineType,
         # )
         writer.write(resized_image)
+        resized_image = cv2.resize(resized_image, (800, 600))
         if not NO_DISPLAY:
             cv2.imshow("image", resized_image)
             cv2.waitKey(1)

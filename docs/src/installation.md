@@ -69,7 +69,7 @@ You will need to have `/etc/docker/daemon.json` to be exactly:
 |Carla|Carla Leaderboard|Installation below in `scripts/install.sh`. Version: [Leaderboard Version](https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/Leaderboard/CARLA_Leaderboard_20.tar.gz)|
 |NVIDIA Driver|515.86.01||
 |CUDA|11.7||
-|dora-rs|0.1.3|Installation below|
+|dora-rs|0.2.0|Installation below|
 
 
 ### Environments
@@ -104,7 +104,7 @@ chmod +x ./scripts/*
 
 ## Installing dora
 
-sudo wget https://github.com/dora-rs/dora/releases/download/v0.1.3/dora-v0.1.3-x86_64-Linux.zip && sudo unzip dora-v0.1.3-x86_64-Linux.zip -d ~/.local/bin && sudo mv ~/.local/bin/iceoryx/iox-roudi ~/.local/bin
+sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.0/dora-v0.2.0-x86_64-Linux.zip && sudo unzip dora-v0.2.0-x86_64-Linux.zip -d ~/.local/bin 
 ``` 
 
 ### Running the graph
@@ -117,10 +117,10 @@ export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/depende
 ## Running the simulation
 chmod +x ./scripts/run_simulator.sh
 ./scripts/run_simulator.sh &
-dora up
+
 
 ## Spawn the dataflow
-dora-coordinator --run-dataflow graphs/tutorials/carla_waypoints.yaml
+dora-daemon --run-dataflow graphs/tutorials/carla_waypoints.yaml
 ```
 
 

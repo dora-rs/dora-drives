@@ -6,6 +6,8 @@ import torch
 from dora import DoraStatus
 from strong_sort import StrongSORT
 
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
 
 def xxyy2xywh(x):
     # Convert nx4 boxes from [x1, y1, x2, y2] to [x, y, w, h] where xy1=top-left, xy2=bottom-right
@@ -32,6 +34,15 @@ class Operator:
         self.model = model
         self.frame = []
 
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
+
     def on_input(
         self,
         dora_input: dict,
@@ -39,13 +50,10 @@ class Operator:
     ) -> DoraStatus:
 
         if dora_input["id"] == "image":
-            frame = cv2.imdecode(
-                np.frombuffer(
+            frame = np.frombuffer(
                     dora_input["data"],
                     dtype="uint8",
-                ),
-                -1,
-            )
+                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
             self.frame = frame[:, :, :3]
 

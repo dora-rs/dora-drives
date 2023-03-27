@@ -3,10 +3,15 @@ from typing import Callable
 
 import cv2
 import numpy as np
-from _dora_utils import (distance_points, distance_vertex,
-                         get_extrinsic_matrix, get_intrinsic_matrix,
-                         get_projection_matrix, location_to_camera_view,
-                         to_world_coordinate)
+from _dora_utils import (
+    distance_points,
+    distance_vertex,
+    get_extrinsic_matrix,
+    get_intrinsic_matrix,
+    get_projection_matrix,
+    location_to_camera_view,
+    to_world_coordinate,
+)
 from dora import DoraStatus
 from shapely.geometry import LineString
 
@@ -294,6 +299,15 @@ class Operator:
         self.position = []
         self.depth_frame = []
         self.segmented_frame = []
+
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
 
     def on_input(
         self,

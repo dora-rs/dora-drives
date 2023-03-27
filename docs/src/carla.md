@@ -28,7 +28,7 @@ export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/depende
 ## First start the simulator if it is not started
 ./scripts/run_simulator.sh &
 
-dora-coordinator --run-dataflow graphs/tutorials/carla_perception.yaml
+dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
 ```
 
 > I have removed the traffic sign operator to reduce GPU memory consumption.

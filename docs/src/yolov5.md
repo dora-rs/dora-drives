@@ -29,5 +29,5 @@ I've added capabilities for the plot to show the bounding box found by the `yolo
 - To run it without docker:
 
 ```bash
-dora-coordinator --run-dataflow graphs/tutorials/webcam_yolov5.yaml
+dora-daemon --run-dataflow graphs/tutorials/webcam_yolov5.yaml
 ```

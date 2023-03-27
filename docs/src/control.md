@@ -87,7 +87,7 @@ To test it out:
 - To run it without docker:
 
 ```bash
-dora-coordinator --run-dataflow graphs/tutorials/carla_full.yaml
+dora-daemon --run-dataflow graphs/tutorials/carla_full.yaml
 ```
 
 😎 We now have a working autonomous car!

@@ -10,7 +10,6 @@ from scipy.spatial.transform import Rotation as R
 from carla import Map
 
 # Planning general
-TARGET_SPEED = 7.0
 NUM_WAYPOINTS_AHEAD = 120
 GOAL_LOCATION = [234, 59, 39]
 OBJECTIVE_MIN_DISTANCE = 0
@@ -36,6 +35,15 @@ class Operator:
         self.objective_waypoints = []
         self.completed_waypoints = 0
         self.waypoints_array = np.array([])
+
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
 
     def on_input(
         self,
@@ -99,7 +107,7 @@ class Operator:
                     index : index + NUM_WAYPOINTS_AHEAD
                 ]
 
-            if len(self.waypoints) < NUM_WAYPOINTS_AHEAD / 2:
+            if len(self.waypoints) == 0:
 
                 [x, y, z, rx, ry, rz, rw] = self.position
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
@@ -121,8 +129,9 @@ class Operator:
                 diff_angle = np.arctan2(
                     np.sin(angle - yaw), np.cos(angle - yaw)
                 )
-                if np.abs(diff_angle) > np.pi * 2 / 3:
-                    print("Error in computation of waypoints")
+                if np.abs(diff_angle) > np.pi / 2:
+                    print("Error in computation of waypoints.")
+                    print("The next target waypoint requires to make a 180 degrees turn.")
                     print(f"target waypoint: {waypoints[0]}")
                     print(f"position: {[x, y, z]}")
                     print(f"goal location: {self._goal_location}")

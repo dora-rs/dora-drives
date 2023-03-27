@@ -1,5 +1,6 @@
 from typing import Callable
 
+import time
 import numpy as np
 from dora import DoraStatus
 from dora_utils import LABELS, pairwise_distances
@@ -11,13 +12,11 @@ from scipy.spatial.transform import Rotation as R
 
 # Planning general
 TARGET_SPEED = 7
-NUM_WAYPOINTS_AHEAD = 10
 
 OBSTACLE_CLEARANCE = 3
 OBSTACLE_RADIUS = 1
 OBSTACLE_RADIUS_TANGENT = 1.5
 MAX_CURBATURE = np.pi / 6
-
 
 def get_lane_list(position, lanes, waypoints):
 
@@ -90,6 +89,7 @@ class Operator:
         self.obstacles = np.array([])
         self.lanes = np.array([])
         self.position = []
+        self.speed = []
         self.last_position = []
         self.waypoints = []
         self.gps_waypoints = []
@@ -127,6 +127,15 @@ class Operator:
             "target_speed": TARGET_SPEED,
         }  # paste output from debug log
 
+    def on_event(
+        self,
+        dora_event: dict,
+        send_output: Callable[[str, bytes], None],
+    ) -> DoraStatus:
+        if dora_event["type"] == "INPUT":
+            return self.on_input(dora_event, send_output)
+        return DoraStatus.CONTINUE
+
     def on_input(
         self,
         dora_input: dict,
@@ -138,6 +147,10 @@ class Operator:
             self.position = np.frombuffer(dora_input["data"], np.float32)
             if len(self.last_position) == 0:
                 self.last_position = self.position
+            return DoraStatus.CONTINUE
+
+        elif dora_input["id"] == "speed":
+            self.speed = np.frombuffer(dora_input["data"], np.float32)
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "check":
@@ -181,6 +194,9 @@ class Operator:
             print("No position")
             return DoraStatus.CONTINUE
 
+        elif len(self.speed) == 0:
+            print("No speed")
+            return DoraStatus.CONTINUE
         [x, y, z, rx, ry, rz, rw] = self.position
         [_, _, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
             "xyz", degrees=False
@@ -199,9 +215,7 @@ class Operator:
             "ps": 0,
             "target_speed": self.conds["target_speed"],
             "pos": self.position[:2],
-            "vel": (
-                np.clip(LA.norm(self.position - self.last_position), 0.5, 7)
-            )
+            "vel": (np.clip(LA.norm(self.speed), 0.5, 40))
             * np.array([np.cos(yaw), np.sin(yaw)]),
             "wp": self.gps_waypoints,
             "obs": obstacles,
@@ -222,7 +236,9 @@ class Operator:
             costs,
             success,
         ) = fot_wrapper.run_fot(initial_conditions, self.hyperparameters)
-        if not success:
+
+        if not success:          
+            initial_conditions["wp"] = initial_conditions["wp"][:5]
             print(f"fot failed. stopping with {initial_conditions}.")
             for obstacle in self.obstacles:
                 print(
