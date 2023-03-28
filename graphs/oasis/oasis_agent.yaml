@@ -28,8 +28,6 @@ nodes:
         --openscenario $XOSC
         --agent $TEAM_AGENT
         --agentConfig $TEAM_AGENT_CONF
-        --save_csv
-        --save_influx
 
   - id: carla_gps_op
     operator:
