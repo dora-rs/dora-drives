@@ -9,6 +9,7 @@ from strong_sort import StrongSORT
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
 
+
 def xxyy2xywh(x):
     # Convert nx4 boxes from [x1, y1, x2, y2] to [x, y, w, h] where xy1=top-left, xy2=bottom-right
     y = x.clone() if isinstance(x, torch.Tensor) else np.copy(x)
@@ -51,9 +52,9 @@ class Operator:
 
         if dora_input["id"] == "image":
             frame = np.frombuffer(
-                    dora_input["data"],
-                    dtype="uint8",
-                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+                dora_input["data"],
+                dtype="uint8",
+            ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
             self.frame = frame[:, :, :3]
 

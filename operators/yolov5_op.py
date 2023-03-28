@@ -9,9 +9,11 @@ from dora import DoraStatus
 DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-DEVICE= "cuda"
-YOLOV5_PATH="/home/dora/workspace/simulate/team_code/dependencies/yolov5"
-YOLOV5_WEIGHT_PATH="/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt"
+DEVICE = "cuda"
+YOLOV5_PATH = "/home/dora/workspace/simulate/team_code/dependencies/yolov5"
+YOLOV5_WEIGHT_PATH = (
+    "/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt"
+)
 
 
 class Operator:
@@ -29,7 +31,7 @@ class Operator:
         else:
             # Without internet
             self.model = torch.hub.load(
-            YOLOV5_PATH,
+                YOLOV5_PATH,
                 "custom",
                 path=YOLOV5_WEIGHT_PATH,
                 source="local",
@@ -64,9 +66,9 @@ class Operator:
 
         else:
             frame = np.frombuffer(
-                    dora_input["data"],
-                    dtype="uint8",
-                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+                dora_input["data"],
+                dtype="uint8",
+            ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
             results = self.model(frame)  # includes NMS

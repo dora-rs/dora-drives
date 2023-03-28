@@ -1,14 +1,13 @@
 from typing import Callable
 
-import time
 import numpy as np
 from dora import DoraStatus
-from dora_utils import LABELS, pairwise_distances
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
-    fot_wrapper,
-)
+from dora_utils import LABELS
+from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import \
+    fot_wrapper
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
+from sklearn.metrics import pairwise_distances
 
 # Planning general
 TARGET_SPEED = 7
@@ -17,6 +16,7 @@ OBSTACLE_CLEARANCE = 3
 OBSTACLE_RADIUS = 1
 OBSTACLE_RADIUS_TANGENT = 1.5
 MAX_CURBATURE = np.pi / 6
+
 
 def get_lane_list(position, lanes, waypoints):
 
@@ -237,13 +237,25 @@ class Operator:
             success,
         ) = fot_wrapper.run_fot(initial_conditions, self.hyperparameters)
 
-        if not success:          
+        if not success:
             initial_conditions["wp"] = initial_conditions["wp"][:5]
             print(f"fot failed. stopping with {initial_conditions}.")
+            target_distance = LA.norm(
+                self.gps_waypoints[-1] - self.position[:2]
+            )
+            print(f"Distance to target: {target_distance}")
             for obstacle in self.obstacles:
                 print(
                     f"obstacles:{obstacle}, label: {LABELS[int(obstacle[-1])]}"
                 )
+            min_distance_to_obstacle = pairwise_distances(
+                waypoints, self.obstacles[:, :2]
+            ).min()
+
+            ## Send GPS Waypoint if we are very close to the target
+            if target_distance < min_distance_to_obstacle:
+                send_output("waypoints", self.gps_waypoints.tobytes())
+
             send_output(
                 "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
             )

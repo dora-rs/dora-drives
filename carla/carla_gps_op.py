@@ -131,7 +131,9 @@ class Operator:
                 )
                 if np.abs(diff_angle) > np.pi / 2:
                     print("Error in computation of waypoints.")
-                    print("The next target waypoint requires to make a 180 degrees turn.")
+                    print(
+                        "The next target waypoint requires to make a 180 degrees turn."
+                    )
                     print(f"target waypoint: {waypoints[0]}")
                     print(f"position: {[x, y, z]}")
                     print(f"goal location: {self._goal_location}")

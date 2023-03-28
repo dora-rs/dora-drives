@@ -203,7 +203,6 @@ def local_points_to_camera_view(location: np.array, intrinsic_matrix):
     return location_2D
 
 
-
 LABELS = [
     "person",
     "bicycle",

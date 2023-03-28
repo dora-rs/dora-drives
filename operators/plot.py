@@ -178,10 +178,10 @@ class Operator:
 
         elif "image" == dora_input["id"]:
             self.camera_frame = np.frombuffer(
-                    dora_input["data"],
-                    dtype="uint8",
-                ).reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
-            
+                dora_input["data"],
+                dtype="uint8",
+            ).reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
+
         if "image" != dora_input["id"] or isinstance(self.camera_frame, list):
             return DoraStatus.CONTINUE
 
