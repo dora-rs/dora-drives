@@ -3,8 +3,9 @@ from typing import Callable
 import numpy as np
 from dora import DoraStatus
 from dora_utils import LABELS
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import \
-    fot_wrapper
+from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
+    fot_wrapper,
+)
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
@@ -248,13 +249,6 @@ class Operator:
                 print(
                     f"obstacles:{obstacle}, label: {LABELS[int(obstacle[-1])]}"
                 )
-            min_distance_to_obstacle = pairwise_distances(
-                waypoints, self.obstacles[:, :2]
-            ).min()
-
-            ## Send GPS Waypoint if we are very close to the target
-            if target_distance < min_distance_to_obstacle:
-                send_output("waypoints", self.gps_waypoints.tobytes())
 
             send_output(
                 "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
