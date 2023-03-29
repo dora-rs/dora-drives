@@ -11,3 +11,31 @@
 ## Outputs
 
 - Bounding box coordinates as well as the confidence and class label as output.
+
+
+## Graph Description
+
+```yaml
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: oasis_agent/image
+      python: ../../operators/yolov5_op.py
+```
+
+## Graph Viz
+
+```mermaid
+        flowchart TB
+  oasis_agent
+subgraph yolov5
+  yolov5/op[op]
+end
+subgraph obstacle_location_op
+  obstacle_location_op/op[op]
+end
+  oasis_agent -- image --> yolov5/op
+  yolov5/op -- bbox as obstacles_bbox --> obstacle_location_op/op
+```

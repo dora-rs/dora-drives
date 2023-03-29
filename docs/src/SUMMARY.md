@@ -23,15 +23,14 @@
 
 # Operators and Nodes
 
-- [Carla Source Node](./carla_source_node.md)
-- [Perfect detection operator](./perfect_detection_operator.md)
+- [GPS operator](./gps_operator.md)
 - [Yolov5 operator](./yolov5_operator.md)
 - [Obstacle location operator](./obstacle_location_operator.md)
-- [Hybrid A-Star operator](./hybrid_astar_operator.md)
+- [FOT operator](./fot_operator.md)
 - [PID Control operator](./pid_control_operator.md)
-- [Control operator](./control_operator.md)
-- [Plot operator](./plot_operator.md)
 
 # Reference Guide
-
+- [oasis-sensor](./oasis-sensor.md)
+- [oasis-control](./oasis-control.md)
+- [Overview](./overview.md)
 - [data format](./data-format.md)
