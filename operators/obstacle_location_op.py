@@ -75,9 +75,9 @@ class Operator:
 
             # From Velodyne axis to Camera axis
             # from Velodyne axis:
-            # x -> forward, y -> right, z -> bottom
+            # x -> forward, y -> right, z -> top
             # to Camera axis:
-            # x -> right, y -> top, z -> forward
+            # x -> right, y -> bottom, z -> forward
             point_cloud = np.dot(
                 point_cloud,
                 VELODYNE_MATRIX,
@@ -85,6 +85,9 @@ class Operator:
 
             # Forward points only ( forward = z > 0.1 )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
+
+            # Remove ground points. Above lidar only ( bottom = y < 1.0 )
+            point_cloud = point_cloud[np.where(point_cloud[:, 1] < 1.0)]
 
             # 3D array -> 2D array with index_x -> pixel x, index_y -> pixel_y, value -> z
             camera_point_cloud = local_points_to_camera_view(
@@ -146,6 +149,7 @@ class Operator:
             if len(self.position) == 0 or len(self.point_cloud) == 0:
                 return DoraStatus.CONTINUE
 
+            # bbox = np.array([[min_x, max_x, min_y, max_y, confidence, label], ... n_bbox ... ])
             self.obstacles_bbox = np.frombuffer(
                 dora_input["data"], dtype="int32"
             ).reshape((-1, 6))
