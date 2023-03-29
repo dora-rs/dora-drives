@@ -149,8 +149,8 @@
 <p>To translate out waypoints to those control, we're using a PID controller that is able to adjust the steering according to the response of the steering, and we're going to pipe this response to the CARLA API so that the car can move. The PID controller code is in <code>pid_control_op.py</code>.</p>
 <p>The full graph look as follows:</p>
 <pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
     
 nodes:
   - id: carla_source_node

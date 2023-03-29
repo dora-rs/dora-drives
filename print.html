@@ -423,9 +423,11 @@ from dora import DoraStatus
 DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-DEVICE= &quot;cuda&quot;
-YOLOV5_PATH=&quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5&quot;
-YOLOV5_WEIGHT_PATH=&quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt&quot;
+DEVICE = &quot;cuda&quot;
+YOLOV5_PATH = &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5&quot;
+YOLOV5_WEIGHT_PATH = (
+    &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt&quot;
+)
 
 
 class Operator:
@@ -443,7 +445,7 @@ class Operator:
         else:
             # Without internet
             self.model = torch.hub.load(
-            YOLOV5_PATH,
+                YOLOV5_PATH,
                 &quot;custom&quot;,
                 path=YOLOV5_WEIGHT_PATH,
                 source=&quot;local&quot;,
@@ -478,9 +480,9 @@ class Operator:
 
         else:
             frame = np.frombuffer(
-                    dora_input[&quot;data&quot;],
-                    dtype=&quot;uint8&quot;,
-                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+                dora_input[&quot;data&quot;],
+                dtype=&quot;uint8&quot;,
+            ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
             results = self.model(frame)  # includes NMS
@@ -497,8 +499,8 @@ class Operator:
 It sends the bounding box as a numpy bytes array with type <code>int32</code>.</p>
 <p>To use it, just add it to the graph:</p>
 <pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
 
 nodes:
   - id: webcam
@@ -550,8 +552,8 @@ nodes:
 </ul>
 <p>the graph will look as follows:</p>
 <pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
 
 nodes:
   - id: webcam
@@ -623,8 +625,8 @@ nodes:
 <p>To launch the simulator all you have to do is add the <code>-s</code>flag in the <code>./script/launch.sh</code> command.</p>
 <p>We can then switch from the webcam to the simulator in our graph.</p>
 <pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
     
 nodes:
   - id: carla_source_node
@@ -792,8 +794,8 @@ dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
 <p>To translate out waypoints to those control, we're using a PID controller that is able to adjust the steering according to the response of the steering, and we're going to pipe this response to the CARLA API so that the car can move. The PID controller code is in <code>pid_control_op.py</code>.</p>
 <p>The full graph look as follows:</p>
 <pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
     
 nodes:
   - id: carla_source_node

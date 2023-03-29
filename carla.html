@@ -148,8 +148,8 @@
 <p>To launch the simulator all you have to do is add the <code>-s</code>flag in the <code>./script/launch.sh</code> command.</p>
 <p>We can then switch from the webcam to the simulator in our graph.</p>
 <pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
     
 nodes:
   - id: carla_source_node

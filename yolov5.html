@@ -156,9 +156,11 @@ from dora import DoraStatus
 DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-DEVICE= &quot;cuda&quot;
-YOLOV5_PATH=&quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5&quot;
-YOLOV5_WEIGHT_PATH=&quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt&quot;
+DEVICE = &quot;cuda&quot;
+YOLOV5_PATH = &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5&quot;
+YOLOV5_WEIGHT_PATH = (
+    &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt&quot;
+)
 
 
 class Operator:
@@ -176,7 +178,7 @@ class Operator:
         else:
             # Without internet
             self.model = torch.hub.load(
-            YOLOV5_PATH,
+                YOLOV5_PATH,
                 &quot;custom&quot;,
                 path=YOLOV5_WEIGHT_PATH,
                 source=&quot;local&quot;,
@@ -211,9 +213,9 @@ class Operator:
 
         else:
             frame = np.frombuffer(
-                    dora_input[&quot;data&quot;],
-                    dtype=&quot;uint8&quot;,
-                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+                dora_input[&quot;data&quot;],
+                dtype=&quot;uint8&quot;,
+            ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
             results = self.model(frame)  # includes NMS
@@ -230,8 +232,8 @@ class Operator:
 It sends the bounding box as a numpy bytes array with type <code>int32</code>.</p>
 <p>To use it, just add it to the graph:</p>
 <pre><code class="language-yaml">communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
 
 nodes:
   - id: webcam
