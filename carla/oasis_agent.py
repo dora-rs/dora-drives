@@ -185,13 +185,14 @@ class DoraAgent(AutonomousAgent):
 
         return sensors
 
-    def save_input_data(self,keys,inputdata):
+    def save_input_data(self, keys, inputdata):
         import json
-        data = {keys:inputdata}
-        opendrive_file = '/home/dora/workspace/simulate/inputdata_log.txt'
+
+        data = {keys: inputdata}
+        opendrive_file = "/home/dora/workspace/simulate/inputdata_log.txt"
         if os.path.exists(opendrive_file):
             os.remove(opendrive_file)
-        with open(opendrive_file, 'w') as f:
+        with open(opendrive_file, "w") as f:
             f.write(json.dumps(data))
             f.close()
 
@@ -203,17 +204,20 @@ class DoraAgent(AutonomousAgent):
 
         ### Opendrive preprocessing
         if "高精地图传感器" in input_data.keys():
-            
-            if self.opendrive_map is None: 
+
+            if self.opendrive_map is None:
                 opendrive_map = input_data["高精地图传感器"][1]["opendrive"]
-                self.save_input_data("高精地图传感器",input_data["高精地图传感器"])
-            
+                self.save_input_data("高精地图传感器", input_data["高精地图传感器"])
+
                 self.opendrive_map = opendrive_map
                 self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
                 node.send_output("opendrive", opendrive_map.encode())
         if "速度传感器" in input_data.keys():
-            node.send_output("speed", np.array(input_data["速度传感器"][1]["speed"], np.float32).tobytes())
-        
+            node.send_output(
+                "speed",
+                np.array(input_data["速度传感器"][1]["speed"], np.float32).tobytes(),
+            )
+
         if self.lat_ref is None:
             return VehicleControl(
                 steer=0.0,

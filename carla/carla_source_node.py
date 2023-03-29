@@ -6,17 +6,23 @@ import zlib
 
 import cv2
 import numpy as np
-from _generate_world import (add_camera, add_depth_camera, add_lidar,
-                             add_segmented_camera, spawn_actors,
-                             spawn_driving_vehicle)
+from _generate_world import (
+    add_camera,
+    add_depth_camera,
+    add_lidar,
+    add_segmented_camera,
+    spawn_actors,
+    spawn_driving_vehicle,
+)
 from dora import Node
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import \
-    TraceContextTextMapPropagator
+from opentelemetry.trace.propagation.tracecontext import (
+    TraceContextTextMapPropagator,
+)
 from scipy.spatial.transform import Rotation as R
 
 from carla import Client, Location, Rotation, Transform

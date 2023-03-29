@@ -1,0 +1,31 @@
+communication:
+  zenoh:
+    prefix: dora-zenoh-example
+
+nodes:
+  - id: webcam
+    operator:
+      python: ../../operators/webcam_op.py
+      inputs:
+        tick: dora/timer/millis/100
+      outputs:
+        - image
+
+  # - id: midas
+    # operator: 
+      # outputs:
+        # - depth_frame
+      # inputs:
+        # image: webcam/image
+      # python: ../../operators/midas_op.py
+    # env:
+      # MIDAS_PATH: $HOME/Documents/CONTRIB/MiDaS
+      # PYTORCH_DEVICE: "cuda"
+      # MIDAS_WEIGHT_PATH: $HOME/Documents/CONTRIB/dpt_beit_base_384.pt.1
+
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
+        # depth_frame: midas/depth_frame
+        image: webcam/image

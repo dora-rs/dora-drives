@@ -1,6 +1,6 @@
 communication:
   zenoh:
-    prefix: dora-iceoryx-example
+    prefix: dora-zenoh-example
     
 nodes:
   - id: oasis_agent

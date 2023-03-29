@@ -1,6 +1,6 @@
 communication:
-  iceoryx:
-    app_name_prefix: dora-iceoryx-example
+  zenoh:
+    prefix: dora-zenoh-example
 
 nodes:
   - id: webcam

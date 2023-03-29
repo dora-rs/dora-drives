@@ -108,9 +108,9 @@ class Operator:
 
         if dora_input["id"] == "image":
             frame = np.frombuffer(
-                    dora_input["data"],
-                    dtype="uint8",
-                ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+                dora_input["data"],
+                dtype="uint8",
+            ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             # if len(self.frame) != 0:
             # cv2.imwrite("previous_image.jpg", self.frame)
             # cv2.imwrite("current_image.jpg", frame)
