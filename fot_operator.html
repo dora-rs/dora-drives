@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Carla Source Node - dora-drives</title>
+        <title>FOT operator - dora-drives</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="chapter-item expanded "><a href="leaderboard.html"><strong aria-hidden="true">9.</strong> Leaderboard</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="carla_source_node.html" class="active"><strong aria-hidden="true">10.</strong> Carla Source Node</a></li><li class="chapter-item expanded "><a href="perfect_detection_operator.html"><strong aria-hidden="true">11.</strong> Perfect detection operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">12.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">13.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="hybrid_astar_operator.html"><strong aria-hidden="true">14.</strong> Hybrid A-Star operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">15.</strong> PID Control operator</a></li><li class="chapter-item expanded "><a href="control_operator.html"><strong aria-hidden="true">16.</strong> Control operator</a></li><li class="chapter-item expanded "><a href="plot_operator.html"><strong aria-hidden="true">17.</strong> Plot operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">18.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="chapter-item expanded "><a href="leaderboard.html"><strong aria-hidden="true">9.</strong> Leaderboard</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="gps_operator.html"><strong aria-hidden="true">10.</strong> GPS operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="fot_operator.html" class="active"><strong aria-hidden="true">13.</strong> FOT operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="oasis-sensor.html"><strong aria-hidden="true">15.</strong> oasis-sensor</a></li><li class="chapter-item expanded "><a href="oasis-control.html"><strong aria-hidden="true">16.</strong> oasis-control</a></li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">17.</strong> Overview</a></li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">18.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,25 +143,122 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="carla-source-node"><a class="header" href="#carla-source-node">Carla Source Node</a></h1>
-<p>Carla source node generates pedestrians, vehicles, as well as an <code>ego</code> vehicle with camera and sensors attached to it.</p>
-<h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
-<ul>
-<li>Camera Frame from the simulator camera.</li>
-<li>Depth Frame.</li>
-<li>Segmented Frame in case of perfect detection.</li>
-<li>position of the <code>ego</code> vehicle.</li>
-</ul>
+                        <h1 id="fot-operator"><a class="header" href="#fot-operator">FOT operator</a></h1>
+<h2 id="graph-description"><a class="header" href="#graph-description">Graph Description</a></h2>
+<pre><code class="language-yaml">  - id: fot_op
+    operator:
+      python: ../../operators/fot_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: oasis_agent/position
+        speed: oasis_agent/speed
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+</code></pre>
+<h2 id="graph-viz"><a class="header" href="#graph-viz">Graph Viz</a></h2>
+<pre><code class="language-mermaid">        flowchart TB
+  oasis_agent
+subgraph carla_gps_op
+  carla_gps_op/op[op]
+end
+subgraph fot_op
+  fot_op/op[op]
+end
+subgraph obstacle_location_op
+  obstacle_location_op/op[op]
+end
+subgraph pid_control_op
+  pid_control_op/op[op]
+end
+  carla_gps_op/op -- gps_waypoints --&gt; fot_op/op
+  obstacle_location_op/op -- obstacles --&gt; fot_op/op
+  oasis_agent -- position --&gt; fot_op/op
+  oasis_agent -- speed --&gt; fot_op/op
+  fot_op/op -- waypoints --&gt; pid_control_op/op
+</code></pre>
+<h2 id="hyper-parameters-to-consider"><a class="header" href="#hyper-parameters-to-consider">Hyper Parameters to consider</a></h2>
+<p>See: https://github.com/erdos-project/frenet_optimal_trajectory_planner</p>
+<pre><code class="language-python">        self.hyperparameters = {
+            &quot;max_speed&quot;: 25.0,
+            &quot;max_accel&quot;: 45.0,
+            &quot;max_curvature&quot;: 55.0,
+            &quot;max_road_width_l&quot;: 0.1,
+            &quot;max_road_width_r&quot;: 0.1,
+            &quot;d_road_w&quot;: 0.5,
+            &quot;dt&quot;: 0.5,
+            &quot;maxt&quot;: 5.0,
+            &quot;mint&quot;: 2.0,
+            &quot;d_t_s&quot;: 5,
+            &quot;n_s_sample&quot;: 2.0,
+            &quot;obstacle_clearance&quot;: 0.1,
+            &quot;kd&quot;: 1.0,
+            &quot;kv&quot;: 0.1,
+            &quot;ka&quot;: 0.1,
+            &quot;kj&quot;: 0.1,
+            &quot;kt&quot;: 0.1,
+            &quot;ko&quot;: 0.1,
+            &quot;klat&quot;: 1.0,
+            &quot;klon&quot;: 1.0,
+            &quot;num_threads&quot;: 0,  # set 0 to avoid using threaded algorithm
+        }
+</code></pre>
+<pre><code class="language-bash">        initial_conditions (dict): dict containing the following items
+            ps (float): previous longitudinal position
+            target_speed (float): target speed [m/s]
+            pos (np.ndarray([float, float])): initial position in global coord
+            vel (np.ndarray([float, float])): initial velocity [m/s]
+            wp (np.ndarray([float, float])): list of global waypoints
+            obs (np.ndarray([float, float, float, float])): list of obstacles
+                as: [lower left x, lower left y, upper right x, upper right y]
+        hyperparameters (dict): a dict of optional hyperparameters
+            max_speed (float): maximum speed [m/s]
+            max_accel (float): maximum acceleration [m/s^2]
+            max_curvature (float): maximum curvature [1/m]
+            max_road_width_l (float): maximum road width to the left [m]
+            max_road_width_r (float): maximum road width to the right [m]
+            d_road_w (float): road width sampling discretization [m]
+            dt (float): time sampling discretization [s]
+            maxt (float): max prediction horizon [s]
+            mint (float): min prediction horizon [s]
+            d_t_s (float): target speed sampling discretization [m/s]
+            n_s_sample (float): sampling number of target speed
+            obstacle_clearance (float): obstacle radius [m]
+            kd (float): positional deviation cost
+            kv (float): velocity cost
+            ka (float): acceleration cost
+            kj (float): jerk cost
+            kt (float): time cost
+            ko (float): dist to obstacle cost
+            klat (float): lateral cost
+            klon (float): longitudinal cost
+    Returns:
+        result_x (np.ndarray(float)): x positions of fot, if it exists
+        result_y (np.ndarray(float)): y positions of fot, if it exists
+        speeds (np.ndarray(float)): speeds of fot, if it exists
+        ix (np.ndarray(float)): spline x of fot, if it exists
+        iy (np.ndarray(float)): spline y of fot, if it exists
+        iyaw (np.ndarray(float)): spline yaws of fot, if it exists
+        d (np.ndarray(float)): lateral offset of fot, if it exists
+        s (np.ndarray(float)): longitudinal offset of fot, if it exists
+        speeds_x (np.ndarray(float)): x speeds of fot, if it exists
+        speeds_y (np.ndarray(float)): y speeds of fot, if it exists
+        params (dict): next frenet coordinates, if they exist
+        costs (dict): costs of best frenet path, if it exists
+        success (bool): whether a fot was found or not
+
+</code></pre>
+<p>Ref: https://github.com/erdos-project/frenet_optimal_trajectory_planner/blob/master/FrenetOptimalTrajectory/fot_wrapper.py</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="leaderboard.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="obstacle_location_operator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="perfect_detection_operator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="pid_control_operator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -171,11 +268,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="leaderboard.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="obstacle_location_operator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="perfect_detection_operator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="pid_control_operator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
