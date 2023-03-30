@@ -9,7 +9,6 @@ from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
 
-
 MIN_PID_WAYPOINT_DISTANCE = 1
 pid_p = 0.1
 pid_d = 0.0
@@ -139,9 +138,6 @@ class Operator:
         self.metadata = {}
         self.position = []
         self.speed = []
-        self.previous_position = []
-        self.current_speed = []
-        self.previous_time = time.time()
 
     def on_event(
         self,
@@ -167,14 +163,6 @@ class Operator:
         if "position" == dora_input["id"]:
             position = np.frombuffer(dora_input["data"], np.float32)
             self.position = position
-            if len(self.previous_position) == 0:
-                self.previous_position = self.position
-                self.previous_time = time.time()
-                return DoraStatus.CONTINUE
-
-            self.previous_position = self.position
-            self.previous_time = time.time()
-
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "speed":
@@ -193,13 +181,11 @@ class Operator:
             self.waypoints = waypoints[:, :2]
             self.metadata = dora_input["metadata"]
 
-        if len(self.position) == 0:
-            return DoraStatus.CONTINUE
-
-        if len(self.speed) == 0:
-            return DoraStatus.CONTINUE
-
-        if len(self.waypoints) == 0:
+        if (
+            len(self.position) == 0
+            or len(self.speed) == 0
+            or len(self.waypoints) == 0
+        ):
             send_output(
                 "control",
                 np.array([0, 0, 1], np.float16).tobytes(),

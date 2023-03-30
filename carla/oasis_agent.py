@@ -1,7 +1,8 @@
 import math
 import os.path
-import xml.etree.ElementTree as ET
 import time
+import xml.etree.ElementTree as ET
+
 import cv2
 import numpy as np
 from autoagents.autonomous_agent import AutonomousAgent
@@ -305,11 +306,6 @@ class DoraAgent(AutonomousAgent):
 
                 if input_id == "tick" and iteration > 0 and iteration < 4:
                     print(f"Did not receive control after {iteration} ticks...")
-                elif input_id == "tick" and iteration == 4:
-                    print(
-                        f"Sending null control after waiting {iteration} ticks..."
-                    )
-                    value = np.array([0.0, 0.0, 0.0], np.float16)
                 elif input_id == "control":
                     break
 

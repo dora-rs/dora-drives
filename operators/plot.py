@@ -63,13 +63,13 @@ class Operator:
         self.drivable_area = []
         self.last_timestamp = time.time()
         self.position = []
+        self.speed = []
         self.last_position = []
         self.camera_frame = []
         self.traffic_sign_bbox = []
         self.point_cloud = np.array([])
         self.control = []
         self.last_time = time.time()
-        self.current_speed = []
 
     def on_event(
         self,
@@ -159,6 +159,10 @@ class Operator:
                 self.position[:2] - self.last_position[:2]
             ) * 20
 
+        elif dora_input["id"] == "speed":
+            self.speed = np.frombuffer(dora_input["data"], np.float32)
+            return DoraStatus.CONTINUE
+
         elif "lidar_pc" == dora_input["id"]:
             point_cloud = np.frombuffer(dora_input["data"], dtype="float32")
             point_cloud = point_cloud.reshape((-1, 3))
@@ -218,10 +222,10 @@ class Operator:
                     -1,
                 )
                 if VERBOSE:
-                    [x, y, z] = self.waypoints[id]
+                    [x, y, v] = self.waypoints[id]
                     cv2.putText(
                         resized_image,
-                        f"x: {x:.2f}, y: {y:.2f}",
+                        f"x: {x:.2f}, y: {y:.2f}, v: {v:.2f}",
                         (int(waypoint[0]), int(waypoint[1])),
                         font,
                         0.5,
@@ -397,10 +401,10 @@ class Operator:
                 lineType,
             )
 
-        if len(self.current_speed) != 0:
+        if len(self.speed) != 0:
             cv2.putText(
                 resized_image,
-                f"""vx: {self.current_speed[0]:.2f}, vy: {self.current_speed[1]:.2f}""",
+                f"""v: {self.speed[0]:.2f}""",
                 (10, 50),
                 font,
                 fontScale,

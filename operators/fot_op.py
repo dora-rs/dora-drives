@@ -3,9 +3,8 @@ from typing import Callable
 import numpy as np
 from dora import DoraStatus
 from dora_utils import LABELS
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
-    fot_wrapper,
-)
+from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import \
+    fot_wrapper
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
@@ -168,7 +167,6 @@ class Operator:
                 )
             else:
                 self.obstacles = obstacles
-            return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "global_lanes":
             lanes = np.frombuffer(dora_input["data"], dtype=np.float32).reshape(
@@ -181,9 +179,10 @@ class Operator:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))[:, :2]
             self.gps_waypoints = waypoints
+            return DoraStatus.CONTINUE
 
-        if len(self.gps_waypoints) == 0:
-            print("No waypoints")
+        if len(self.gps_waypoints) == 0 or len(self.position) == 0 or len(self.speed) == 0:
+            print("Missing data for waypoints")
             send_output(
                 "waypoints",
                 self.gps_waypoints.tobytes(),
@@ -191,13 +190,6 @@ class Operator:
             )
             return DoraStatus.CONTINUE
 
-        elif len(self.position) == 0:
-            print("No position")
-            return DoraStatus.CONTINUE
-
-        elif len(self.speed) == 0:
-            print("No speed")
-            return DoraStatus.CONTINUE
         [x, y, z, rx, ry, rz, rw] = self.position
         [_, _, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
             "xyz", degrees=False
