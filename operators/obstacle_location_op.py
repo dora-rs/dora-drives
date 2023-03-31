@@ -42,7 +42,7 @@ def get_predictions(obstacles, obstacle_with_locations):
 
 class Operator:
     """
-    Compute the location of obstacles.
+    Compute the location of obstacles, given 2D `bbox`, LIDAR point cloud and a position.
     """
 
     def __init__(self):

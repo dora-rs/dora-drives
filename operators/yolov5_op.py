@@ -18,7 +18,7 @@ YOLOV5_WEIGHT_PATH = (
 
 class Operator:
     """
-    Infering object from images
+    Send `bbox` found by YOLOv5 on given `image`
     """
 
     def __init__(self):

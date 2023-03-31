@@ -9,7 +9,6 @@ from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
 
-
 MIN_PID_WAYPOINT_DISTANCE = 1
 pid_p = 0.1
 pid_d = 0.0
@@ -130,7 +129,7 @@ pid = PIDLongitudinalController(pid_p, pid_d, pid_i, dt, pid_use_real_time)
 
 class Operator:
     """
-    Compute a `control` based on the position and the waypoints of the car.
+    Compute the throttle, target angle and brake given a `position`, a `speed` and a `waypoints`.
     """
 
     def __init__(self):

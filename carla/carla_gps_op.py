@@ -23,7 +23,7 @@ def filter_consecutive_duplicate(x):
 
 class Operator:
     """
-    Compute a `control` based on the position and the waypoints of the car.
+    Compute GPS waypoints, given a `position`, an `objective waypoints` and an `opendrive` map.
     """
 
     def __init__(self):

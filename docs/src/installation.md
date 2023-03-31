@@ -4,7 +4,6 @@
 
 - NVIDIA GPU with CUDA
 
-
 ## From Docker Hub
 ### Environments
 
@@ -106,22 +105,6 @@ chmod +x ./scripts/*
 
 sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.0/dora-v0.2.0-x86_64-Linux.zip && sudo unzip dora-v0.2.0-x86_64-Linux.zip -d ~/.local/bin 
 ``` 
-
-### Running the graph
-```bash
-export DORA_DEP_HOME=<PATH TO A PARENT FOLDER>
-export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.13
-export PYLOT_HOME=$DORA_DEP_HOME
-export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.13/PythonAPI/carla:$DORA_DEP_HOME/dependencies/leaderboard:$DORA_DEP_HOME/dependencies/scenario_runner
-
-## Running the simulation
-chmod +x ./scripts/run_simulator.sh
-./scripts/run_simulator.sh &
-
-
-## Spawn the dataflow
-dora-daemon --run-dataflow graphs/tutorials/carla_waypoints.yaml
-```
 
 
 ### Uninstalling package
