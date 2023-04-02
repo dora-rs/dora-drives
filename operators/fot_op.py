@@ -11,7 +11,7 @@ from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
 
 # Planning general
-TARGET_SPEED = 7
+TARGET_SPEED = 10
 
 OBSTACLE_CLEARANCE = 3
 OBSTACLE_RADIUS = 1

@@ -28,6 +28,7 @@ nodes:
         --openscenario $XOSC
         --agent $TEAM_AGENT
         --agentConfig $TEAM_AGENT_CONF
+        --destination $DESTINATION
 
   - id: carla_gps_op
     operator:

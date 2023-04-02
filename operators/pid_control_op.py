@@ -10,7 +10,7 @@ from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
 
 MIN_PID_WAYPOINT_DISTANCE = 1
-pid_p = 0.1
+pid_p = 0.4
 pid_d = 0.0
 pid_i = 0.05
 dt = 1.0 / 20
