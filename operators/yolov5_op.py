@@ -60,11 +60,7 @@ class Operator:
             dora_input["data"] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
-        if dora_input["id"] == "check":
-            send_output("ready", b"")
-            return DoraStatus.CONTINUE
-
-        else:
+        if dora_input["id"] == "image":
             frame = np.frombuffer(
                 dora_input["data"],
                 dtype="uint8",

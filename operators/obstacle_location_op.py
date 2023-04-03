@@ -107,10 +107,6 @@ class Operator:
                         [self.last_camera_point_cloud, self.camera_point_cloud]
                     )
 
-        elif dora_input["id"] == "check":
-            send_output("ready", b"")
-            return DoraStatus.CONTINUE
-
         elif "position" == dora_input["id"]:
             # Add sensor transform
             self.position = np.frombuffer(dora_input["data"], np.float32)

@@ -56,14 +56,11 @@ class Operator:
 
             return DoraStatus.CONTINUE
 
-        elif dora_input["id"] == "check":
-            send_output("ready", b"")
-            return DoraStatus.CONTINUE
-        if "opendrive" == dora_input["id"]:
+        elif "opendrive" == dora_input["id"]:
             opendrive = dora_input["data"].decode()
             self.hd_map = HDMap(Map("map", opendrive))
 
-        if "objective_waypoints" == dora_input["id"]:
+        elif "objective_waypoints" == dora_input["id"]:
             self.objective_waypoints = np.frombuffer(
                 dora_input["data"], np.float32
             ).reshape((-1, 3))[self.completed_waypoints :]

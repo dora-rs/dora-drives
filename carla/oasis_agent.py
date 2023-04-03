@@ -1,8 +1,7 @@
 import math
 import os.path
 import xml.etree.ElementTree as ET
-import time
-import cv2
+
 import numpy as np
 from autoagents.autonomous_agent import AutonomousAgent
 from dora import Node
@@ -94,30 +93,6 @@ class DoraAgent(AutonomousAgent):
         self.lat_ref = None
         self.lon_ref = None
         self.opendrive_map = None
-
-        ## Check for node readiness
-        check_nodes = [
-            "carla_gps",
-            "yolov5",
-            "obstacle_location",
-            "fot",
-            "pid_control",
-        ]
-        node.send_output("check", b"")
-
-        ## Using tick to avoid deadlock due to unreceived input.
-        while True:
-            event = node.next()
-            if event["type"] == "INPUT":
-                input_id = event["id"]
-                value = event["data"]
-                if input_id == "tick":
-                    print("Waiting for nodes to be ready...")
-                elif "_ready" in input_id:
-                    ready_node = input_id.replace("_ready", "")
-                    check_nodes.remove(ready_node)
-                    if len(check_nodes) == 0:
-                        break
 
     def sensors(self):  # pylint: disable=no-self-use
         """

@@ -198,10 +198,6 @@ class Operator:
             self.speed = np.frombuffer(dora_input["data"], np.float32)
             return DoraStatus.CONTINUE
 
-        elif dora_input["id"] == "check":
-            send_output("ready", b"")
-            return DoraStatus.CONTINUE
-
         elif dora_input["id"] == "obstacles":
             obstacles = np.frombuffer(
                 dora_input["data"], dtype=np.float32

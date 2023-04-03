@@ -1,25 +1,15 @@
-communication:
-  zenoh:
-    prefix: dora-zenoh-example
-    
 nodes:
   - id: oasis_agent
     custom:
       inputs:
         control: pid_control_op/control
         tick: dora/timer/secs/1
-        carla_gps_ready: carla_gps_op/ready
-        yolov5_ready: yolov5/ready
-        obstacle_location_ready: obstacle_location_op/ready
-        fot_ready: fot_op/ready
-        pid_control_ready: pid_control_op/ready
       outputs:
         - position
         - speed
         - image
         - objective_waypoints
         - lidar_pc
-        - check
         - opendrive
       source: shell
       args: >
@@ -35,21 +25,17 @@ nodes:
       python: ../../carla/carla_gps_op.py
       outputs:
         - gps_waypoints
-        - ready
       inputs:
         opendrive: oasis_agent/opendrive
         objective_waypoints: oasis_agent/objective_waypoints
         position: oasis_agent/position
-        check: oasis_agent/check
 
   - id: yolov5
     operator: 
       outputs:
         - bbox
-        - ready
       inputs:
         image: oasis_agent/image
-        check: oasis_agent/check
       python: ../../operators/yolov5_op.py
     env:
       # CUDA_VISIBLE_DEVICES: ""
@@ -73,14 +59,12 @@ nodes:
     operator: 
       outputs:
         - obstacles
-        - global_lanes
-        - ready
+        # - global_lanes
       inputs:
         lidar_pc: oasis_agent/lidar_pc
         obstacles_bbox: yolov5/bbox
         position: oasis_agent/position
-        check: oasis_agent/check
-        lanes: yolop/lanes
+        # lanes: yolop/lanes
       python: ../../operators/obstacle_location_op.py
 
   - id: fot_op
@@ -88,26 +72,22 @@ nodes:
       python: ../../operators/fot_op.py
       outputs:
         - waypoints
-        - ready
       inputs:
         position: oasis_agent/position
         speed: oasis_agent/speed
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
         global_lanes: obstacle_location_op/global_lanes
-        check: oasis_agent/check
  
   - id: pid_control_op
     operator:
       python: ../../operators/pid_control_op.py
       outputs:
         - control
-        - ready
       inputs:
         position: oasis_agent/position
         speed: oasis_agent/speed
         waypoints: fot_op/waypoints
-        check: oasis_agent/check
 
   - id: plot
     operator:
