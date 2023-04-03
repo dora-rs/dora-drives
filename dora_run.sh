@@ -1,4 +1,5 @@
 #! /bin/bash
 export DESTINATION=`cat $DEST`
-dora-daemon --run-dataflow $YAML
+dora up
+dora start $YAML --attach # --hot-reload
 
