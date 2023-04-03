@@ -208,7 +208,6 @@ class Operator:
                 )
             else:
                 self.obstacles = obstacles
-            return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "global_lanes":
             lanes = np.frombuffer(dora_input["data"], dtype=np.float32).reshape(
@@ -221,6 +220,7 @@ class Operator:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))[:, :2]
             self.gps_waypoints = waypoints
+            return DoraStatus.CONTINUE
 
         if len(self.gps_waypoints) == 0:
             print("No waypoints")
@@ -291,7 +291,7 @@ class Operator:
                 )
 
             send_output(
-                "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
+                "waypoints", np.array([x, y, 0.0], np.float32).tobytes(), dora_input["metadata"]
             )
             return DoraStatus.CONTINUE
 

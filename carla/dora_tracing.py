@@ -82,3 +82,9 @@ def extract_context(dora_input):
     context = propagator.extract(carrier=carrier, getter=getter)
 
     return context
+
+def serialize_context(context: dict) -> str:
+    output = ""
+    for key, value in context.items():
+        output += f"{key}:{value};"
+    return output
