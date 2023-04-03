@@ -77,7 +77,7 @@ nodes:
         speed: oasis_agent/speed
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
-        global_lanes: obstacle_location_op/global_lanes
+       # global_lanes: obstacle_location_op/global_lanes
  
   - id: pid_control_op
     operator:
@@ -89,21 +89,21 @@ nodes:
         speed: oasis_agent/speed
         waypoints: fot_op/waypoints
 
-  - id: plot
-    operator:
-      python: ../../operators/plot.py
-      inputs:
-        image: oasis_agent/image
-        obstacles_bbox: yolov5/bbox
-        obstacles: obstacle_location_op/obstacles
-        # traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        global_lanes: obstacle_location_op/global_lanes
-        drivable_area: yolop/drivable_area
-        # obstacles_id: strong_sort/obstacles_id
-        gps_waypoints: carla_gps_op/gps_waypoints
-        position: oasis_agent/position
-        waypoints: fot_op/waypoints
-        control: pid_control_op/control
-        # lidar_pc: oasis_agent/lidar_pc
+  # - id: plot
+    # operator:
+      # python: ../../operators/plot.py
+      # inputs:
+        # image: oasis_agent/image
+        # obstacles_bbox: yolov5/bbox
+        # obstacles: obstacle_location_op/obstacles
+        # # traffic_sign_bbox: traffic_sign/bbox
+      # #  lanes: yolop/lanes
+      # #  global_lanes: obstacle_location_op/global_lanes
+      # #  drivable_area: yolop/drivable_area
+        # # obstacles_id: strong_sort/obstacles_id
+        # gps_waypoints: carla_gps_op/gps_waypoints
+        # position: oasis_agent/position
+        # waypoints: fot_op/waypoints
+        # control: pid_control_op/control
+        # # lidar_pc: oasis_agent/lidar_pc
 
