@@ -4,7 +4,6 @@ import numpy as np
 from _dora_utils import closest_vertex
 from _hd_map import HDMap
 from dora import DoraStatus
-from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 
 from carla import Map
@@ -124,6 +123,14 @@ class Operator:
                 else:
                     self.waypoints = waypoints
                     self.target_speeds = np.array([5.0] * len(waypoints))
+
+            if len(self.waypoints) == 0:
+                send_output(
+                    "gps_waypoints",
+                    self.waypoints.tobytes(),
+                    dora_input["metadata"],
+                )  # World coordinate
+                return DoraStatus.CONTINUE
 
             self.waypoints_array = np.concatenate(
                 [
