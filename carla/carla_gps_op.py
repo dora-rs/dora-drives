@@ -11,7 +11,6 @@ from carla import Map
 # Planning general
 NUM_WAYPOINTS_AHEAD = 120
 GOAL_LOCATION = [234, 59, 39]
-OBJECTIVE_MIN_DISTANCE = 0
 
 
 def filter_consecutive_duplicate(x):

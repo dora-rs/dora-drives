@@ -268,7 +268,7 @@ class DoraAgent(AutonomousAgent):
                     [
                         self.destination.x,
                         self.destination.y,
-                        self.destination.z,
+                        0.0,
                     ]
                 ],
                 np.float32,
