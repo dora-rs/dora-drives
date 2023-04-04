@@ -290,7 +290,7 @@ class Operator:
         frame = cv2.imdecode(
             np.frombuffer(
                 dora_input["data"],
-                dtype="uint8",
+                np.uint8,
             ),
             -1,
         )
@@ -354,6 +354,6 @@ class Operator:
         ll_seg_mask = morphological_process(
             ll_seg_mask, kernel_size=7, func_type=cv2.MORPH_OPEN
         )
-        ll_seg_points = np.array(connect_lane(ll_seg_mask), dtype=np.int32)
+        ll_seg_points = np.array(connect_lane(ll_seg_mask), np.int32)
         send_output("lanes", ll_seg_points.tobytes(), dora_input["metadata"])
         return DoraStatus.CONTINUE

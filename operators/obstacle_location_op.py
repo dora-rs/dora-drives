@@ -72,7 +72,7 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
         if "lidar_pc" == dora_input["id"]:
-            point_cloud = np.frombuffer(dora_input["data"], dtype=np.float32)
+            point_cloud = np.frombuffer(dora_input["data"], np.float32)
             point_cloud = point_cloud.reshape((-1, 3))
 
             # From Velodyne axis to Camera axis
@@ -124,7 +124,7 @@ class Operator:
             )
 
         elif "lanes" == dora_input["id"]:
-            lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
+            lanes = np.frombuffer(dora_input["data"], np.int32).reshape(
                 (-1, 60, 2)
             )
 
@@ -158,7 +158,7 @@ class Operator:
 
             # bbox = np.array([[min_x, max_x, min_y, max_y, confidence, label], ... n_bbox ... ])
             self.obstacles_bbox = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 6))
 
             obstacles_with_location = []
@@ -192,9 +192,7 @@ class Operator:
                 predictions = get_predictions(
                     self.obstacles_bbox, obstacles_with_location
                 )
-                predictions_bytes = np.array(
-                    predictions, dtype="float32"
-                ).tobytes()
+                predictions_bytes = np.array(predictions, np.float32).tobytes()
 
                 send_output(
                     "obstacles", predictions_bytes, dora_input["metadata"]

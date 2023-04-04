@@ -89,7 +89,7 @@ sensor_transform = Transform(
 
 def on_segmented_msg(frame):
 
-    frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
+    frame = np.frombuffer(frame.raw_data, np.uint8)
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
     frame = frame[:, :, 2]
     global segmented_frame
@@ -99,7 +99,7 @@ def on_segmented_msg(frame):
 def on_lidar_msg(frame):
 
     global lidar_pc
-    frame = np.frombuffer(frame.raw_data, dtype=np.dtype("float32"))
+    frame = np.frombuffer(frame.raw_data, np.float32)
     point_cloud = np.reshape(frame, (-1, 4))
     point_cloud = point_cloud[:, :3]
 
@@ -107,7 +107,7 @@ def on_lidar_msg(frame):
 
 
 def on_camera_msg(frame):
-    frame = np.frombuffer(frame.raw_data, dtype=np.dtype("uint8"))
+    frame = np.frombuffer(frame.raw_data, np.uint8)
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
     global camera_frame
@@ -118,7 +118,7 @@ def on_depth_msg(frame):
 
     frame = np.frombuffer(
         frame.raw_data,
-        dtype="uint8",
+        np.uint8,
     )
     frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
     frame = frame.astype(np.float32)

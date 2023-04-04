@@ -35,7 +35,7 @@ class Operator:
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
         if dora_input["id"] == "image":
-            frame = np.frombuffer(dora_input["data"], dtype="uint8")
+            frame = np.frombuffer(dora_input["data"], np.uint8)
             frame = cv2.imdecode(frame, -1)
             self.image = frame
             cv2.imshow("frame", self.image)

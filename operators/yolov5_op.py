@@ -63,7 +63,7 @@ class Operator:
         if dora_input["id"] == "image":
             frame = np.frombuffer(
                 dora_input["data"],
-                dtype="uint8",
+                np.uint8,
             ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 

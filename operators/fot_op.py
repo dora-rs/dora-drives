@@ -3,8 +3,9 @@ from typing import Callable
 import numpy as np
 from dora import DoraStatus
 from dora_utils import LABELS
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import \
-    fot_wrapper
+from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
+    fot_wrapper,
+)
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
@@ -198,9 +199,9 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "obstacles":
-            obstacles = np.frombuffer(
-                dora_input["data"], dtype=np.float32
-            ).reshape((-1, 5))
+            obstacles = np.frombuffer(dora_input["data"], np.float32).reshape(
+                (-1, 5)
+            )
             if len(self.last_obstacles) > 0:
                 self.obstacles = np.concatenate(
                     [self.last_obstacles, obstacles]
@@ -209,7 +210,7 @@ class Operator:
                 self.obstacles = obstacles
 
         elif dora_input["id"] == "global_lanes":
-            lanes = np.frombuffer(dora_input["data"], dtype=np.float32).reshape(
+            lanes = np.frombuffer(dora_input["data"], np.float32).reshape(
                 (-1, 60, 3)
             )
             self.lanes = lanes

@@ -251,13 +251,13 @@ class DoraAgent(AutonomousAgent):
 
             ### Camera preprocessing
             frame_raw_data = input_data["camera.center"][1]
-            ## frame = np.frombuffer(frame_raw_data, dtype=np.dtype("uint8"))
+            ## frame = np.frombuffer(frame_raw_data, np.uint8)
             ## frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             camera_frame = frame_raw_data.tobytes()
 
             ### LIDAR preprocessing
             frame_raw_data = input_data["LIDAR"][1]
-            frame = np.frombuffer(frame_raw_data, dtype=np.dtype("float32"))
+            frame = np.frombuffer(frame_raw_data, np.float32)
             point_cloud = np.reshape(frame, (-1, 4))
             point_cloud = point_cloud[:, :3]
             lidar_pc = point_cloud.tobytes()

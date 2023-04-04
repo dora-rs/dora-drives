@@ -116,9 +116,9 @@ class Operator:
             self.position = np.frombuffer(dora_input["data"], np.float32)
 
         elif dora_input["id"] == "obstacles":
-            obstacles = np.frombuffer(
-                dora_input["data"], dtype="float32"
-            ).reshape((-1, 5))
+            obstacles = np.frombuffer(dora_input["data"], np.float32).reshape(
+                (-1, 5)
+            )
             self.obstacles = obstacles
             self.obstacle_metadata = dora_input["metadata"]
 
