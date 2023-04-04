@@ -5,9 +5,9 @@ import xml.etree.ElementTree as ET
 import numpy as np
 from autoagents.autonomous_agent import AutonomousAgent
 from dora import Node
-from dora_tracing import tracer, propagator, serialize_context
-
+from dora_tracing import propagator, serialize_context, tracer
 from scipy.spatial.transform import Rotation as R
+
 from carla import VehicleControl
 
 IMAGE_WIDTH = 1920
@@ -16,6 +16,7 @@ STEER_GAIN = 1
 AVERAGE_WINDOW = 10
 
 node = Node()
+
 
 def _get_latlon_ref(xodr):
     """
@@ -177,9 +178,7 @@ class DoraAgent(AutonomousAgent):
         Execute one step of navigation.
         :return: control
         """
-        with tracer.start_as_current_span(
-                    name="run_step"
-                ) as child_span:
+        with tracer.start_as_current_span(name="run_step") as child_span:
             output = {}
             propagator.inject(output)
             metadata = {"open_telemetry_context": serialize_context(output)}
@@ -192,12 +191,16 @@ class DoraAgent(AutonomousAgent):
 
                     self.opendrive_map = opendrive_map
                     self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
-                    node.send_output("opendrive", opendrive_map.encode(), metadata)
+                    node.send_output(
+                        "opendrive", opendrive_map.encode(), metadata
+                    )
             if "速度传感器" in input_data.keys():
                 node.send_output(
                     "speed",
-                    np.array(input_data["速度传感器"][1]["speed"], np.float32).tobytes(),
-                    metadata
+                    np.array(
+                        input_data["速度传感器"][1]["speed"], np.float32
+                    ).tobytes(),
+                    metadata,
                 )
 
             if self.lat_ref is None:
@@ -275,7 +278,9 @@ class DoraAgent(AutonomousAgent):
             node.send_output("position", position.tobytes(), metadata)
             node.send_output("image", camera_frame, metadata)
             node.send_output("lidar_pc", lidar_pc, metadata)
-            node.send_output("objective_waypoints", waypoints_xyz.tobytes(), metadata)
+            node.send_output(
+                "objective_waypoints", waypoints_xyz.tobytes(), metadata
+            )
 
             # Receiving back control information
             ## Using tick to avoid deadlock due to unreceived input.
@@ -286,7 +291,9 @@ class DoraAgent(AutonomousAgent):
                     value = event["data"]
 
                     if input_id == "tick" and iteration > 0 and iteration < 4:
-                        print(f"Did not receive control after {iteration} ticks...")
+                        print(
+                            f"Did not receive control after {iteration} ticks..."
+                        )
                     elif input_id == "tick" and iteration == 4:
                         print(
                             f"Sending null control after waiting {iteration} ticks..."

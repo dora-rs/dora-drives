@@ -48,6 +48,8 @@ class Operator:
     def __init__(self):
         self.point_cloud = []
         self.camera_point_cloud = []
+        self.ground_point_cloud = []
+        self.camera_ground_point_cloud = []
         self.last_point_cloud = []
         self.last_camera_point_cloud = []
         self.obstacles = []
@@ -87,11 +89,18 @@ class Operator:
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
 
             # Remove ground points. Above lidar only ( bottom = y < 1.0 )
-            point_cloud = point_cloud[np.where(point_cloud[:, 1] < 1.0)]
+            above_ground_point_index = np.where(point_cloud[:, 1] < 1.0)
+            point_cloud = point_cloud[above_ground_point_index]
+            self.ground_point_cloud = point_cloud[
+                above_ground_point_index == False
+            ]
 
             # 3D array -> 2D array with index_x -> pixel x, index_y -> pixel_y, value -> z
             camera_point_cloud = local_points_to_camera_view(
                 point_cloud, INTRINSIC_MATRIX
+            )
+            self.camera_ground_point_cloud = local_points_to_camera_view(
+                self.ground_point_cloud, INTRINSIC_MATRIX
             )
 
             if len(point_cloud) != 0:
@@ -120,7 +129,9 @@ class Operator:
             )
 
             knnr = KNeighborsRegressor(n_neighbors=4)
-            knnr.fit(self.camera_point_cloud[:, :2], self.point_cloud)
+            knnr.fit(
+                self.camera_ground_point_cloud[:, :2], self.ground_point_cloud
+            )
 
             processed_lanes = []
             for lane in lanes:

@@ -3,9 +3,8 @@ from typing import Callable
 import numpy as np
 from dora import DoraStatus
 from dora_utils import LABELS
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
-    fot_wrapper,
-)
+from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import \
+    fot_wrapper
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
@@ -137,7 +136,7 @@ class Operator:
         self.speed = []
         self.last_position = []
         self.waypoints = []
-        self.gps_waypoints = []
+        self.gps_waypoints = np.array([])
         self.last_obstacles = np.array([])
         self.obstacle_metadata = {}
         self.gps_metadata = {}
@@ -231,13 +230,9 @@ class Operator:
             )
             return DoraStatus.CONTINUE
 
-        elif len(self.position) == 0:
-            print("No position")
+        elif len(self.position) == 0 or len(self.speed) == 0:
             return DoraStatus.CONTINUE
 
-        elif len(self.speed) == 0:
-            print("No speed")
-            return DoraStatus.CONTINUE
         [x, y, z, rx, ry, rz, rw] = self.position
         [_, _, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
             "xyz", degrees=False
@@ -291,7 +286,9 @@ class Operator:
                 )
 
             send_output(
-                "waypoints", np.array([x, y, 0.0], np.float32).tobytes(), dora_input["metadata"]
+                "waypoints",
+                np.array([x, y, 0.0], np.float32).tobytes(),
+                dora_input["metadata"],
             )
             return DoraStatus.CONTINUE
 
