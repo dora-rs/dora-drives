@@ -4,8 +4,8 @@ import time
 
 from carla import command
 
-IMAGE_WIDTH = 800
-IMAGE_HEIGHT = 600
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
 AUTOPILOT = os.environ.get("SET_AUTOPILOT") == "true"
 
 
@@ -27,8 +27,8 @@ def add_lidar(world, transform, callback, vehicle):
 
 def add_depth_camera(world, transform, callback, vehicle):
     depth_blueprint = world.get_blueprint_library().find("sensor.camera.depth")
-    depth_blueprint.set_attribute("image_size_x", "800")
-    depth_blueprint.set_attribute("image_size_y", "600")
+    depth_blueprint.set_attribute("image_size_x", str(IMAGE_WIDTH))
+    depth_blueprint.set_attribute("image_size_y", str(IMAGE_HEIGHT))
     depth_blueprint.set_attribute("fov", str(90.0))
     depth_camera = world.spawn_actor(
         depth_blueprint, transform, attach_to=vehicle
@@ -40,8 +40,8 @@ def add_depth_camera(world, transform, callback, vehicle):
 
 def add_camera(world, transform, callback, vehicle):
     camera_blueprint = world.get_blueprint_library().find("sensor.camera.rgb")
-    camera_blueprint.set_attribute("image_size_x", "800")
-    camera_blueprint.set_attribute("image_size_y", "600")
+    camera_blueprint.set_attribute("image_size_x", str(IMAGE_WIDTH))
+    camera_blueprint.set_attribute("image_size_y", str(IMAGE_HEIGHT))
     camera = world.spawn_actor(camera_blueprint, transform, attach_to=vehicle)
     # Register callback to be invoked when a new frame is received.
     camera.listen(callback)

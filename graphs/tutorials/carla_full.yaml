@@ -11,8 +11,10 @@ nodes:
         - image
         - lidar_pc
         - objective_waypoints
-      source: python
-      args: ../../carla/carla_source_node.py
+        - opendrive
+        - speed
+      source: shell
+      args: python3 ../../carla/carla_source_node.py
 
   - id: carla_gps_op
     operator:
@@ -20,7 +22,7 @@ nodes:
       outputs:
         - gps_waypoints
       inputs:
-        # opendrive: carla_source_node/opendrive
+        opendrive: carla_source_node/opendrive
         objective_waypoints: carla_source_node/objective_waypoints
         position: carla_source_node/position
 
@@ -33,7 +35,9 @@ nodes:
       python: ../../operators/yolov5_op.py
     env:
      # CUDA_VISIBLE_DEVICES: ""
-      PYTORCH_DEVICE: cuda
+     # PYTORCH_DEVICE: cuda
+      YOLOV5_PATH: $HOME/Documents/yolov5 
+      YOLOV5_WEIGHT_PATH:  $HOME/Documents/yolov5n.pt
 
   #- id: yolop
     #operator: 
@@ -55,7 +59,7 @@ nodes:
         lidar_pc: carla_source_node/lidar_pc
         obstacles_bbox: yolov5/bbox
         position: carla_source_node/position
-        lanes: yolop/lanes
+       # lanes: yolop/lanes
       python: ../../operators/obstacle_location_op.py
 
   - id: fot_op
@@ -68,6 +72,7 @@ nodes:
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
         global_lanes: obstacle_location_op/global_lanes
+        speed: carla_source_node/speed
  
   - id: pid_control_op
     operator:
@@ -77,6 +82,7 @@ nodes:
       inputs:
         position: carla_source_node/position
         waypoints: fot_op/waypoints
+        speed: carla_source_node/speed
 
   - id: plot
     operator:
@@ -85,12 +91,11 @@ nodes:
         image: carla_source_node/image
         obstacles_bbox: yolov5/bbox
         obstacles: obstacle_location_op/obstacles
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        global_lanes: obstacle_location_op/global_lanes
-        drivable_area: yolop/drivable_area
-        obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/400
+      #  traffic_sign_bbox: traffic_sign/bbox
+      #  lanes: yolop/lanes
+      #  global_lanes: obstacle_location_op/global_lanes
+      #  drivable_area: yolop/drivable_area
+      #  obstacles_id: strong_sort/obstacles_id
         gps_waypoints: carla_gps_op/gps_waypoints
         position: carla_source_node/position
         waypoints: fot_op/waypoints

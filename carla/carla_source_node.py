@@ -6,23 +6,18 @@ import zlib
 
 import cv2
 import numpy as np
-from _generate_world import (
-    add_camera,
-    add_depth_camera,
-    add_lidar,
-    add_segmented_camera,
-    spawn_actors,
-    spawn_driving_vehicle,
-)
+from _generate_world import (add_camera, add_depth_camera, add_lidar,
+                             add_segmented_camera, spawn_actors,
+                             spawn_driving_vehicle)
 from dora import Node
+from numpy import linalg as LA
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import (
-    TraceContextTextMapPropagator,
-)
+from opentelemetry.trace.propagation.tracecontext import \
+    TraceContextTextMapPropagator
 from scipy.spatial.transform import Rotation as R
 
 from carla import Client, Location, Rotation, Transform
@@ -72,15 +67,15 @@ trace.get_tracer_provider().add_span_processor(span_processor)
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
 LABELS = "image"
-IMAGE_WIDTH = 800
-IMAGE_HEIGHT = 600
+IMAGE_WIDTH = 1920
+IMAGE_HEIGHT = 1080
 OBJECTIVE_WAYPOINTS = np.array([[234, 59, 39]], np.float32)
 
 lidar_pc = None
 depth_frame = None
 camera_frame = None
 segmented_frame = None
-
+last_position = np.array([0., 0.])
 
 sensor_transform = Transform(
     Location(3, 0, 1), Rotation(pitch=0, yaw=0, roll=0)
@@ -107,11 +102,11 @@ def on_lidar_msg(frame):
 
 
 def on_camera_msg(frame):
-    frame = np.frombuffer(frame.raw_data, np.uint8)
-    frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+    # frame = np.frombuffer(frame.raw_data, np.uint8)
+    # frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
     global camera_frame
-    camera_frame = cv2.imencode(".jpg", frame)[1].tobytes()
+    camera_frame = np.frombuffer(frame.raw_data, np.uint8).tobytes()
 
 
 def on_depth_msg(frame):
@@ -163,7 +158,7 @@ node.send_output("opendrive", world.get_map().to_opendrive().encode())
 
 
 def main():
-
+    global last_position
     if camera_frame is None or segmented_frame is None or depth_frame is None:
         return {}
 
@@ -185,6 +180,11 @@ def main():
     propagator.inject(output)
     metadata = {"open_telemetry_context": serialize_context(output)}
     node.send_output("position", position.tobytes(), metadata)
+    node.send_output(
+        "speed",
+        np.array([LA.norm(position[:2] - last_position[:2])]).tobytes(),
+        metadata,
+    )
     node.send_output("image", camera_frame, metadata)
     node.send_output(
         "objective_waypoints", OBJECTIVE_WAYPOINTS.tobytes(), metadata
@@ -192,7 +192,8 @@ def main():
     # node.send_output("depth_frame", depth_frame, metadata)
     # node.send_output("segmented_frame", segmented_frame, metadata)
     node.send_output("lidar_pc", lidar_pc, metadata)
+    last_position = position
 
 
-for input_id, value, metadata in node:
+for event in node:
     main()
