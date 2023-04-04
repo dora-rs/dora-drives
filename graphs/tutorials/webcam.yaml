@@ -9,6 +9,6 @@ nodes:
 
   - id: plot
     operator:
-      python: ../../operators/simple_plot.py
+      python: ../../operators/plot.py
       inputs:
         image: webcam/image

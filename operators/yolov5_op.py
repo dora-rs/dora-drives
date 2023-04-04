@@ -1,19 +1,15 @@
 import os
 from typing import Callable
 
-import cv2
 import numpy as np
 import torch
 from dora import DoraStatus
 
-DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-DEVICE = "cuda"
-YOLOV5_PATH = "/home/dora/workspace/simulate/team_code/dependencies/yolov5"
-YOLOV5_WEIGHT_PATH = (
-    "/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt"
-)
+DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
+YOLOV5_PATH = os.environ.get("YOLOV5_PATH")
+YOLOV5_WEIGHT_PATH = os.environ.get("YOLOV5_WEIGHT_PATH")
 
 
 class Operator:
