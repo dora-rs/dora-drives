@@ -8,11 +8,14 @@
 
 - [installation](./installation.md)
 
-# Tutorials
+# Tutorials Webcam
 
 - [Streaming a video](./webcam_plot.md)
 - [Yolov5](./yolov5.md)
 - [Full perception](./webcam_full_nodes.md)
+
+# Tutorials Carla
+
 - [Carla simulator](./carla.md)
 - [Obstacle location](./obstacle_location.md)
 - [Planning](./planning.md)
@@ -30,7 +33,5 @@
 - [PID Control operator](./pid_control_operator.md)
 
 # Reference Guide
-- [oasis-sensor](./oasis-sensor.md)
-- [oasis-control](./oasis-control.md)
 - [Overview](./overview.md)
 - [data format](./data-format.md)

@@ -111,17 +111,17 @@ class Operator:
                 diff_angle = np.arctan2(
                     np.sin(angle - yaw), np.cos(angle - yaw)
                 )
-                if np.abs(diff_angle) > np.pi / 2:
-                    print("Error in computation of waypoints.")
-                    print(
-                        "The next target waypoint requires to make a 180 degrees turn."
-                    )
-                    print(f"target waypoint: {waypoints[0]}")
-                    print(f"position: {[x, y, z]}")
-                    print(f"goal location: {self._goal_location}")
-                else:
-                    self.waypoints = waypoints
-                    self.target_speeds = np.array([5.0] * len(waypoints))
+                #if np.abs(diff_angle) > np.pi / 2:
+                    #print("Error in computation of waypoints.")
+                    #print(
+                        #"The next target waypoint requires to make a 180 degrees turn."
+                    #)
+                    #print(f"target waypoint: {waypoints[0]}")
+                    #print(f"position: {[x, y, z]}")
+                    #print(f"goal location: {self._goal_location}")
+                #else:
+                self.waypoints = waypoints
+                self.target_speeds = np.array([5.0] * len(waypoints))
 
             if len(self.waypoints) == 0:
                 send_output(
