@@ -164,24 +164,11 @@ class Operator:
         """
 
         if "position" == dora_input["id"]:
-            position = np.frombuffer(dora_input["data"], np.float32)
-            self.position = position
-            if len(self.previous_position) == 0:
-                self.previous_position = self.position
-                self.previous_time = time.time()
-                return DoraStatus.CONTINUE
-
-            self.previous_position = self.position
-            self.previous_time = time.time()
-
+            self.position = np.frombuffer(dora_input["data"], np.float32)
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "speed":
             self.speed = np.frombuffer(dora_input["data"], np.float32)
-            return DoraStatus.CONTINUE
-
-        elif dora_input["id"] == "check":
-            send_output("ready", b"")
             return DoraStatus.CONTINUE
 
         elif "waypoints" == dora_input["id"]:
@@ -192,10 +179,7 @@ class Operator:
             self.waypoints = waypoints[:, :2]
             self.metadata = dora_input["metadata"]
 
-        if len(self.position) == 0:
-            return DoraStatus.CONTINUE
-
-        if len(self.speed) == 0:
+        if len(self.position) == 0 or len(self.speed) == 0:
             return DoraStatus.CONTINUE
 
         if len(self.waypoints) == 0:

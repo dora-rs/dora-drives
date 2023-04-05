@@ -43,7 +43,7 @@ class Operator:
         frame = cv2.imdecode(
             np.frombuffer(
                 dora_input["data"],
-                dtype="uint8",
+                np.uint8,
             ),
             -1,
         )

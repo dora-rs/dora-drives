@@ -84,7 +84,7 @@ class Operator:
 
         if dora_input["id"] == "lidar_pc":
             point_cloud = np.frombuffer(
-                zlib.decompress(dora_input["data"]), dtype=np.dtype("f4")
+                zlib.decompress(dora_input["data"]), np.dtype("f4")
             )
             point_cloud = np.reshape(
                 point_cloud, (int(point_cloud.shape[0] / 4), 4)
@@ -109,7 +109,7 @@ class Operator:
         if dora_input["id"] == "image":
             frame = np.frombuffer(
                 dora_input["data"],
-                dtype="uint8",
+                np.uint8,
             ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             # if len(self.frame) != 0:
             # cv2.imwrite("previous_image.jpg", self.frame)
@@ -210,7 +210,7 @@ class Operator:
                 math.degrees(yaw_r),
                 math.degrees(roll_r),
             ],
-            dtype=np.float32,
+            np.float32,
         )
         print(f"Infered: {relative_position}")
 

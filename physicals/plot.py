@@ -127,36 +127,36 @@ class Operator:
 
         if "obstacles_bbox" == dora_input["id"]:
             self.obstacles_bbox = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 6))
 
         if "traffic_sign_bbox" == dora_input["id"]:
             self.traffic_sign_bbox = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 6))
 
         elif "obstacles_id" == dora_input["id"]:
             self.obstacles_id = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 7))
 
         elif "lanes" == dora_input["id"]:
-            lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
+            lanes = np.frombuffer(dora_input["data"], np.int32).reshape(
                 (-1, 30, 2)
             )
             self.lanes = lanes
 
         elif "drivable_area" == dora_input["id"]:
-            drivable_area = np.frombuffer(
-                dora_input["data"], dtype="int32"
-            ).reshape((1, -1, 2))
+            drivable_area = np.frombuffer(dora_input["data"], np.int32).reshape(
+                (1, -1, 2)
+            )
             self.drivable_area = drivable_area
 
         elif "image" == dora_input["id"]:
             self.camera_frame = cv2.imdecode(
                 np.frombuffer(
                     dora_input["data"],
-                    dtype="uint8",
+                    np.uint8,
                 ),
                 -1,
             )
@@ -165,7 +165,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         resized_image = self.camera_frame[:, :, :3]
-        resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
+        resized_image = np.ascontiguousarray(resized_image, np.uint8)
 
         for obstacles_bbox in self.obstacles_bbox:
             [min_x, max_x, min_y, max_y, confidence, label] = obstacles_bbox

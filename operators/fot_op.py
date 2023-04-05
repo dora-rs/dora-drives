@@ -137,7 +137,7 @@ class Operator:
         self.speed = []
         self.last_position = []
         self.waypoints = []
-        self.gps_waypoints = []
+        self.gps_waypoints = np.array([])
         self.last_obstacles = np.array([])
         self.obstacle_metadata = {}
         self.gps_metadata = {}
@@ -198,24 +198,19 @@ class Operator:
             self.speed = np.frombuffer(dora_input["data"], np.float32)
             return DoraStatus.CONTINUE
 
-        elif dora_input["id"] == "check":
-            send_output("ready", b"")
-            return DoraStatus.CONTINUE
-
         elif dora_input["id"] == "obstacles":
-            obstacles = np.frombuffer(
-                dora_input["data"], dtype=np.float32
-            ).reshape((-1, 5))
+            obstacles = np.frombuffer(dora_input["data"], np.float32).reshape(
+                (-1, 5)
+            )
             if len(self.last_obstacles) > 0:
                 self.obstacles = np.concatenate(
                     [self.last_obstacles, obstacles]
                 )
             else:
                 self.obstacles = obstacles
-            return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "global_lanes":
-            lanes = np.frombuffer(dora_input["data"], dtype=np.float32).reshape(
+            lanes = np.frombuffer(dora_input["data"], np.float32).reshape(
                 (-1, 60, 3)
             )
             self.lanes = lanes
@@ -225,6 +220,7 @@ class Operator:
             waypoints = np.frombuffer(dora_input["data"], np.float32)
             waypoints = waypoints.reshape((-1, 3))[:, :2]
             self.gps_waypoints = waypoints
+            return DoraStatus.CONTINUE
 
         if len(self.gps_waypoints) == 0:
             print("No waypoints")
@@ -235,13 +231,9 @@ class Operator:
             )
             return DoraStatus.CONTINUE
 
-        elif len(self.position) == 0:
-            print("No position")
+        elif len(self.position) == 0 or len(self.speed) == 0:
             return DoraStatus.CONTINUE
 
-        elif len(self.speed) == 0:
-            print("No speed")
-            return DoraStatus.CONTINUE
         [x, y, z, rx, ry, rz, rw] = self.position
         [_, _, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
             "xyz", degrees=False
@@ -295,7 +287,9 @@ class Operator:
                 )
 
             send_output(
-                "waypoints", np.array([x, y, 0.0], np.float32).tobytes()
+                "waypoints",
+                np.array([x, y, 0.0], np.float32).tobytes(),
+                dora_input["metadata"],
             )
             return DoraStatus.CONTINUE
 

@@ -1,11 +1,11 @@
 import math
 import os.path
 import xml.etree.ElementTree as ET
-import time
-import cv2
+
 import numpy as np
 from autoagents.autonomous_agent import AutonomousAgent
 from dora import Node
+from dora_tracing import propagator, serialize_context, tracer
 from scipy.spatial.transform import Rotation as R
 
 from carla import VehicleControl
@@ -94,30 +94,7 @@ class DoraAgent(AutonomousAgent):
         self.lat_ref = None
         self.lon_ref = None
         self.opendrive_map = None
-
-        ## Check for node readiness
-        check_nodes = [
-            "carla_gps",
-            "yolov5",
-            "obstacle_location",
-            "fot",
-            "pid_control",
-        ]
-        node.send_output("check", b"")
-
-        ## Using tick to avoid deadlock due to unreceived input.
-        while True:
-            event = node.next()
-            if event["type"] == "INPUT":
-                input_id = event["id"]
-                value = event["data"]
-                if input_id == "tick":
-                    print("Waiting for nodes to be ready...")
-                elif "_ready" in input_id:
-                    ready_node = input_id.replace("_ready", "")
-                    check_nodes.remove(ready_node)
-                    if len(check_nodes) == 0:
-                        break
+        self.last_metadata = ""
 
     def sensors(self):  # pylint: disable=no-self-use
         """
@@ -201,126 +178,138 @@ class DoraAgent(AutonomousAgent):
         Execute one step of navigation.
         :return: control
         """
+        with tracer.start_as_current_span(name="run_step") as child_span:
+            output = {}
+            propagator.inject(output)
+            metadata = {"open_telemetry_context": serialize_context(output)}
+            ### Opendrive preprocessing
+            if "高精地图传感器" in input_data.keys():
 
-        ### Opendrive preprocessing
-        if "高精地图传感器" in input_data.keys():
+                if self.opendrive_map is None:
+                    opendrive_map = input_data["高精地图传感器"][1]["opendrive"]
+                    self.save_input_data("高精地图传感器", input_data["高精地图传感器"])
 
-            if self.opendrive_map is None:
-                opendrive_map = input_data["高精地图传感器"][1]["opendrive"]
-                self.save_input_data("高精地图传感器", input_data["高精地图传感器"])
-
-                self.opendrive_map = opendrive_map
-                self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
-                node.send_output("opendrive", opendrive_map.encode())
-        if "速度传感器" in input_data.keys():
-            node.send_output(
-                "speed",
-                np.array(input_data["速度传感器"][1]["speed"], np.float32).tobytes(),
-            )
-
-        if self.lat_ref is None:
-            return VehicleControl(
-                steer=0.0,
-                throttle=0.0,
-                brake=0.0,
-                hand_brake=False,
-            )
-
-        ### Position preprocessing
-        [lat, lon, z] = input_data["GPS"][1]
-        [x, y] = from_gps_to_world_coordinate(
-            lat, lon, self.lat_ref, self.lon_ref
-        )
-        yaw = input_data["IMU"][1][-1] - np.pi / 2
-        roll = 0.0
-        pitch = 0.0
-        [[qx, qy, qz, qw]] = R.from_euler(
-            "xyz", [[roll, pitch, yaw]], degrees=False
-        ).as_quat()
-        try:
-            R.from_quat([qx, qy, qz, qw])
-        except:
-            print("Error in quaternion.")
-            return VehicleControl(
-                steer=0.0,
-                throttle=0.0,
-                brake=0.0,
-                hand_brake=False,
-            )
-
-        self.previous_positions.append([x, y])
-
-        ## Accumulate previous position until having window size average.
-        if len(self.previous_positions) < AVERAGE_WINDOW:
-            return VehicleControl(
-                steer=0.0,
-                throttle=0.0,
-                brake=0.0,
-                hand_brake=False,
-            )
-        self.previous_positions = self.previous_positions[-AVERAGE_WINDOW:]
-
-        ## Average last 5 position
-        [avg_x, avg_y] = np.array(self.previous_positions).mean(axis=0)
-        position = np.array([avg_x, avg_y, 0.0, qx, qy, qz, qw], np.float32)
-
-        ### Camera preprocessing
-        frame_raw_data = input_data["camera.center"][1]
-        ## frame = np.frombuffer(frame_raw_data, dtype=np.dtype("uint8"))
-        ## frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-        camera_frame = frame_raw_data.tobytes()
-
-        ### LIDAR preprocessing
-        frame_raw_data = input_data["LIDAR"][1]
-        frame = np.frombuffer(frame_raw_data, dtype=np.dtype("float32"))
-        point_cloud = np.reshape(frame, (-1, 4))
-        point_cloud = point_cloud[:, :3]
-        lidar_pc = point_cloud.tobytes()
-
-        ### Waypoints preprocessing
-        waypoints_xyz = np.array(
-            [
-                [
-                    self.destination.x,
-                    self.destination.y,
-                    self.destination.z,
-                ]
-            ],
-            np.float32,
-        )
-
-        ## Sending data into the dataflow
-        node.send_output("position", position.tobytes())
-        node.send_output("image", camera_frame)
-        node.send_output("lidar_pc", lidar_pc)
-        node.send_output("objective_waypoints", waypoints_xyz.tobytes())
-
-        # Receiving back control information
-        ## Using tick to avoid deadlock due to unreceived input.
-        for iteration in range(5):
-            event = node.next()
-            if event["type"] == "INPUT":
-                input_id = event["id"]
-                value = event["data"]
-
-                if input_id == "tick" and iteration > 0 and iteration < 4:
-                    print(f"Did not receive control after {iteration} ticks...")
-                elif input_id == "tick" and iteration == 4:
-                    print(
-                        f"Sending null control after waiting {iteration} ticks..."
+                    self.opendrive_map = opendrive_map
+                    self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
+                    node.send_output(
+                        "opendrive", opendrive_map.encode(), metadata
                     )
-                    value = np.array([0.0, 0.0, 0.0], np.float16)
-                elif input_id == "control":
-                    break
+            if "速度传感器" in input_data.keys():
+                node.send_output(
+                    "speed",
+                    np.array(
+                        input_data["速度传感器"][1]["speed"], np.float32
+                    ).tobytes(),
+                    metadata,
+                )
 
-        [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
+            if self.lat_ref is None:
+                return VehicleControl(
+                    steer=0.0,
+                    throttle=0.0,
+                    brake=0.0,
+                    hand_brake=False,
+                )
 
-        steer = radians_to_steer(target_angle, STEER_GAIN)
-        vec_control = VehicleControl(
-            steer=float(steer),
-            throttle=float(throttle),
-            brake=float(brake),
-            hand_brake=False,
-        )
+            ### Position preprocessing
+            [lat, lon, z] = input_data["GPS"][1]
+            [x, y] = from_gps_to_world_coordinate(
+                lat, lon, self.lat_ref, self.lon_ref
+            )
+            yaw = input_data["IMU"][1][-1] - np.pi / 2
+            roll = 0.0
+            pitch = 0.0
+            [[qx, qy, qz, qw]] = R.from_euler(
+                "xyz", [[roll, pitch, yaw]], degrees=False
+            ).as_quat()
+            try:
+                R.from_quat([qx, qy, qz, qw])
+            except:
+                print("Error in quaternion.")
+                return VehicleControl(
+                    steer=0.0,
+                    throttle=0.0,
+                    brake=0.0,
+                    hand_brake=False,
+                )
 
-        return vec_control
+            self.previous_positions.append([x, y])
+
+            ## Accumulate previous position until having window size average.
+            if len(self.previous_positions) < AVERAGE_WINDOW:
+                return VehicleControl(
+                    steer=0.0,
+                    throttle=0.0,
+                    brake=0.0,
+                    hand_brake=False,
+                )
+            self.previous_positions = self.previous_positions[-AVERAGE_WINDOW:]
+
+            ## Average last 5 position
+            [avg_x, avg_y] = np.array(self.previous_positions).mean(axis=0)
+            position = np.array([avg_x, avg_y, 0.0, qx, qy, qz, qw], np.float32)
+
+            ### Camera preprocessing
+            frame_raw_data = input_data["camera.center"][1]
+            ## frame = np.frombuffer(frame_raw_data, np.uint8)
+            ## frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+            camera_frame = frame_raw_data.tobytes()
+
+            ### LIDAR preprocessing
+            frame_raw_data = input_data["LIDAR"][1]
+            frame = np.frombuffer(frame_raw_data, np.float32)
+            point_cloud = np.reshape(frame, (-1, 4))
+            point_cloud = point_cloud[:, :3]
+            lidar_pc = point_cloud.tobytes()
+
+            ### Waypoints preprocessing
+            waypoints_xyz = np.array(
+                [
+                    [
+                        self.destination.x,
+                        self.destination.y,
+                        self.destination.z,
+                    ]
+                ],
+                np.float32,
+            )
+
+            ## Sending data into the dataflow
+            node.send_output("position", position.tobytes(), metadata)
+            node.send_output("image", camera_frame, metadata)
+            node.send_output("lidar_pc", lidar_pc, metadata)
+            node.send_output(
+                "objective_waypoints", waypoints_xyz.tobytes(), metadata
+            )
+
+            # Receiving back control information
+            ## Using tick to avoid deadlock due to unreceived input.
+            for iteration in range(5):
+                event = node.next()
+                if event["type"] == "INPUT":
+                    input_id = event["id"]
+                    value = event["data"]
+
+                    if input_id == "tick" and iteration > 0 and iteration < 4:
+                        print(
+                            f"Did not receive control after {iteration} ticks..."
+                        )
+                    elif input_id == "tick" and iteration == 4:
+                        print(
+                            f"Sending null control after waiting {iteration} ticks..."
+                        )
+                        value = np.array([0.0, 0.0, 0.0], np.float16)
+                    elif input_id == "control":
+                        break
+
+            [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
+
+            steer = radians_to_steer(target_angle, STEER_GAIN)
+            vec_control = VehicleControl(
+                steer=float(steer),
+                throttle=float(throttle),
+                brake=float(brake),
+                hand_brake=False,
+            )
+
+            return vec_control

@@ -4,7 +4,6 @@ import numpy as np
 from _dora_utils import closest_vertex
 from _hd_map import HDMap
 from dora import DoraStatus
-from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 
 from carla import Map
@@ -33,7 +32,6 @@ class Operator:
         self.waypoints = np.array([])
         self.target_speeds = np.array([])
         self.objective_waypoints = []
-        self.completed_waypoints = 0
         self.waypoints_array = np.array([])
 
     def on_event(
@@ -53,41 +51,26 @@ class Operator:
 
         if "position" == dora_input["id"]:
             self.position = np.frombuffer(dora_input["data"], np.float32)
-
             return DoraStatus.CONTINUE
 
-        elif dora_input["id"] == "check":
-            send_output("ready", b"")
-            return DoraStatus.CONTINUE
-        if "opendrive" == dora_input["id"]:
+        elif "opendrive" == dora_input["id"]:
             opendrive = dora_input["data"].decode()
             self.hd_map = HDMap(Map("map", opendrive))
+            return DoraStatus.CONTINUE
 
-        if "objective_waypoints" == dora_input["id"]:
+        elif "objective_waypoints" == dora_input["id"]:
             self.objective_waypoints = np.frombuffer(
                 dora_input["data"], np.float32
-            ).reshape((-1, 3))[self.completed_waypoints :]
+            ).reshape((-1, 3))
 
-            if self.hd_map is None:
-                print("No map within the gps")
+            if self.hd_map is None or len(self.position) == 0:
+                print("No map within the gps or position")
                 return DoraStatus.CONTINUE
 
-            (index, closest_objective) = closest_vertex(
+            (index, _closest_objective) = closest_vertex(
                 self.objective_waypoints[:, :2],
                 np.array([self.position[:2]]),
             )
-
-            if (
-                LA.norm(closest_objective - self.position[:2])
-                < OBJECTIVE_MIN_DISTANCE
-            ):
-                self.completed_waypoints += 1
-
-                # Oasis leaderboard has only one waypoint
-                # to complete so we are stopping the datasflow
-                # after the first completed waypoint.
-                print("Completed destination. Stopping.")
-                return DoraStatus.CONTINUE
 
             self.objective_waypoints = self.objective_waypoints[
                 index : index + NUM_WAYPOINTS_AHEAD
@@ -107,7 +90,7 @@ class Operator:
                     index : index + NUM_WAYPOINTS_AHEAD
                 ]
 
-            if len(self.waypoints) == 0:
+            elif len(self.waypoints) == 0:
 
                 [x, y, z, rx, ry, rz, rw] = self.position
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
@@ -162,4 +145,4 @@ class Operator:
                 dora_input["metadata"],
             )  # World coordinate
 
-        return DoraStatus.CONTINUE
+            return DoraStatus.CONTINUE

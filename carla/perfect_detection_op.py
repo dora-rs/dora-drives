@@ -216,7 +216,7 @@ def get_bounding_box_in_camera_view(bb_coordinates) -> np.array:
         x = [int(x) for x, _ in thresholded_points]
         y = [int(y) for _, y in thresholded_points]
         if min(x) != max(x) and min(y) != max(y):
-            return np.array([min(x), max(x), min(y), max(y)], dtype="int32")
+            return np.array([min(x), max(x), min(y), max(y)], np.int32)
         else:
             return []
 
@@ -317,7 +317,7 @@ class Operator:
         if dora_input["id"] == "depth_frame":
             depth_frame = np.frombuffer(
                 zlib.decompress(dora_input["data"]),
-                dtype="float32",
+                np.float32,
             )
             depth_frame = np.reshape(
                 depth_frame, (DEPTH_IMAGE_HEIGHT, DEPTH_IMAGE_WIDTH)
@@ -330,7 +330,7 @@ class Operator:
             segmented_frame = cv2.imdecode(
                 np.frombuffer(
                     dora_input["data"],
-                    dtype="uint8",
+                    np.uint8,
                 ),
                 -1,
             )
@@ -386,7 +386,7 @@ class Operator:
                         segmentation_class = 0
                     obstacle = np.append(
                         bbox,
-                        np.array([100, segmentation_class], dtype="int32"),
+                        np.array([100, segmentation_class], np.int32),
                     )
 
                     outputs.append(obstacle)

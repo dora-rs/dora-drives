@@ -110,41 +110,41 @@ class Operator:
 
         elif "obstacles_bbox" == dora_input["id"]:
             self.obstacles_bbox = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 6))
 
         elif "traffic_sign_bbox" == dora_input["id"]:
             self.traffic_sign_bbox = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 6))
 
         elif "obstacles_id" == dora_input["id"]:
             self.obstacles_id = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 7))
 
         elif "obstacles" == dora_input["id"]:
-            obstacles = np.frombuffer(
-                dora_input["data"], dtype="float32"
-            ).reshape((-1, 5))[:, :3]
+            obstacles = np.frombuffer(dora_input["data"], np.float32).reshape(
+                (-1, 5)
+            )[:, :3]
             self.obstacles = obstacles
 
         elif "lanes" == dora_input["id"]:
-            lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
+            lanes = np.frombuffer(dora_input["data"], np.int32).reshape(
                 (-1, 30, 2)
             )
             self.lanes = lanes
 
         elif "global_lanes" == dora_input["id"]:
             global_lanes = np.frombuffer(
-                dora_input["data"], dtype=np.float32
+                dora_input["data"], np.float32
             ).reshape((-1, 3))
             self.global_lanes = global_lanes
 
         elif "drivable_area" == dora_input["id"]:
-            drivable_area = np.frombuffer(
-                dora_input["data"], dtype="int32"
-            ).reshape((1, -1, 2))
+            drivable_area = np.frombuffer(dora_input["data"], np.int32).reshape(
+                (1, -1, 2)
+            )
             self.drivable_area = drivable_area
 
         elif "position" == dora_input["id"]:
@@ -160,7 +160,7 @@ class Operator:
             ) * 20
 
         elif "lidar_pc" == dora_input["id"]:
-            point_cloud = np.frombuffer(dora_input["data"], dtype="float32")
+            point_cloud = np.frombuffer(dora_input["data"], np.float32)
             point_cloud = point_cloud.reshape((-1, 3))
             # To camera coordinate
             # The latest coordinate space is the unreal space.
@@ -179,7 +179,7 @@ class Operator:
         elif "image" == dora_input["id"]:
             self.camera_frame = np.frombuffer(
                 dora_input["data"],
-                dtype="uint8",
+                np.uint8,
             ).reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
 
         if "image" != dora_input["id"] or isinstance(self.camera_frame, list):
@@ -194,7 +194,7 @@ class Operator:
             # print("no position messages.")
 
         resized_image = self.camera_frame[:, :, :3]
-        resized_image = np.ascontiguousarray(resized_image, dtype=np.uint8)
+        resized_image = np.ascontiguousarray(resized_image, np.uint8)
 
         ## Drawing waypoints on frame
         if inv_extrinsic_matrix is not None:

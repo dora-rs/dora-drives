@@ -48,6 +48,8 @@ class Operator:
     def __init__(self):
         self.point_cloud = []
         self.camera_point_cloud = []
+        self.ground_point_cloud = []
+        self.camera_ground_point_cloud = []
         self.last_point_cloud = []
         self.last_camera_point_cloud = []
         self.obstacles = []
@@ -70,7 +72,7 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
         if "lidar_pc" == dora_input["id"]:
-            point_cloud = np.frombuffer(dora_input["data"], dtype=np.float32)
+            point_cloud = np.frombuffer(dora_input["data"], np.float32)
             point_cloud = point_cloud.reshape((-1, 3))
 
             # From Velodyne axis to Camera axis
@@ -87,11 +89,18 @@ class Operator:
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
 
             # Remove ground points. Above lidar only ( bottom = y < 1.0 )
-            point_cloud = point_cloud[np.where(point_cloud[:, 1] < 1.0)]
+            above_ground_point_index = np.where(point_cloud[:, 1] < 1.0)
+            point_cloud = point_cloud[above_ground_point_index]
+            self.ground_point_cloud = point_cloud[
+                above_ground_point_index == False
+            ]
 
             # 3D array -> 2D array with index_x -> pixel x, index_y -> pixel_y, value -> z
             camera_point_cloud = local_points_to_camera_view(
                 point_cloud, INTRINSIC_MATRIX
+            )
+            self.camera_ground_point_cloud = local_points_to_camera_view(
+                self.ground_point_cloud, INTRINSIC_MATRIX
             )
 
             if len(point_cloud) != 0:
@@ -107,10 +116,6 @@ class Operator:
                         [self.last_camera_point_cloud, self.camera_point_cloud]
                     )
 
-        elif dora_input["id"] == "check":
-            send_output("ready", b"")
-            return DoraStatus.CONTINUE
-
         elif "position" == dora_input["id"]:
             # Add sensor transform
             self.position = np.frombuffer(dora_input["data"], np.float32)
@@ -119,12 +124,14 @@ class Operator:
             )
 
         elif "lanes" == dora_input["id"]:
-            lanes = np.frombuffer(dora_input["data"], dtype="int32").reshape(
+            lanes = np.frombuffer(dora_input["data"], np.int32).reshape(
                 (-1, 60, 2)
             )
 
             knnr = KNeighborsRegressor(n_neighbors=4)
-            knnr.fit(self.camera_point_cloud[:, :2], self.point_cloud)
+            knnr.fit(
+                self.camera_ground_point_cloud[:, :2], self.ground_point_cloud
+            )
 
             processed_lanes = []
             for lane in lanes:
@@ -151,7 +158,7 @@ class Operator:
 
             # bbox = np.array([[min_x, max_x, min_y, max_y, confidence, label], ... n_bbox ... ])
             self.obstacles_bbox = np.frombuffer(
-                dora_input["data"], dtype="int32"
+                dora_input["data"], np.int32
             ).reshape((-1, 6))
 
             obstacles_with_location = []
@@ -185,9 +192,7 @@ class Operator:
                 predictions = get_predictions(
                     self.obstacles_bbox, obstacles_with_location
                 )
-                predictions_bytes = np.array(
-                    predictions, dtype="float32"
-                ).tobytes()
+                predictions_bytes = np.array(predictions, np.float32).tobytes()
 
                 send_output(
                     "obstacles", predictions_bytes, dora_input["metadata"]
