@@ -402,19 +402,15 @@ nodes:
 <pre><code class="language-python">import os
 from typing import Callable
 
-import cv2
 import numpy as np
 import torch
 from dora import DoraStatus
 
-DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-DEVICE = &quot;cuda&quot;
-YOLOV5_PATH = &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5&quot;
-YOLOV5_WEIGHT_PATH = (
-    &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt&quot;
-)
+DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
+YOLOV5_PATH = os.environ.get(&quot;YOLOV5_PATH&quot;)
+YOLOV5_WEIGHT_PATH = os.environ.get(&quot;YOLOV5_WEIGHT_PATH&quot;)
 
 
 class Operator:
@@ -461,14 +457,10 @@ class Operator:
             dora_input[&quot;data&quot;] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         &quot;&quot;&quot;
-        if dora_input[&quot;id&quot;] == &quot;check&quot;:
-            send_output(&quot;ready&quot;, b&quot;&quot;)
-            return DoraStatus.CONTINUE
-
-        else:
+        if dora_input[&quot;id&quot;] == &quot;image&quot;:
             frame = np.frombuffer(
                 dora_input[&quot;data&quot;],
-                dtype=&quot;uint8&quot;,
+                np.uint8,
             ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
@@ -485,11 +477,7 @@ class Operator:
 <p>The operator basically load a pytorch model and run it on <code>jpeg</code> encoded images. 
 It sends the bounding box as a numpy bytes array with type <code>int32</code>.</p>
 <p>To use it, just add it to the graph:</p>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: dora-zenoh-example
-
-nodes:
+<pre><code class="language-yaml">nodes:
   - id: webcam
     operator:
       python: ../../operators/webcam_op.py
@@ -538,11 +526,7 @@ nodes:
 <li><code>traffic_sign</code> a traffic sign detector.</li>
 </ul>
 <p>the graph will look as follows:</p>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: dora-zenoh-example
-
-nodes:
+<pre><code class="language-yaml">nodes:
   - id: webcam
     operator:
       python: ../../operators/webcam_op.py
@@ -611,11 +595,7 @@ nodes:
 <p>Let's try to use a car simulator to not only do perception but also control.</p>
 <p>To launch the simulator all you have to do is add the <code>-s</code>flag in the <code>./script/launch.sh</code> command.</p>
 <p>We can then switch from the webcam to the simulator in our graph.</p>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: dora-zenoh-example
-    
-nodes:
+<pre><code class="language-yaml">nodes:
   - id: carla_source_node
     custom:
       inputs:
@@ -780,11 +760,7 @@ dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
 <p>To send a control to a Carla car, we can use <code>carla_control_op.py</code> that takes an array of 3 variables: <code>throttle, steering, brake</code> and apply it to our car.</p>
 <p>To translate out waypoints to those control, we're using a PID controller that is able to adjust the steering according to the response of the steering, and we're going to pipe this response to the CARLA API so that the car can move. The PID controller code is in <code>pid_control_op.py</code>.</p>
 <p>The full graph look as follows:</p>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: dora-zenoh-example
-    
-nodes:
+<pre><code class="language-yaml">nodes:
   - id: carla_source_node
     custom:
       inputs:

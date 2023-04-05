@@ -148,11 +148,7 @@
 <p>Let's try to use a car simulator to not only do perception but also control.</p>
 <p>To launch the simulator all you have to do is add the <code>-s</code>flag in the <code>./script/launch.sh</code> command.</p>
 <p>We can then switch from the webcam to the simulator in our graph.</p>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: dora-zenoh-example
-    
-nodes:
+<pre><code class="language-yaml">nodes:
   - id: carla_source_node
     custom:
       inputs:

@@ -153,11 +153,7 @@
 <li><code>traffic_sign</code> a traffic sign detector.</li>
 </ul>
 <p>the graph will look as follows:</p>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: dora-zenoh-example
-
-nodes:
+<pre><code class="language-yaml">nodes:
   - id: webcam
     operator:
       python: ../../operators/webcam_op.py

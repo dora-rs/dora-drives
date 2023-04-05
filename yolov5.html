@@ -149,19 +149,15 @@
 <pre><code class="language-python">import os
 from typing import Callable
 
-import cv2
 import numpy as np
 import torch
 from dora import DoraStatus
 
-DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-DEVICE = &quot;cuda&quot;
-YOLOV5_PATH = &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5&quot;
-YOLOV5_WEIGHT_PATH = (
-    &quot;/home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt&quot;
-)
+DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
+YOLOV5_PATH = os.environ.get(&quot;YOLOV5_PATH&quot;)
+YOLOV5_WEIGHT_PATH = os.environ.get(&quot;YOLOV5_WEIGHT_PATH&quot;)
 
 
 class Operator:
@@ -208,14 +204,10 @@ class Operator:
             dora_input[&quot;data&quot;] (bytes): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         &quot;&quot;&quot;
-        if dora_input[&quot;id&quot;] == &quot;check&quot;:
-            send_output(&quot;ready&quot;, b&quot;&quot;)
-            return DoraStatus.CONTINUE
-
-        else:
+        if dora_input[&quot;id&quot;] == &quot;image&quot;:
             frame = np.frombuffer(
                 dora_input[&quot;data&quot;],
-                dtype=&quot;uint8&quot;,
+                np.uint8,
             ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             frame = frame[:, :, :3]
 
@@ -232,11 +224,7 @@ class Operator:
 <p>The operator basically load a pytorch model and run it on <code>jpeg</code> encoded images. 
 It sends the bounding box as a numpy bytes array with type <code>int32</code>.</p>
 <p>To use it, just add it to the graph:</p>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: dora-zenoh-example
-
-nodes:
+<pre><code class="language-yaml">nodes:
   - id: webcam
     operator:
       python: ../../operators/webcam_op.py
