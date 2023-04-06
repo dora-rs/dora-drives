@@ -1,6 +1,24 @@
 # FOT operator
 
+The Frenet Optimal Planner Operator is based on [https://github.com/erdos-project/frenet_optimal_trajectory_planner/](https://github.com/erdos-project/frenet_optimal_trajectory_planner/) and wrap the different elements `obstacles`, `position`, `speed` ... into a frenet consumable format. 
 
+
+FOT inputs are:
+```python
+initial_conditions = {
+    "ps": 0,
+    "target_speed": # The target speed
+    "pos": # The x, y current position
+    "vel": # The vx, vy current speed
+    "wp": # [[x, y], ... n_waypoints ] desired waypoints
+    "obs": # [[min_x, min_y, max_x, max_y], ... ] obstacles on the way
+}
+```
+There is also a set of hyperparameters that are described below.
+
+As our obstacles are defined as 3D dot we need to transform those dot into `[min_x, min_y, max_x, max_y]` format. We do that within the `get_obstacle_list` function. This approximation is very basic and probably need to be revisited.
+
+The output is either a successful trajectory that we can feed into PID. Or it is a failure in which case we send the current position as waypoint.
 
 ## Graph Description
 
@@ -41,36 +59,7 @@ end
   fot_op/op -- waypoints --> pid_control_op/op
 ```
 
-
-## Hyper Parameters to consider 
-
-See: https://github.com/erdos-project/frenet_optimal_trajectory_planner
-
-```python
-        self.hyperparameters = {
-            "max_speed": 25.0,
-            "max_accel": 45.0,
-            "max_curvature": 55.0,
-            "max_road_width_l": 0.1,
-            "max_road_width_r": 0.1,
-            "d_road_w": 0.5,
-            "dt": 0.5,
-            "maxt": 5.0,
-            "mint": 2.0,
-            "d_t_s": 5,
-            "n_s_sample": 2.0,
-            "obstacle_clearance": 0.1,
-            "kd": 1.0,
-            "kv": 0.1,
-            "ka": 0.1,
-            "kj": 0.1,
-            "kt": 0.1,
-            "ko": 0.1,
-            "klat": 1.0,
-            "klon": 1.0,
-            "num_threads": 0,  # set 0 to avoid using threaded algorithm
-        }
-```
+## Hyperparameter descriptions
 
 ```bash
         initial_conditions (dict): dict containing the following items

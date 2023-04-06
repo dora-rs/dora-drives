@@ -22,7 +22,9 @@ The following operator will compute the route from the current `position` to the
         position: oasis_agent/position
 ```
 
-> The waypoints are defined as a an array of `x, y, speed` as `float32` waypoints, with global coordinate.
+> The waypoints are defined as a an array of `x, y, speed` as `float32` waypoints, with global coordinates.
+
+> For more information on `gps`, go on [our `gps` detail page](./gps_operator.md)
 
 ## Planner
 
@@ -42,8 +44,6 @@ We're going to reuse a model called `fot` (Frenet Optimal Trajectory) as a black
         gps_waypoints: carla_gps_op/gps_waypoints
 ```
 
-> More info here: [https://github.com/erdos-project/frenet_optimal_trajectory_planner](https://github.com/erdos-project/frenet_optimal_trajectory_planner)
-
 To test both functionallities:
 
 ```bash
@@ -54,3 +54,6 @@ dora start graphs/oasis/oasis_agent_planning.yaml --attach
 <p align="center">
     <img src="./planning.png" width="800">
 </p>
+
+
+> For more information on `fot`, go on [our `fot` detail page](./fot_operator.md)

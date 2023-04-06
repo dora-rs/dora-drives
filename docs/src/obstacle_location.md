@@ -40,3 +40,5 @@ You should be able to see a dot within the bounding box representing the estimat
 <p align="center">
     <img src="./obstacle_location.png" width="800">
 </p>
+
+> For more information on `obstacle_location`, go on [our `obstacle_location` detail page](./obstacle_location_operator.md)

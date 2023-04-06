@@ -1,14 +1,25 @@
 # Obstacle location operator
 
-The obstacle location operator match bounding box with depth frame to find the exact position of obstacles.
+The obstacle location operator match bounding box with depth frame to find an approximative position of obstacles.
+
+There is two logic within it:
+- One is for the ground dot for lane detection.
+- One is for bounding box obstacle localisation.
+
+Both logic are based on he computation of the projection in 2D space of the lidar 3D point and then reusing the index to get the 3D position.
+
+- In the case of ground dot detection, the approximation is based on a knnr, as we might not have enough data on the floor.
+- In the case of bounding box, we use first quantile closest point within the bounding box to estimate the distance. We use the first quantile closest point to remove the noise.
+
+The mecanism to project the lidar point cloud into a 2D is also used in the `plot.py` operator. You can use the input `lidar_pc` within it to help you debug.
 
 ## Inputs
 
-- Obstacles bounding box.
+- 2D Obstacles bounding box.
 
 ## Outputs
 
-- GPS location of obstacles.
+- 3D position of obstacles as dot.
 
 
 ## Graph Description
