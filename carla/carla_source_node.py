@@ -2,13 +2,14 @@
 
 import logging
 import typing
-import zlib
 
-import cv2
 import numpy as np
-from _generate_world import (add_camera, add_depth_camera, add_lidar,
-                             add_segmented_camera, spawn_actors,
-                             spawn_driving_vehicle)
+from _generate_world import (
+    add_camera,
+    add_lidar,
+    spawn_actors,
+    spawn_driving_vehicle,
+)
 from dora import Node
 from numpy import linalg as LA
 from opentelemetry import trace
@@ -16,11 +17,26 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import \
-    TraceContextTextMapPropagator
+from opentelemetry.trace.propagation.tracecontext import (
+    TraceContextTextMapPropagator,
+)
 from scipy.spatial.transform import Rotation as R
 
-from carla import Client, Location, Rotation, Transform
+from carla import Client, Location, Rotation, Transform, VehicleControl, command
+
+
+def radians_to_steer(rad: float, steer_gain: float):
+    """Converts radians to steer input.
+
+    Returns:
+        :obj:`float`: Between [-1.0, 1.0].
+    """
+    steer = steer_gain * rad
+    if steer > 0:
+        steer = min(steer, 1)
+    else:
+        steer = max(steer, -1)
+    return steer
 
 
 def euler_to_quaternion(yaw, pitch, roll):
@@ -70,25 +86,17 @@ LABELS = "image"
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
 OBJECTIVE_WAYPOINTS = np.array([[234, 59, 39]], np.float32)
+STEER_GAIN = 0.7
 
 lidar_pc = None
 depth_frame = None
 camera_frame = None
 segmented_frame = None
-last_position = np.array([0., 0.])
+last_position = np.array([0.0, 0.0])
 
 sensor_transform = Transform(
     Location(3, 0, 1), Rotation(pitch=0, yaw=0, roll=0)
 )
-
-
-def on_segmented_msg(frame):
-
-    frame = np.frombuffer(frame.raw_data, np.uint8)
-    frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-    frame = frame[:, :, 2]
-    global segmented_frame
-    segmented_frame = cv2.imencode(".jpg", frame)[1].tobytes()
 
 
 def on_lidar_msg(frame):
@@ -109,21 +117,6 @@ def on_camera_msg(frame):
     camera_frame = np.frombuffer(frame.raw_data, np.uint8).tobytes()
 
 
-def on_depth_msg(frame):
-
-    frame = np.frombuffer(
-        frame.raw_data,
-        np.uint8,
-    )
-    frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-    frame = frame.astype(np.float32)
-    frame = np.dot(frame[:, :, :3], [65536.0, 256.0, 1.0])
-    frame /= 16777215.0  # (256.0 * 256.0 * 256.0 - 1.0)
-    frame = frame.astype(np.float32)
-    global depth_frame
-    depth_frame = zlib.compress(frame.tobytes())
-
-
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)  # seconds
 world = client.get_world()
@@ -132,7 +125,7 @@ world = client.get_world()
     client,
     world,
     8000,
-    "0.9.10",
+    "0.9.13",
     -1,
     True,
     0,
@@ -143,23 +136,16 @@ world = client.get_world()
 
 ego_vehicle, vehicle_id = spawn_driving_vehicle(client, world)
 lidar = add_lidar(world, sensor_transform, on_lidar_msg, ego_vehicle)
-depth_camera = add_depth_camera(
-    world, sensor_transform, on_depth_msg, ego_vehicle
-)
 camera = add_camera(world, sensor_transform, on_camera_msg, ego_vehicle)
-segmented_camera = add_segmented_camera(
-    world, sensor_transform, on_segmented_msg, ego_vehicle
-)
 
 node = Node()
 
-node.send_output("vehicle_id", vehicle_id.to_bytes(2, "big"))
 node.send_output("opendrive", world.get_map().to_opendrive().encode())
 
 
 def main():
     global last_position
-    if camera_frame is None or segmented_frame is None or depth_frame is None:
+    if camera_frame is None:
         return {}
 
     vec_transform = ego_vehicle.get_transform()
@@ -196,4 +182,22 @@ def main():
 
 
 for event in node:
-    main()
+    if event["type"] == "INPUT":
+        if event["id"] == "control":
+            [throttle, target_angle, brake] = np.frombuffer(
+                event["data"], np.float16
+            )
+
+            steer = radians_to_steer(target_angle, STEER_GAIN)
+            vec_control = VehicleControl(
+                steer=float(steer),
+                throttle=float(throttle),
+                brake=float(brake),
+                hand_brake=False,
+            )
+
+            client.apply_batch(
+                [command.ApplyVehicleControl(vehicle_id, vec_control)]
+            )
+
+        main()

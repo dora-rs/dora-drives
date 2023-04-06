@@ -3,7 +3,7 @@ nodes:
     custom:
       inputs:
         control: pid_control_op/control
-        tick: dora/timer/secs/1
+        tick: dora/timer/millis/400
       outputs:
         - position
         - speed
@@ -19,6 +19,10 @@ nodes:
         --agent $TEAM_AGENT
         --agentConfig $TEAM_AGENT_CONF
         --destination $DESTINATION
+      #
+      # or for Carla Standalone:
+      #
+      # args: python3 ../../carla/carla_source_node.py
 
   - id: carla_gps_op
     operator:
@@ -43,28 +47,15 @@ nodes:
       YOLOV5_PATH:       /home/dora/workspace/simulate/team_code/dependencies/yolov5 
       YOLOV5_WEIGHT_PATH:  /home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt
 
-  # - id: yolop
-  #   operator: 
-  #     outputs:
-  #       - lanes
-  #       - drivable_area
-  #     inputs:
-  #       image: oasis_agent/image
-  #     python: ../../operators/yolop_op.py
-  #   env:
-  #     #  CUDA_VISIBLE_DEVICES: ""
-  #      PYTORCH_DEVICE: cuda
 
   - id: obstacle_location_op
     operator: 
       outputs:
         - obstacles
-        # - global_lanes
       inputs:
         lidar_pc: oasis_agent/lidar_pc
         obstacles_bbox: yolov5/bbox
         position: oasis_agent/position
-        # lanes: yolop/lanes
       python: ../../operators/obstacle_location_op.py
 
   - id: fot_op
@@ -77,7 +68,6 @@ nodes:
         speed: oasis_agent/speed
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
-       # global_lanes: obstacle_location_op/global_lanes
  
   - id: pid_control_op
     operator:
@@ -89,20 +79,14 @@ nodes:
         speed: oasis_agent/speed
         waypoints: fot_op/waypoints
 
-  # - id: plot
-    # operator:
-      # python: ../../operators/plot.py
-      # inputs:
-        # image: oasis_agent/image
-        # obstacles_bbox: yolov5/bbox
-        # obstacles: obstacle_location_op/obstacles
-        # # traffic_sign_bbox: traffic_sign/bbox
-      # #  lanes: yolop/lanes
-      # #  global_lanes: obstacle_location_op/global_lanes
-      # #  drivable_area: yolop/drivable_area
-        # # obstacles_id: strong_sort/obstacles_id
-        # gps_waypoints: carla_gps_op/gps_waypoints
-        # position: oasis_agent/position
-        # waypoints: fot_op/waypoints
-        # control: pid_control_op/control
-        # # lidar_pc: oasis_agent/lidar_pc
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
+        image: oasis_agent/image
+        obstacles_bbox: yolov5/bbox
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+        position: oasis_agent/position
+        waypoints: fot_op/waypoints
+        control: pid_control_op/control

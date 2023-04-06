@@ -3,6 +3,8 @@
 Let's add a `yolov5` object detection operator that has already been written for us in `./operators/yolov5_op.py`. This will help us detect object as bounding boxes within the webcam stream.
 
 ```python
+# operators/yolov5_op.py
+
 {{#include ../../operators/yolov5_op.py }}
 ```
 
@@ -26,6 +28,8 @@ Let's add a `yolov5` object detection operator that has already been written for
 To add an operator within the dataflow. You need to explicit what the input and output are. You can reference node by their ids:
 
 ```yaml
+# graphs/tutorials/webcam_yolov5.yaml
+
 {{#include ../../graphs/tutorials/webcam_yolov5.yaml }}
 ```
 
@@ -33,6 +37,9 @@ In this case, we have connected the `webcam/image` output to the `image` input o
 
 Inputs are prefixed by the node name to be able to separate name conflicts.
 
+To run: 
+
 ```bash
+dora up
 dora start graphs/tutorials/webcam_yolov5.yaml --attach
 ```

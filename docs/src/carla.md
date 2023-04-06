@@ -26,7 +26,23 @@ If you're using the OASIS platflorm, follow the OASIS platform to start and run 
 We can then switch from the webcam to the simulator in our graph.
 
 ```yaml
-{{#include ../../graphs/tutorials/carla_waypoints.yaml}}
+# graphs/oasis/oasis_agent_gps.yaml
+
+{{#include ../../graphs/oasis/oasis_agent_yolov5.yaml}}
 ```
 
-> I have removed the traffic sign operator to reduce GPU memory consumption.
+To run:
+
+```bash
+dora up
+dora start graphs/oasis/oasis_agent_yolov5.yaml --attach
+```
+
+You should see a window showing the view from a camera within the carla simulator. On this camera stream, you should see object detection happenning.
+
+You can <kbd>ctrl</kbd>+<kbd>c</kbd> to kill your running 
+dataflow.
+
+<p align="center">
+    <img src="./yolov5.png" width="800">
+</p>

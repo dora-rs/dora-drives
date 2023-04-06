@@ -119,9 +119,9 @@ def check_simulator_version(
     if len(ver_strs) < 2 or len(ver_strs) > 3:
         print(
             "WARNING: Assuming that installed CARLA {} API is compatible "
-            "with CARLA 0.9.10 API".format(simulator_version)
+            "with CARLA 0.9.13 API".format(simulator_version)
         )
-        ver_strs = "0.9.10".split(".")
+        ver_strs = "0.9.13".split(".")
     major = int(ver_strs[0])
     minor = int(ver_strs[1])
     if major != required_major:

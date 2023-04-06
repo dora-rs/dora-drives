@@ -2,8 +2,7 @@ nodes:
   - id: oasis_agent
     custom:
       inputs:
-        control: pid_control_op/control
-        tick: dora/timer/secs/1
+        tick: dora/timer/millis/400
       outputs:
         - position
         - speed
@@ -12,13 +11,18 @@ nodes:
         - lidar_pc
         - opendrive
       source: shell
-      args: >
-        python3 $SIMULATE --output 
-        --oasJson --criteriaConfig $CRITERIA
-        --openscenario $XOSC
-        --agent $TEAM_AGENT
-        --agentConfig $TEAM_AGENT_CONF
-        --destination $DESTINATION
+      # With Carla_source_node
+      args: python3 ../../carla/carla_source_node.py
+      #
+      # Or with the OASIS AGENT
+      #
+      # args: >
+        # python3 $SIMULATE --output 
+        # --oasJson --criteriaConfig $CRITERIA
+        # --openscenario $XOSC
+        # --agent $TEAM_AGENT
+        # --agentConfig $TEAM_AGENT_CONF
+        # --destination $DESTINATION
   
   - id: yolov5
     operator: 
@@ -28,11 +32,11 @@ nodes:
         image: oasis_agent/image
       python: ../../operators/yolov5_op.py
     env:
-      # CUDA_VISIBLE_DEVICES: ""
-      PYTORCH_DEVICE: cuda
-      YOLOV5_PATH:       /home/dora/workspace/simulate/team_code/dependencies/yolov5 
-      YOLOV5_WEIGHT_PATH:  /home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt
-  
+     # CUDA_VISIBLE_DEVICES: ""
+     # PYTORCH_DEVICE: cuda
+      YOLOV5_PATH: $HOME/Documents/yolov5 
+      YOLOV5_WEIGHT_PATH:  $HOME/Documents/yolov5n.pt
+
   - id: obstacle_location_op
     operator: 
       outputs:
@@ -43,33 +47,11 @@ nodes:
         position: oasis_agent/position
       python: ../../operators/obstacle_location_op.py
 
-  - id: carla_gps_op
-    operator:
-      python: ../../carla/carla_gps_op.py
-      outputs:
-        - gps_waypoints
-      inputs:
-        opendrive: oasis_agent/opendrive
-        objective_waypoints: oasis_agent/objective_waypoints
-        position: oasis_agent/position
- 
-  - id: pid_control_op
-    operator:
-      python: ../../operators/pid_control_op.py
-      outputs:
-        - control
-      inputs:
-        position: oasis_agent/position
-        speed: oasis_agent/speed
-        waypoints: carla_gps_op/waypoints
-
   - id: plot
     operator:
       python: ../../operators/plot.py
       inputs:
         image: oasis_agent/image
         obstacles_bbox: yolov5/bbox
-        gps_waypoints: carla_gps_op/gps_waypoints
         position: oasis_agent/position
-        control: pid_control_op/control
         obstacles: obstacle_location_op/obstacles

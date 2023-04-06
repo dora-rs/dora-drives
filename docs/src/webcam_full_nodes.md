@@ -8,6 +8,8 @@ Let's add all `dora-drives` operators that works on image frame, which are:
 
 the graph will look as follows:
 ```yaml
+# graphs/tutorials/webcam_full.yaml
+
 {{#include ../../graphs/tutorials/webcam_full.yaml}}
 ```
 

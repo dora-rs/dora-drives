@@ -4,34 +4,31 @@ To make the car drive itself we first need to plan the way we want to go.
 
 ## GPS 
 
-To do this, we're going to use gps waypoints from our current location to our target location.
+To do this, we're going to use gps to trace the route from our current location to our target location. 
 
-Luckily we have a `carla` gps operator. 
+Carla `GlobalRoutePlanner` enables us to get the route from two points given a map. We have encapsulated this function within `operators/carla_gps_op.py`.
 
-To get the gps waypoint with a preset target location. All we have to do is add:
+The following operator will compute the route from the current `position` to the `objective_waypoints` given an `opendrive` map. 
 
 ```yaml
   - id: carla_gps_op
     operator:
-      python: carla/carla_gps_op.py
+      python: ../../carla/carla_gps_op.py
       outputs:
         - gps_waypoints
       inputs:
-        position: carla_source_node/position
-        objective_waypoints: carla_source_node/objective_waypoints
+        opendrive: oasis_agent/opendrive
+        objective_waypoints: oasis_agent/objective_waypoints
+        position: oasis_agent/position
 ```
 
-It will compute waypoints from the input location to go to follow the objective waypoints. 
-
-By default, the first message is: `[[234, 59, 39]]`.
-
-The waypoints are defined as a an array of `x, y, speed` as `float32` waypoints, with global coordinate.
+> The waypoints are defined as a an array of `x, y, speed` as `float32` waypoints, with global coordinate.
 
 ## Planner
 
 The GPS waypoints does not take into account obstacles. To avoid collision, we can implement a motion planner that can avoid obstacles. 
 
-We're going to reuse a model called `fot` (Frenet Optimal Trajectory) as a black box, that take as input a starting location and a goal location, as well as a list of obstacles and he will be able to solve the best waypoints on its own.
+We're going to reuse a model called `fot` (Frenet Optimal Trajectory) as a black box, that take as input a starting location and a goal waypoints, as well as a list of obstacles and outputs the best waypoints to follow.
 
 ```yaml
   - id: fot_op
@@ -40,19 +37,20 @@ We're going to reuse a model called `fot` (Frenet Optimal Trajectory) as a black
       outputs:
         - waypoints
       inputs:
-        position: carla_source_node/position
+        position: oasis_agent/position
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
 ```
 
-To test waypoints algorithms, launch:
+> More info here: [https://github.com/erdos-project/frenet_optimal_trajectory_planner](https://github.com/erdos-project/frenet_optimal_trajectory_planner)
+
+To test both functionallities:
 
 ```bash
-./scripts/launch.sh -b -s -g tutorials/carla_waypoints.yaml
+dora up
+dora start graphs/oasis/oasis_agent_planning.yaml --attach
 ```
 
-- To run it without docker:
-
-```bash
-dora-daemon --run-dataflow graphs/tutorials/carla_waypoints.yaml
-```
+<p align="center">
+    <img src="./planning.png" width="800">
+</p>
