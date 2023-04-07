@@ -30,7 +30,7 @@ docker pull haixuantao/dora-drives
 
 For linux, run:
 ```bash
-git clone git@github.com:futurewei-tech/dora-drives.git
+git clone git@github.com:dora-rs/dora-drives.git
 cd dora-drives
 ./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
 ```
