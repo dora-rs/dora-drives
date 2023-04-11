@@ -53,6 +53,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif "opendrive" == dora_input["id"]:
+            # Registering the map
             opendrive = dora_input["data"].decode()
             self.hd_map = HDMap(Map("map", opendrive))
             return DoraStatus.CONTINUE
@@ -76,6 +77,7 @@ class Operator:
             ]
             self._goal_location = self.objective_waypoints[0]
 
+            # Used cached waypoints but start at closest point.
             if len(self.waypoints) != 0:
                 (index, _) = closest_vertex(
                     self.waypoints,
@@ -91,11 +93,13 @@ class Operator:
 
             elif len(self.waypoints) == 0:
 
+                # Deconstructing the position
                 [x, y, z, rx, ry, rz, rw] = self.position
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
                     "xyz", degrees=False
                 )
 
+                # Compute the waypoints
                 waypoints = self.hd_map.compute_waypoints(
                     [
                         x,
@@ -111,15 +115,15 @@ class Operator:
                 diff_angle = np.arctan2(
                     np.sin(angle - yaw), np.cos(angle - yaw)
                 )
-                #if np.abs(diff_angle) > np.pi / 2:
-                    #print("Error in computation of waypoints.")
-                    #print(
-                        #"The next target waypoint requires to make a 180 degrees turn."
-                    #)
-                    #print(f"target waypoint: {waypoints[0]}")
-                    #print(f"position: {[x, y, z]}")
-                    #print(f"goal location: {self._goal_location}")
-                #else:
+                # if np.abs(diff_angle) > np.pi / 2:
+                # print("Error in computation of waypoints.")
+                # print(
+                # "The next target waypoint requires to make a 180 degrees turn."
+                # )
+                # print(f"target waypoint: {waypoints[0]}")
+                # print(f"position: {[x, y, z]}")
+                # print(f"goal location: {self._goal_location}")
+                # else:
                 self.waypoints = waypoints
                 self.target_speeds = np.array([5.0] * len(waypoints))
 

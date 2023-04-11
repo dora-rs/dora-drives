@@ -31,11 +31,6 @@ nodes:
       inputs:
         image: oasis_agent/image
       python: ../../operators/yolov5_op.py
-    env:
-     # CUDA_VISIBLE_DEVICES: ""
-     # PYTORCH_DEVICE: cuda
-      YOLOV5_PATH: $HOME/Documents/yolov5 
-      YOLOV5_WEIGHT_PATH:  $HOME/Documents/yolov5n.pt
 
   - id: obstacle_location_op
     operator: 

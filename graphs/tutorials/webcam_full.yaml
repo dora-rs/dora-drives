@@ -15,14 +15,14 @@ nodes:
         image: webcam/image
       python: ../../operators/yolov5_op.py
 
-  - id: yolop
-    operator: 
-      outputs:
-        - lanes
-        - drivable_area
-      inputs:
-        image: webcam/image
-      python: ../../operators/yolop_op.py
+  # - id: yolop
+    # operator: 
+      # outputs:
+        # - lanes
+        # - drivable_area
+      # inputs:
+        # image: webcam/image
+      # python: ../../operators/yolop_op.py
 
   ## Commented out as it takes a lot of GPU memory.
   #- id: traffic_sign
@@ -48,8 +48,7 @@ nodes:
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        drivable_area: yolop/drivable_area
+       # traffic_sign_bbox: traffic_sign/bbox
+       # lanes: yolop/lanes
+       # drivable_area: yolop/drivable_area
         obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/100
