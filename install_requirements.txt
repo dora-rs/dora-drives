@@ -20,7 +20,7 @@ pycocotools
 pytest
 scikit-image==0.18.3
 scipy==1.7.1
-shapely==1.6.4
+shapely==1.8.5
 # tensorflow-gpu>=2.7.1
 ##### Tracking dependencies #####
 Cython
