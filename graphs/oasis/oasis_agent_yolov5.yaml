@@ -34,8 +34,8 @@ nodes:
     env:
       # CUDA_VISIBLE_DEVICES: ""
       PYTORCH_DEVICE: cuda
-      YOLOV5_PATH:       /home/dora/workspace/simulate/team_code/dependencies/yolov5 
-      YOLOV5_WEIGHT_PATH:  /home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt
+      YOLOV5_PATH: ../../dependencies/yolov5
+      YOLOV5_WEIGHT_PATH: ../../dependencies/yolov5/yolov5n.pt
 
   - id: plot
     operator:
