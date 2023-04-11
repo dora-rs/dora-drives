@@ -48,6 +48,10 @@ dora start graphs/tutorials/webcam.yaml --attach --hot-reload --name webcam
 4. You should see a small webcam open up!
 > Make sure to have a webcam and cv2 install via: `pip install opencv-python`
 
+<p align="center">
+    <img src="./webcam.png" width="800">
+</p>
+
 5. To stop your dataflow, you can use <kbd>ctrl</kbd>+<kbd>c</bkbd>
 
 6. That's it! You know the basic of dora!

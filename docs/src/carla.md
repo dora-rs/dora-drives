@@ -46,3 +46,5 @@ dataflow.
 <p align="center">
     <img src="./yolov5.png" width="800">
 </p>
+
+> This very first step is done to show you how to connect carla simulator with dora. It does not provide any control to move the car.

@@ -43,5 +43,8 @@ To run:
 dora up
 dora start graphs/tutorials/webcam_yolov5.yaml --attach
 ```
+<p align="center">
+    <img src="./webcam_yolov5.png" width="800">
+</p>
 
 > For more information on `yolov5`, go on [our `yolov5` detail page](./yolov5_operator.md)

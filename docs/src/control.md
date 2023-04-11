@@ -4,7 +4,7 @@
 
 To translate our waypoints to `throttle, steering and brake` control, we're using a Proportional Integral Derivative (PID) controller that is able to adjust the throttle, steering and breaking according to the car position and speed by comparing it to the desired waypoints. The code can be found in `operator/pid_control_op.py`.
 
-> For more information on `pid`, go on [our `pid` detail page](./pid_operator.md)
+> For more information on `pid`, go on [our `pid` detail page](./pid_control_operator.md)
 
 ## Control
 
