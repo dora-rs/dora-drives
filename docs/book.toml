@@ -5,6 +5,7 @@ multilingual = false
 src = "src"
 title = "dora-drives"
 
+
 [preprocessor]
 
 [preprocessor.mermaid]
@@ -14,3 +15,5 @@ command = "mdbook-mermaid"
 
 [output.html]
 additional-js = ["mermaid.min.js", "mermaid-init.js"]
+git-repository-url = "https://github.com/dora-rs/dora-drives/tree/main/docs"
+edit-url-template = "https://github.com/dora-rs/dora-drives/edit/main/docs/{path}"

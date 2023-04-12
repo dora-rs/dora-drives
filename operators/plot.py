@@ -29,7 +29,7 @@ INTRINSIC_MATRIX = get_intrinsic_matrix(
 )
 
 VERBOSE = True
-NO_DISPLAY = True
+NO_DISPLAY = False
 
 writer = cv2.VideoWriter(
     "output01.avi",

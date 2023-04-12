@@ -1,6 +1,6 @@
 # Full perception
 
-Let's add all the operators currently provided by `dora-drives` that works on image frame. We currently have implemented:
+Let's add all `dora-drives` operators that works on image frame, which are:
 - `yolov5` an object detector.
 - `strong_sort` a multi-object tracker.
 - `yolop` a lane and drivable area detector.
@@ -8,19 +8,14 @@ Let's add all the operators currently provided by `dora-drives` that works on im
 
 the graph will look as follows:
 ```yaml
+# graphs/tutorials/webcam_full.yaml
+
 {{#include ../../graphs/tutorials/webcam_full.yaml}}
 ```
 
-Run it with docker:
-
 ```bash
-./scripts/launch.sh -g tutorials/webcam_full.yaml
+dora start graphs/tutorials/webcam_full.yaml --attach
 ```
-
-- To run it without docker:
-
-```bash
-dora-daemon --run-dataflow graphs/tutorials/webcam_full.yaml
-```
+> I'm currently having issue running all nodes behind the GFW. You can look into it for inspiration.
 
 Nice 🥳 As you can see, the value of `dora` comes from the idea that you can compose different algorithm really quickly.

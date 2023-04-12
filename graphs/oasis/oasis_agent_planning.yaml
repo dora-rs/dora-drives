@@ -1,0 +1,76 @@
+nodes:
+  - id: oasis_agent
+    custom:
+      inputs:
+        tick: dora/timer/millis/400
+      outputs:
+        - position
+        - speed
+        - image
+        - objective_waypoints
+        - lidar_pc
+        - opendrive
+      source: shell
+      # With Carla_source_node
+      args: python3 ../../carla/carla_source_node.py
+      #
+      # Or with the OASIS AGENT
+      #
+      # args: >
+        # python3 $SIMULATE --output 
+        # --oasJson --criteriaConfig $CRITERIA
+        # --openscenario $XOSC
+        # --agent $TEAM_AGENT
+        # --agentConfig $TEAM_AGENT_CONF
+        # --destination $DESTINATION
+  
+  - id: carla_gps_op
+    operator:
+      python: ../../carla/carla_gps_op.py
+      outputs:
+        - gps_waypoints
+      inputs:
+        opendrive: oasis_agent/opendrive
+        objective_waypoints: oasis_agent/objective_waypoints
+        position: oasis_agent/position
+
+  - id: fot_op
+    operator:
+      python: ../../operators/fot_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: oasis_agent/position
+        speed: oasis_agent/speed
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: oasis_agent/image
+      python: ../../operators/yolov5_op.py
+  
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+        - global_lanes
+      inputs:
+        lidar_pc: oasis_agent/lidar_pc
+        obstacles_bbox: yolov5/bbox
+        position: oasis_agent/position
+      python: ../../operators/obstacle_location_op.py
+
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
+        image: oasis_agent/image
+        obstacles_bbox: yolov5/bbox
+        position: oasis_agent/position
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+        waypoints: fot_op/waypoints

@@ -54,15 +54,8 @@ git clone https://github.com/erdos-project/prediction.git
 . /opt/conda/etc/profile.d/conda.sh 
 conda activate dora3.7 
 
-###### Download the Carla simulator ######
-echo "[x] Downloading the CARLA_0.9.13 simulator..."
 cd $DORA_DEP_HOME/dependencies/
 
-mkdir CARLA_0.9.13
-cd CARLA_0.9.13
-wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz 
-tar -xvf CARLA_0.9.13.tar.gz
-rm CARLA_0.9.13.tar.gz
 pip install carla==0.9.13
 
 ###### Install Carla Leaderboard ######

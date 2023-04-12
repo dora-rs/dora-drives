@@ -1,6 +1,7 @@
 # PID Control operator
 
-`pid` control operator computes the command that needs to be executed to follow the `hybrid_astar` waypoints.
+`pid` control operator computes the command that needs to be executed to follow the given waypoints. 
+It reacts to the car current speed and position in a way that accelerates or brake according to previous inputs.
 
 ## Inputs
 
@@ -8,7 +9,7 @@
 
 ## Outputs
 
-- Command control.
+- throttle, steering (rad) and braking.
 
 ## Graph Description
 
@@ -51,6 +52,8 @@ pid_d = 0.0
 pid_i = 0.05
 dt = 1.0 / 20   
 ```
+
+Example reaction:
 
 <p align="center">
 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c0/Change_with_Ki.png" width="800">

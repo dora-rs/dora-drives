@@ -30,7 +30,7 @@ docker pull haixuantao/dora-drives
 
 For linux, run:
 ```bash
-git clone git@github.com:futurewei-tech/dora-drives.git
+git clone git@github.com:dora-rs/dora-drives.git
 cd dora-drives
 ./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
 ```
@@ -76,6 +76,8 @@ You will need to have `/etc/docker/daemon.json` to be exactly:
 ### Installation
 
 ```bash
+git clone git@github.com:dora-rs/dora-drives.git
+
 export DORA_DEP_HOME=<PATH TO A PARENT FOLDER> # Ex: $HOME/Documents
 export DORA_DEP_HOME=$HOME/Documents
 export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.13
@@ -101,8 +103,13 @@ pip install -r requirements.txt
 chmod +x ./scripts/*
 ./scripts/install.sh
 
-## Installing dora
+## Installing Carla
+cd $DORA_DEP_HOME/dependencies/
+wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz 
+tar -xvf CARLA_0.9.13.tar.gz
+rm CARLA_0.9.13.tar.gz
 
+## Installing dora
 sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.0/dora-v0.2.0-x86_64-Linux.zip && sudo unzip dora-v0.2.0-x86_64-Linux.zip -d ~/.local/bin 
 ``` 
 

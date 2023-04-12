@@ -89,7 +89,7 @@ RUN sudo chmod +x /home/dora/workspace/dora_dependencies/install.sh
 RUN DEBIAN_FRONTEND=noninteractive /home/dora/workspace/dora_dependencies/install.sh
 
 # # Clone scenario_runner.
-# RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/scenario_runner.git && cd scenario_runner && git checkout 0.9.10
+# RUN cd /home/dora/workspace && git clone https://github.com/carla-simulator/scenario_runner.git && cd scenario_runner && git checkout 0.9.13
 # # Install scenario_runner's dependencies.
 # RUN python3 -m pip install -r /home/dora/workspace/scenario_runner/requirements.txt
 # # Clone leaderboard.
