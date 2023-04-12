@@ -15,7 +15,8 @@
         <meta name="theme-color" content="#ffffff" />
 
                 <link rel="icon" href="favicon.svg">
-                        <link rel="stylesheet" href="css/variables.css">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
                 <link rel="stylesheet" href="css/print.css" media="print">
@@ -84,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="chapter-item expanded "><a href="leaderboard.html"><strong aria-hidden="true">9.</strong> Leaderboard</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="gps_operator.html"><strong aria-hidden="true">10.</strong> GPS operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">11.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">12.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="fot_operator.html"><strong aria-hidden="true">13.</strong> FOT operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">14.</strong> PID Control operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="oasis-sensor.html"><strong aria-hidden="true">15.</strong> oasis-sensor</a></li><li class="chapter-item expanded "><a href="oasis-control.html"><strong aria-hidden="true">16.</strong> oasis-control</a></li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">17.</strong> Overview</a></li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">18.</strong> data format</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="installation.html"><strong aria-hidden="true">1.</strong> installation</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials Webcam</li><li class="chapter-item expanded "><a href="webcam_plot.html"><strong aria-hidden="true">2.</strong> Streaming a video</a></li><li class="chapter-item expanded "><a href="yolov5.html"><strong aria-hidden="true">3.</strong> Yolov5</a></li><li class="chapter-item expanded "><a href="webcam_full_nodes.html"><strong aria-hidden="true">4.</strong> Full perception</a></li><li class="chapter-item expanded affix "><li class="part-title">Tutorials Carla</li><li class="chapter-item expanded "><a href="carla.html"><strong aria-hidden="true">5.</strong> Carla simulator</a></li><li class="chapter-item expanded "><a href="obstacle_location.html"><strong aria-hidden="true">6.</strong> Obstacle location</a></li><li class="chapter-item expanded "><a href="planning.html"><strong aria-hidden="true">7.</strong> Planning</a></li><li class="chapter-item expanded "><a href="control.html"><strong aria-hidden="true">8.</strong> Control</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Operators and Nodes</li><li class="chapter-item expanded "><a href="gps_operator.html"><strong aria-hidden="true">9.</strong> GPS operator</a></li><li class="chapter-item expanded "><a href="yolov5_operator.html"><strong aria-hidden="true">10.</strong> Yolov5 operator</a></li><li class="chapter-item expanded "><a href="obstacle_location_operator.html"><strong aria-hidden="true">11.</strong> Obstacle location operator</a></li><li class="chapter-item expanded "><a href="fot_operator.html"><strong aria-hidden="true">12.</strong> FOT operator</a></li><li class="chapter-item expanded "><a href="pid_control_operator.html"><strong aria-hidden="true">13.</strong> PID Control operator</a></li><li class="chapter-item expanded affix "><li class="part-title">Reference Guide</li><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">14.</strong> Overview</a></li><li class="chapter-item expanded "><a href="data-format.html"><strong aria-hidden="true">15.</strong> data format</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -119,7 +120,10 @@
                                                 <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
-                                                                        
+                                                                        <a href="https://github.com/dora-rs/dora-drives/tree/main/docs" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                                                
                     </div>
                 </div>
 
@@ -243,7 +247,7 @@
 <tr><td>Linux</td><td>Ubuntu 20.04.5 LTS</td><td></td></tr>
 </tbody></table>
 <p>For linux, run:</p>
-<pre><code class="language-bash">git clone git@github.com:futurewei-tech/dora-drives.git
+<pre><code class="language-bash">git clone git@github.com:dora-rs/dora-drives.git
 cd dora-drives
 ./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
 </code></pre>
@@ -279,7 +283,9 @@ You will need to have <code>/etc/docker/daemon.json</code> to be exactly:</p>
 </tbody></table>
 <h3 id="environments-2"><a class="header" href="#environments-2">Environments</a></h3>
 <h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
-<pre><code class="language-bash">export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt; # Ex: $HOME/Documents
+<pre><code class="language-bash">git clone git@github.com:dora-rs/dora-drives.git
+
+export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt; # Ex: $HOME/Documents
 export DORA_DEP_HOME=$HOME/Documents
 export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.13
 export PYLOT_HOME=$DORA_DEP_HOME
@@ -304,8 +310,13 @@ pip install -r requirements.txt
 chmod +x ./scripts/*
 ./scripts/install.sh
 
-## Installing dora
+## Installing Carla
+cd $DORA_DEP_HOME/dependencies/
+wget https://carla-releases.s3.eu-west-3.amazonaws.com/Linux/CARLA_0.9.13.tar.gz 
+tar -xvf CARLA_0.9.13.tar.gz
+rm CARLA_0.9.13.tar.gz
 
+## Installing dora
 sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.0/dora-v0.2.0-x86_64-Linux.zip &amp;&amp; sudo unzip dora-v0.2.0-x86_64-Linux.zip -d ~/.local/bin 
 </code></pre>
 <h3 id="uninstalling-package"><a class="header" href="#uninstalling-package">Uninstalling package</a></h3>
@@ -313,93 +324,69 @@ sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.0/dora-v0.2.0-x
 sudo rm -rf $DORA_DEP_HOME/dependencies
 rm ~/.local/bin/dora*
     ```</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
 <p>This first tutorial enables to stream a video stream from a webcam from scratch.</p>
 <ol>
-<li>Create a new dataflow</li>
+<li>Fork this project</li>
 </ol>
-<pre><code class="language-bash">dora new abc_project --lang python
-cd abc_project
+<pre><code class="language-bash"># Go to: https://github.com/dora-rs/dora-drives/fork
+#
+# Then clone your fork:
+git clone git@github.com:&lt;USERNAME&gt;/dora-drives.git
+
+# Add dora as a remote source to be able to fetch updates.
+git remote add dora git@github.com:dora-rs/dora-drives.git
 </code></pre>
-<p>This creates the following <code>abc_project</code> directory</p>
+<p>You will find the following folder structure</p>
 <pre><code class="language-bash">.
-├── dataflow.yml
-├── node_1
-│   └── node_1.py
-├── op_1
-│   └── op_1.py
-└── op_2
-    └── op_2.py
+├── graphs # Example graph
+├── operators # Exemple operators
+├── carla # Carla nodes and operators that requires the CARLA API
+├── ros # ROS based operators to bridge between ROS and dora
+├── docs # This docs folder. You can replace the src file to keep your operator documented.
+├── ... # utils folder
 </code></pre>
-<ol start="3">
-<li>Start <code>dora-daemon</code> in a separate terminal window</li>
+<ol start="2">
+<li>To be able to run dora, you will need to start <code>dora-coordinator</code> and <code>dora-daemon</code>:</li>
 </ol>
-<pre><code class="language-bash"># New terminal window
+<pre><code class="language-bash"># Start the `dora-coordinator` and `dora-daemon`. 
 dora up 
 </code></pre>
+<ol start="3">
+<li>To start a dataflow, you just need to pass a dataflow path.</li>
+</ol>
+<pre><code class="language-bash">conda activate dora3.7
+dora start graphs/tutorials/webcam.yaml --attach --hot-reload --name webcam
+</code></pre>
+<blockquote>
+<p><code>--attach</code>: enables you to wait for the dataflow to finish 
+before returning.</p>
+<p><code>--hot-reload</code>: enables you to modify Python Operator while the 
+dataflow is running.</p>
+<p><code>--name</code>: enables you to name a dataflow that might be simpler to use than the UUID.</p>
+</blockquote>
 <ol start="4">
-<li>Start your dataflow</li>
+<li>You should see a small webcam open up!</li>
 </ol>
-<pre><code class="language-bash"># Other window
-dora start dataflow.yml
-# Output: c95d118b-cded-4531-a0e4-cd85b7c3916c
-</code></pre>
-<p>The output is the unique ID of the dataflow instance, which can be used to control it through the <code>dora</code> CLI.</p>
-<ol start="5">
-<li>You will see in your <code>dora-daemon</code> window operators receiving ticks.</li>
-</ol>
-<pre><code class="language-bash">Received input tick, with data: b''
-Received input tick, with data: b''
-Received input tick, with data: b''
-...
-</code></pre>
-<ol start="6">
-<li>Stop your dataflow</li>
-</ol>
-<pre><code class="language-bash">dora stop c95d118b-cded-4531-a0e4-cd85b7c3916c
-</code></pre>
-<p>(Pass the ID returned by <code>dora start</code> here.)</p>
-<ol start="7">
-<li>You can then add or modify operators or nodes. For adding nodes easily, you can use the <code>dora</code> CLI again:</li>
-</ol>
-<ul>
-<li>Run <code>dora new --kind operator --lang Rust &lt;name&gt;</code> to create a new Rust operator named <code>&lt;name&gt;</code>.</li>
-<li>Run <code>dora new --kind custom-node --lang Rust &lt;name&gt;</code> to create a new custom node named <code>&lt;name&gt;</code>.</li>
-</ul>
-<p>You need to add the created operators/nodes to your dataflow YAML file.</p>
-<ol start="8">
-<li>You can also download already implemented operators by putting links in the dataflow. This example will launch a webcam plot stream. </li>
-</ol>
-<pre><code class="language-yaml">communication:
-  zenoh:
-    prefix: /abc_project
-
-nodes:
-  - id: op_1
-    operator:
-      python: https://raw.githubusercontent.com/dora-rs/dora-drives/main/operators/webcam_op.py
-      inputs:
-        tick: dora/timer/millis/100
-      outputs:
-        - image
-  - id: op_2
-    operator:
-      python: https://raw.githubusercontent.com/dora-rs/dora-drives/main/physicals/plot.py
-      inputs:
-        image: op_1/image 
-</code></pre>
-<ol start="9">
-<li>Then restart the dataflow</li>
-</ol>
-<pre><code class="language-bash">dora start dataflow.yml
-</code></pre>
 <blockquote>
 <p>Make sure to have a webcam and cv2 install via: <code>pip install opencv-python</code></p>
 </blockquote>
-<p>You should see a small webcam open up!</p>
+<p align="center">
+    <img src="./webcam.png" width="800">
+</p>
+<ol start="5">
+<li>
+<p>To stop your dataflow, you can use <kbd>ctrl</kbd>+<kbd>c</bkbd></p>
+</li>
+<li>
+<p>That's it! You know the basic of dora!</p>
+</li>
+</ol>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="making-the-video-stream-intelligent"><a class="header" href="#making-the-video-stream-intelligent">Making the video stream intelligent</a></h1>
-<p>To add an operator, you will just have to specify it in the dataflow. Let's add a <code>yolov5</code> object detection operator that has already been written for us in <code>./operators/yolov5_op.py</code>.</p>
-<pre><code class="language-python">import os
+<p>Let's add a <code>yolov5</code> object detection operator that has already been written for us in <code>./operators/yolov5_op.py</code>. This will help us detect object as bounding boxes within the webcam stream.</p>
+<pre><code class="language-python"># operators/yolov5_op.py
+
+import os
 from typing import Callable
 
 import numpy as np
@@ -474,10 +461,30 @@ class Operator:
             send_output(&quot;bbox&quot;, arrays, dora_input[&quot;metadata&quot;])
             return DoraStatus.CONTINUE
 </code></pre>
-<p>The operator basically load a pytorch model and run it on <code>jpeg</code> encoded images. 
-It sends the bounding box as a numpy bytes array with type <code>int32</code>.</p>
-<p>To use it, just add it to the graph:</p>
-<pre><code class="language-yaml">nodes:
+<blockquote>
+<p>Operators are composed of:</p>
+<p><code>__init__</code> methods that help create the object.</p>
+<p><code>on_event</code> methods that is called when an event is received. 
+There is currently 4 event types:</p>
+<ul>
+<li><code>STOP</code>: meaning that the operator was signalled to stop.</li>
+<li><code>INPUT</code>: meannig that an input was received.
+<ul>
+<li>You can use <code>dora_event['id']</code>, to get the id. </li>
+<li>You can use <code>dora_event['data']</code>, to get the data. </li>
+<li>You can use <code>dora_event['meatadata']</code>, to get the metadata.</li>
+</ul>
+</li>
+<li><code>INPUT_CLOSED</code>: meannig that an input source was closed. This could be useful if the input is critical for the well behaviour of the operator.</li>
+<li><code>ERROR</code>: meaning that error message was received.</li>
+<li><code>UNKNOWN</code>: meaning that an unknown message was received.</li>
+</ul>
+<p>We have encapsulated <code>input</code> event in a <code>on_input</code> method but this is not required.</p>
+</blockquote>
+<p>To add an operator within the dataflow. You need to explicit what the input and output are. You can reference node by their ids:</p>
+<pre><code class="language-yaml"># graphs/tutorials/webcam_yolov5.yaml
+
+nodes:
   - id: webcam
     operator:
       python: ../../operators/webcam_op.py
@@ -502,23 +509,20 @@ It sends the bounding box as a numpy bytes array with type <code>int32</code>.</
         obstacles_bbox: yolov5/bbox
         tick: dora/timer/millis/100
 </code></pre>
-<blockquote>
-<p>I have replaced link with local files for clarity.</p>
-</blockquote>
+<p>In this case, we have connected the <code>webcam/image</code> output to the <code>image</code> input of yolov5. <code>yolov5/bbox</code> is then connected to the <code>plot/obstacles_bbox</code>.</p>
 <p>Inputs are prefixed by the node name to be able to separate name conflicts.</p>
-<p>I've added capabilities for the plot to show the bounding box found by the <code>yolov5</code> operator in <code>physicals/plot.py</code>, which is basically mangling with cv2 API.</p>
-<ul>
-<li>To run it with docker:</li>
-</ul>
-<pre><code class="language-bash">./scripts/launch.sh -b -g tutorials/webcam_yolov5.yaml
+<p>To run: </p>
+<pre><code class="language-bash">dora up
+dora start graphs/tutorials/webcam_yolov5.yaml --attach
 </code></pre>
-<ul>
-<li>To run it without docker:</li>
-</ul>
-<pre><code class="language-bash">dora-daemon --run-dataflow graphs/tutorials/webcam_yolov5.yaml
-</code></pre>
+<p align="center">
+    <img src="./webcam_yolov5.png" width="800">
+</p>
+<blockquote>
+<p>For more information on <code>yolov5</code>, go on <a href="./yolov5_operator.html">our <code>yolov5</code> detail page</a></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="full-perception"><a class="header" href="#full-perception">Full perception</a></h1>
-<p>Let's add all the operators currently provided by <code>dora-drives</code> that works on image frame. We currently have implemented:</p>
+<p>Let's add all <code>dora-drives</code> operators that works on image frame, which are:</p>
 <ul>
 <li><code>yolov5</code> an object detector.</li>
 <li><code>strong_sort</code> a multi-object tracker.</li>
@@ -526,7 +530,9 @@ It sends the bounding box as a numpy bytes array with type <code>int32</code>.</
 <li><code>traffic_sign</code> a traffic sign detector.</li>
 </ul>
 <p>the graph will look as follows:</p>
-<pre><code class="language-yaml">nodes:
+<pre><code class="language-yaml"># graphs/tutorials/webcam_full.yaml
+
+nodes:
   - id: webcam
     operator:
       python: ../../operators/webcam_op.py
@@ -543,14 +549,14 @@ It sends the bounding box as a numpy bytes array with type <code>int32</code>.</
         image: webcam/image
       python: ../../operators/yolov5_op.py
 
-  - id: yolop
-    operator: 
-      outputs:
-        - lanes
-        - drivable_area
-      inputs:
-        image: webcam/image
-      python: ../../operators/yolop_op.py
+  # - id: yolop
+    # operator: 
+      # outputs:
+        # - lanes
+        # - drivable_area
+      # inputs:
+        # image: webcam/image
+      # python: ../../operators/yolop_op.py
 
   ## Commented out as it takes a lot of GPU memory.
   #- id: traffic_sign
@@ -576,125 +582,101 @@ It sends the bounding box as a numpy bytes array with type <code>int32</code>.</
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        drivable_area: yolop/drivable_area
+       # traffic_sign_bbox: traffic_sign/bbox
+       # lanes: yolop/lanes
+       # drivable_area: yolop/drivable_area
         obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/100
 </code></pre>
-<p>Run it with docker:</p>
-<pre><code class="language-bash">./scripts/launch.sh -g tutorials/webcam_full.yaml
+<pre><code class="language-bash">dora start graphs/tutorials/webcam_full.yaml --attach
 </code></pre>
-<ul>
-<li>To run it without docker:</li>
-</ul>
-<pre><code class="language-bash">dora-daemon --run-dataflow graphs/tutorials/webcam_full.yaml
-</code></pre>
+<blockquote>
+<p>I'm currently having issue running all nodes behind the GFW. You can look into it for inspiration.</p>
+</blockquote>
 <p>Nice 🥳 As you can see, the value of <code>dora</code> comes from the idea that you can compose different algorithm really quickly.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="carla-simulator"><a class="header" href="#carla-simulator">Carla simulator</a></h1>
 <p>Let's try to use a car simulator to not only do perception but also control.</p>
-<p>To launch the simulator all you have to do is add the <code>-s</code>flag in the <code>./script/launch.sh</code> command.</p>
+<h2 id="carla-setup"><a class="header" href="#carla-setup">Carla Setup</a></h2>
+<p>In the rest of the tutorial, we will accept that you have a carla simulator running at <code>localhost:2000</code> the default carla configuration.</p>
+<p>To start a simulator make sure you have carla installed. You can check the <a href="./installation.html">installation page</a> if you not sure if it's installed.</p>
+<p>You can also a docker version or any other method provided by <a href="https://carla.org/">Carla</a></p>
+<p>In case you have used the installation script. You should be able to run a carla simulator using </p>
+<pre><code class="language-bash">./scripts/run_simulator.sh
+</code></pre>
+<blockquote>
+<p>You can define the VULKAN interface you want to use, using the env variable <code>VK_ICD_FILENAMES</code>. </p>
+<p>Ex for NVIDIA: <code>export VK_ICD_FILENAMES=&quot;/usr/share/vulkan/icd.d/nvidia_icd.json&quot;</code></p>
+</blockquote>
+<p>If you're using the OASIS platflorm, follow the OASIS platform to start and run your dataflow.</p>
+<h2 id="switching-from-the"><a class="header" href="#switching-from-the">Switching from the</a></h2>
 <p>We can then switch from the webcam to the simulator in our graph.</p>
-<pre><code class="language-yaml">nodes:
-  - id: carla_source_node
+<pre><code class="language-yaml"># graphs/oasis/oasis_agent_gps.yaml
+
+nodes:
+  - id: oasis_agent
     custom:
       inputs:
-        tick: dora/timer/millis/300
+        tick: dora/timer/millis/400
       outputs:
         - position
-        - depth_frame
-        - segmented_frame
-        - vehicle_id
+        - speed
         - image
-        - lidar_pc
         - objective_waypoints
-      source: python
-      args: ../../carla/carla_source_node.py
-      env: 
-        SET_AUTOPILOT: true 
-
+        - lidar_pc
+        - opendrive
+      source: shell
+      # With Carla_source_node
+      args: python3 ../../carla/carla_source_node.py
+      #
+      # Or with the OASIS AGENT
+      #
+      # args: &gt;
+        # python3 $SIMULATE --output 
+        # --oasJson --criteriaConfig $CRITERIA
+        # --openscenario $XOSC
+        # --agent $TEAM_AGENT
+        # --agentConfig $TEAM_AGENT_CONF
+        # --destination $DESTINATION
+  
   - id: yolov5
     operator: 
       outputs:
         - bbox
       inputs:
-        image: carla_source_node/image
+        image: oasis_agent/image
       python: ../../operators/yolov5_op.py
-
-  - id: yolop
-    operator: 
-      outputs:
-        - lanes
-        - drivable_area
-      inputs:
-        image: carla_source_node/image
-      python: ../../operators/yolop_op.py
-
-  ## Commented out as it takes a bit of GPU memory.
-  #- id: strong_sort
-    #operator: 
-      #outputs:
-        #- obstacles_id
-      #inputs:
-        #image: carla_source_node/image
-        #obstacles_bbox: yolov5/bbox
-      #python: ../../operators/strong_sort_op.py
-  
-  - id: obstacle_location_op
-    operator: 
-      outputs:
-        - obstacles
-        - global_lanes
-      inputs:
-        lidar_pc: carla_source_node/lidar_pc
-        obstacles_bbox: yolov5/bbox
-        position: carla_source_node/position
-        lanes: yolop/lanes
-      python: ../../operators/obstacle_location_op.py
+    env:
+      # CUDA_VISIBLE_DEVICES: &quot;&quot;
+      # PYTORCH_DEVICE: cuda # Uncomment if you want to use CUDA
+      # YOLOV5_PATH: # /PATH/TO/YOLOv5 Ex: $DORA_DEP_HOME/dependencies/yolov5
+      # YOLOV5_WEIGHT_PATH: : # /PATH/TO/YOLOv5 Ex: $ORA_DEP_HOME/dependencies/yolov5/yolov5n.pt
 
   - id: plot
     operator:
       python: ../../operators/plot.py
       inputs:
-        image: carla_source_node/image
+        image: oasis_agent/image
         obstacles_bbox: yolov5/bbox
-        obstacles: obstacle_location_op/obstacles
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        global_lanes: obstacle_location_op/global_lanes
-        drivable_area: yolop/drivable_area
-        obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/400
-        gps_waypoints: carla_gps_op/gps_waypoints
-        position: carla_source_node/position
-        waypoints: fot_op/waypoints
-        control: pid_control_op/control
+        position: oasis_agent/position
 </code></pre>
-<p>We can then tun it with the following command:</p>
-<pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_perception.yaml
+<p>To run:</p>
+<pre><code class="language-bash">dora up
+dora start graphs/oasis/oasis_agent_yolov5.yaml --attach
 </code></pre>
-<ul>
-<li>To run it without docker:</li>
-</ul>
-<pre><code class="language-bash">## Make sure your environment variable are well set.
-export DORA_DEP_HOME=&lt;PATH TO A PARENT FOLDER&gt; # Ex: $HOME/Documents
-export CARLA_HOME=$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1
-export PYLOT_HOME=$DORA_DEP_HOME
-export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/carla/agents/:$DORA_DEP_HOME/dependencies/CARLA_0.9.10.1/PythonAPI/
-
-## First start the simulator if it is not started
-./scripts/run_simulator.sh &amp;
-
-dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
-</code></pre>
+<p>You should see a window showing the view from a camera within the carla simulator. On this camera stream, you should see object detection happenning.</p>
+<p>You can <kbd>ctrl</kbd>+<kbd>c</kbd> to kill your running 
+dataflow.</p>
+<p align="center">
+    <img src="./yolov5.png" width="800">
+</p>
 <blockquote>
-<p>I have removed the traffic sign operator to reduce GPU memory consumption.</p>
+<p>This very first step is done to show you how to connect carla simulator with dora. It does not provide any control to move the car.</p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="obstacle-location"><a class="header" href="#obstacle-location">Obstacle location</a></h1>
-<p>The carla simulator gives us the possibility to work with many more sensors than just a camera feed. We can emulate an LIDAR, IMU, Depth sensor, segmentation sensor...</p>
+<p>The carla simulator gives us the possibility to work with many more sensors than just a camera feed. We can emulate an LIDAR, IMU, Depth sensor, Segmentation sensor...</p>
 <p>Let's use the LIDAR sensor to locate the exact position of the obstacle that has been located by <code>yolov5</code>.</p>
-<p>The lidar point cloud is an array of <code>x, y, z, intensity</code> points.</p>
 <blockquote>
+<p>Details on lidar point cloud:
+The lidar point cloud is an array of <code>x, y, z, intensity</code> points.</p>
 <p>The coordinates are based on Unreal Engine coordinate system which is: </p>
 <ul>
 <li>z is up</li>
@@ -703,78 +685,158 @@ dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
 </ul>
 <p>More info: <a href="https://www.techarthub.com/a-practical-guide-to-unreal-engine-4s-coordinate-system/">https://www.techarthub.com/a-practical-guide-to-unreal-engine-4s-coordinate-system/</a></p>
 <p>and within carla documentation: <a href="https://carla.readthedocs.io/en/latest/ref_sensors/#lidar-sensor">https://carla.readthedocs.io/en/latest/ref_sensors/#lidar-sensor</a></p>
+<p>You can also check velodyne reference: <a href="https://github.com/ros-drivers/velodyne/blob/master/velodyne_pcl/README.md">https://github.com/ros-drivers/velodyne/blob/master/velodyne_pcl/README.md</a></p>
 </blockquote>
-<p>To get the obstacle location, we are going to compute the angle of every points in the point cloud. We can then map the angle of each pixel of the bounding box to a real point and therefore infere its location. The code can be found here: <a href="https://github.com/dora-rs/dora-drives/blob/main/operators/obstacle_location_op.py"><code>operators/obstacle_location_op.py</code></a></p>
+<p>To get the obstacle location, we are going to compute the angle of every points in the point cloud. We can then map the angle of each pixel of the bounding box to a real point and therefore infere its location. We then transform the coordinate from the relative lIDAR coordinate system into a global coordinate system by adding the current position of the LIDAR sensor. The code can be found here: <a href="https://github.com/dora-rs/dora-drives/blob/main/operators/obstacle_location_op.py"><code>operators/obstacle_location_op.py</code></a>. </p>
 <p>To use the obstacle location, just add it to the graph with:</p>
-<pre><code class="language-yaml">  - id: obstacle_location_op
+<pre><code class="language-yaml"># graphs/oasis/oasis_agent_obstacle_location.yaml
+
+nodes:
+  - id: oasis_agent
+    custom:
+      inputs:
+        tick: dora/timer/millis/400
+      outputs:
+        - position
+        - speed
+        - image
+        - objective_waypoints
+        - lidar_pc
+        - opendrive
+      source: shell
+      # With Carla_source_node
+      args: python3 ../../carla/carla_source_node.py
+      #
+      # Or with the OASIS AGENT
+      #
+      # args: &gt;
+        # python3 $SIMULATE --output 
+        # --oasJson --criteriaConfig $CRITERIA
+        # --openscenario $XOSC
+        # --agent $TEAM_AGENT
+        # --agentConfig $TEAM_AGENT_CONF
+        # --destination $DESTINATION
+  
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: oasis_agent/image
+      python: ../../operators/yolov5_op.py
+
+  - id: obstacle_location_op
     operator: 
       outputs:
         - obstacles
       inputs:
-        lidar_pc: carla_source_node/lidar_pc
+        lidar_pc: oasis_agent/lidar_pc
         obstacles_bbox: yolov5/bbox
-        position: carla_source_node/position
-      python: operators/obstacle_location_op.py
+        position: oasis_agent/position
+      python: ../../operators/obstacle_location_op.py
+
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
+        image: oasis_agent/image
+        obstacles_bbox: yolov5/bbox
+        position: oasis_agent/position
+        obstacles: obstacle_location_op/obstacles
 </code></pre>
+<p>To run: </p>
+<pre><code class="language-bash">dora up
+dora start graphs/oasis/oasis_agent_obstacle_location.yaml --attach
+</code></pre>
+<p>You should be able to see a dot within the bounding box representing the estimated location in global coordinate of the obstacle.</p>
+<p align="center">
+    <img src="./obstacle_location.png" width="800">
+</p>
+<blockquote>
+<p>For more information on <code>obstacle_location</code>, go on <a href="./obstacle_location_operator.html">our <code>obstacle_location</code> detail page</a></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="planning"><a class="header" href="#planning">Planning</a></h1>
 <p>To make the car drive itself we first need to plan the way we want to go.</p>
 <h2 id="gps"><a class="header" href="#gps">GPS</a></h2>
-<p>To do this, we're going to use gps waypoints from our current location to our target location.</p>
-<p>Luckily we have a <code>carla</code> gps operator. </p>
-<p>To get the gps waypoint with a preset target location. All we have to do is add:</p>
+<p>To do this, we're going to use gps to trace the route from our current location to our target location. </p>
+<p>Carla <code>GlobalRoutePlanner</code> enables us to get the route from two points given a map. We have encapsulated this function within <code>operators/carla_gps_op.py</code>.</p>
+<p>The following operator will compute the route from the current <code>position</code> to the <code>objective_waypoints</code> given an <code>opendrive</code> map. </p>
 <pre><code class="language-yaml">  - id: carla_gps_op
     operator:
-      python: carla/carla_gps_op.py
+      python: ../../carla/carla_gps_op.py
       outputs:
         - gps_waypoints
       inputs:
-        position: carla_source_node/position
-        objective_waypoints: carla_source_node/objective_waypoints
+        opendrive: oasis_agent/opendrive
+        objective_waypoints: oasis_agent/objective_waypoints
+        position: oasis_agent/position
 </code></pre>
-<p>It will compute waypoints from the input location to go to follow the objective waypoints. </p>
-<p>By default, the first message is: <code>[[234, 59, 39]]</code>.</p>
-<p>The waypoints are defined as a an array of <code>x, y, speed</code> as <code>float32</code> waypoints, with global coordinate.</p>
+<blockquote>
+<p>The waypoints are defined as a an array of <code>x, y, speed</code> as <code>float32</code> waypoints, with global coordinates.</p>
+</blockquote>
+<blockquote>
+<p>For more information on <code>gps</code>, go on <a href="./gps_operator.html">our <code>gps</code> detail page</a></p>
+</blockquote>
 <h2 id="planner"><a class="header" href="#planner">Planner</a></h2>
 <p>The GPS waypoints does not take into account obstacles. To avoid collision, we can implement a motion planner that can avoid obstacles. </p>
-<p>We're going to reuse a model called <code>fot</code> (Frenet Optimal Trajectory) as a black box, that take as input a starting location and a goal location, as well as a list of obstacles and he will be able to solve the best waypoints on its own.</p>
+<p>We're going to reuse a model called <code>fot</code> (Frenet Optimal Trajectory) as a black box, that take as input a starting location and a goal waypoints, as well as a list of obstacles and outputs the best waypoints to follow.</p>
 <pre><code class="language-yaml">  - id: fot_op
     operator:
       python: operators/fot_op.py
       outputs:
         - waypoints
       inputs:
-        position: carla_source_node/position
+        position: oasis_agent/position
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
 </code></pre>
-<p>To test waypoints algorithms, launch:</p>
-<pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_waypoints.yaml
+<p>To test both functionallities:</p>
+<pre><code class="language-bash">dora up
+dora start graphs/oasis/oasis_agent_planning.yaml --attach
 </code></pre>
-<ul>
-<li>To run it without docker:</li>
-</ul>
-<pre><code class="language-bash">dora-daemon --run-dataflow graphs/tutorials/carla_waypoints.yaml
-</code></pre>
+<p align="center">
+    <img src="./planning.png" width="800">
+</p>
+<blockquote>
+<p>For more information on <code>fot</code>, go on <a href="./fot_operator.html">our <code>fot</code> detail page</a></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="control"><a class="header" href="#control">Control</a></h1>
-<p>Car can simplistically be controlled in general using 3 variables: <code>throttle, steering, brake</code>. We're going to focus on those 3 for the moment.</p>
-<p>To send a control to a Carla car, we can use <code>carla_control_op.py</code> that takes an array of 3 variables: <code>throttle, steering, brake</code> and apply it to our car.</p>
-<p>To translate out waypoints to those control, we're using a PID controller that is able to adjust the steering according to the response of the steering, and we're going to pipe this response to the CARLA API so that the car can move. The PID controller code is in <code>pid_control_op.py</code>.</p>
-<p>The full graph look as follows:</p>
-<pre><code class="language-yaml">nodes:
-  - id: carla_source_node
+<h2 id="pid-controller"><a class="header" href="#pid-controller">PID Controller</a></h2>
+<p>To translate our waypoints to <code>throttle, steering and brake</code> control, we're using a Proportional Integral Derivative (PID) controller that is able to adjust the throttle, steering and breaking according to the car position and speed by comparing it to the desired waypoints. The code can be found in <code>operator/pid_control_op.py</code>.</p>
+<blockquote>
+<p>For more information on <code>pid</code>, go on <a href="./pid_control_operator.html">our <code>pid</code> detail page</a></p>
+</blockquote>
+<h2 id="control-1"><a class="header" href="#control-1">Control</a></h2>
+<p>The actual command being applied to the car is controlled within the <code>oasis_agent</code>.</p>
+<h2 id="fully-looped-graph"><a class="header" href="#fully-looped-graph">Fully looped graph</a></h2>
+<p>We have now all our starter kit node. They will look like this:</p>
+<pre><code class="language-yaml"># graphs/oasis/oasis_agent.yaml
+
+nodes:
+  - id: oasis_agent
     custom:
       inputs:
-        tick: dora/timer/millis/500
+        control: pid_control_op/control
+        tick: dora/timer/millis/400
       outputs:
         - position
-        #- depth_frame
-        #- segmented_frame
-        - vehicle_id
+        - speed
         - image
-        - lidar_pc
         - objective_waypoints
-      source: python
-      args: ../../carla/carla_source_node.py
+        - lidar_pc
+        - opendrive
+      source: shell
+      args: &gt;
+        python3 $SIMULATE --output 
+        --oasJson --criteriaConfig $CRITERIA
+        --openscenario $XOSC
+        --agent $TEAM_AGENT
+        --agentConfig $TEAM_AGENT_CONF
+        --destination $DESTINATION
+      #
+      # or for Carla Standalone:
+      #
+      # args: python3 ../../carla/carla_source_node.py
 
   - id: carla_gps_op
     operator:
@@ -782,42 +844,32 @@ dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
       outputs:
         - gps_waypoints
       inputs:
-        # opendrive: carla_source_node/opendrive
-        objective_waypoints: carla_source_node/objective_waypoints
-        position: carla_source_node/position
+        opendrive: oasis_agent/opendrive
+        objective_waypoints: oasis_agent/objective_waypoints
+        position: oasis_agent/position
 
   - id: yolov5
     operator: 
       outputs:
         - bbox
       inputs:
-        image: carla_source_node/image
+        image: oasis_agent/image
       python: ../../operators/yolov5_op.py
     env:
-     # CUDA_VISIBLE_DEVICES: &quot;&quot;
-      PYTORCH_DEVICE: cuda
-
-  #- id: yolop
-    #operator: 
-      #outputs:
-        #- lanes
-        #- drivable_area
-      #inputs:
-        #image: carla_source_node/image
-      #python: ../../operators/yolop_op.py
-    #env:
       # CUDA_VISIBLE_DEVICES: &quot;&quot;
+      PYTORCH_DEVICE: cuda
+      YOLOV5_PATH:       /home/dora/workspace/simulate/team_code/dependencies/yolov5 
+      YOLOV5_WEIGHT_PATH:  /home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt
+
 
   - id: obstacle_location_op
     operator: 
       outputs:
         - obstacles
-        - global_lanes
       inputs:
-        lidar_pc: carla_source_node/lidar_pc
+        lidar_pc: oasis_agent/lidar_pc
         obstacles_bbox: yolov5/bbox
-        position: carla_source_node/position
-        lanes: yolop/lanes
+        position: oasis_agent/position
       python: ../../operators/obstacle_location_op.py
 
   - id: fot_op
@@ -826,10 +878,10 @@ dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
       outputs:
         - waypoints
       inputs:
-        position: carla_source_node/position
+        position: oasis_agent/position
+        speed: oasis_agent/speed
         obstacles: obstacle_location_op/obstacles
         gps_waypoints: carla_gps_op/gps_waypoints
-        global_lanes: obstacle_location_op/global_lanes
  
   - id: pid_control_op
     operator:
@@ -837,133 +889,78 @@ dora-daemon --run-dataflow graphs/tutorials/carla_perception.yaml
       outputs:
         - control
       inputs:
-        position: carla_source_node/position
+        position: oasis_agent/position
+        speed: oasis_agent/speed
         waypoints: fot_op/waypoints
 
   - id: plot
     operator:
       python: ../../operators/plot.py
       inputs:
-        image: carla_source_node/image
+        image: oasis_agent/image
         obstacles_bbox: yolov5/bbox
         obstacles: obstacle_location_op/obstacles
-        traffic_sign_bbox: traffic_sign/bbox
-        lanes: yolop/lanes
-        global_lanes: obstacle_location_op/global_lanes
-        drivable_area: yolop/drivable_area
-        obstacles_id: strong_sort/obstacles_id
-        tick: dora/timer/millis/400
         gps_waypoints: carla_gps_op/gps_waypoints
-        position: carla_source_node/position
+        position: oasis_agent/position
         waypoints: fot_op/waypoints
         control: pid_control_op/control
-      #  lidar_pc: carla_source_node/lidar_pc
-
-  - id: carla_control_op
-    operator:
-      python: ../../carla/carla_control_op.py
-      outputs:
-        - control_status
-      inputs:
-        control: pid_control_op/control
-        vehicle_id: carla_source_node/vehicle_id
 </code></pre>
-<p>You can visualize your graph with:</p>
-<pre><code class="language-bash">dora graph graphs/tutorials/carla_full.yaml --open                 
-</code></pre>
-<pre><code class="language-mermaid">        flowchart TB
-  oasis_agent
-subgraph carla_gps_op
-  carla_gps_op/op[op]
-end
-subgraph yolov5
-  yolov5/op[op]
-end
-subgraph obstacle_location_op
-  obstacle_location_op/op[op]
-end
-subgraph fot_op
-  fot_op/op[op]
-end
-subgraph pid_control_op
-  pid_control_op/op[op]
-end
-subgraph ___dora___ [dora]
-  subgraph ___timer_timer___ [timer]
-    dora/timer/secs/1[\secs/1/]
-  end
-end
-  pid_control_op/op -- control --&gt; oasis_agent
-  dora/timer/secs/1 -- tick --&gt; oasis_agent
-  oasis_agent -- objective_waypoints --&gt; carla_gps_op/op
-  oasis_agent -- opendrive --&gt; carla_gps_op/op
-  oasis_agent -- position --&gt; carla_gps_op/op
-  oasis_agent -- image --&gt; yolov5/op
-  oasis_agent -- lidar_pc --&gt; obstacle_location_op/op
-  yolov5/op -- bbox as obstacles_bbox --&gt; obstacle_location_op/op
-  oasis_agent -- position --&gt; obstacle_location_op/op
-  carla_gps_op/op -- gps_waypoints --&gt; fot_op/op
-  obstacle_location_op/op -- obstacles --&gt; fot_op/op
-  oasis_agent -- position --&gt; fot_op/op
-  oasis_agent -- speed --&gt; fot_op/op
-  oasis_agent -- position --&gt; pid_control_op/op
-  oasis_agent -- speed --&gt; pid_control_op/op
-  fot_op/op -- waypoints --&gt; pid_control_op/op
-</code></pre>
-<p>To test it out:</p>
-<pre><code class="language-bash">./scripts/launch.sh -b -s -g tutorials/carla_full.yaml
-</code></pre>
-<ul>
-<li>To run it without docker:</li>
-</ul>
-<pre><code class="language-bash">dora-daemon --run-dataflow graphs/tutorials/carla_full.yaml
+<p>To run a running car example:</p>
+<pre><code class="language-bash">dora up
+dora start graphs/oasis/oasis_agent.yaml --attach
 </code></pre>
 <p>😎 We now have a working autonomous car!</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="leaderboard"><a class="header" href="#leaderboard">Leaderboard</a></h1>
-<p>The OASIS Leaderboard enables you to test out your agent on predefined scenarios. It will generates KPI that can be used to compare agent between them. </p>
-<p>You can use the OASIS leaderboard without changing your graph by simply changing the input source. The new source is <code>carla/oasis_agent</code>.</p>
-<p>To use the leaderboard through docker, first build it with:</p>
-<pre><code class="language-bash">docker build . -t haixuantao/dora-drives
-</code></pre>
-<p>or pull it from dockerhub:</p>
-<pre><code class="language-bash">docker pull haixuantao/dora-drives
-</code></pre>
-<p>Then run it within docker with:</p>
-<pre><code class="language-bash">docker run \
-    --gpus all \
-    --runtime=nvidia \
-    --env-file variables.env \
-    --env GRAPH=leaderboard/oasis_agent.yaml \
-    --net=host \
-    -it \
-    --shm-size=2g \
-    --memory=10g \
-    --name dora \
-    haixuantao/dora-drives
-</code></pre>
-<p>Or use the leaderboard natively:</p>
-<pre><code class="language-bash">dora-daemon --run-dataflow graphs/leaderboard/oasis_agent.yaml
-</code></pre>
-<p>To have a more fined-grained control over starting and stopping your agent,
-you can use <code>start/stop</code> command from the cli:</p>
-<pre><code class="language-bash"># In a dedicated terminal
-dora up
-
-# In a client terminal
-dora start graphs/leaderboard/oasis_agent.yaml
-
-# ...
-dora stop
-</code></pre>
-<p>You can name your dataflow as such:</p>
-<pre><code class="language-bash"># In a client terminal
-dora start graphs/leaderboard/oasis_agent.yaml --name oasis-agent-demo
-
-# ...
-dora stop --name oasis-agent-demo
-</code></pre>
-<p>You will be able to find the results in the <code>graphs/leaderboard/</code> folder.</p>
+<p>You might have noticed that improvement can be done in many place.</p>
+<p>In case you need inspiration, we advise you check:</p>
+<ul>
+<li><code>operators/yolop_op.py</code> that enables you to detect lanes. It can be passed to the obstacle location to get the 3D position of the lanes. Those 3D position of lanes can then be passed to <code>fot</code> to plan by taking into account lanes on the floor.</li>
+<li><code>operators/strong_sort.py</code> that enables tracking 2D bounding box through times. This can be useul if you want to avoid moving vehicles.</li>
+<li><code>opertators/traffic_sign.py</code> that is self-trained traffic light detection based on yolov7 and tt100k. THis can be useful to avoid traffic light.</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="gps-operator"><a class="header" href="#gps-operator">GPS operator</a></h1>
+<p>The GPS Operator take a map a current position and wished waypoints
+and compute the best route to go to the wished waypoint.</p>
+<p>It does by using <code>carla.GlobalRoutePlanner</code>. This modules takes an
+<code>opendrive</code> map as an input and can compute most efficient route between 
+two points.</p>
+<ul>
+<li>The caching of result such that we don't compute it every single time. The computation of route is really costly.</li>
+</ul>
+<pre><code class="language-python"># Used cached waypoints but start at closest point.
+if len(self.waypoints) != 0:
+    (index, _) = closest_vertex(
+        self.waypoints,
+        np.array([self.position[:2]]),
+    )
+
+    self.waypoints = self.waypoints[
+        index : index + NUM_WAYPOINTS_AHEAD
+    ]
+    self.target_speeds = self.target_speeds[
+        index : index + NUM_WAYPOINTS_AHEAD
+    ]
+</code></pre>
+<ul>
+<li>The computation of the gps waypoints happens here:</li>
+</ul>
+<pre><code class="language-python"># Compute the waypoints
+waypoints = self.hd_map.compute_waypoints(
+    [
+        x,
+        y,
+        self._goal_location[2],
+    ],
+    self._goal_location,
+</code></pre>
+<blockquote>
+<p>Sometimes the computation might put the position on the wrong side of the road.
+I have put a failsafe mecanism, but that might have other consequences. You can try to revisit this part.
+To increase the precision of the map, you can change the parameters in <code>_hd_map.py</code>:</p>
+<pre><code class="language-python">       self._grp = GlobalRoutePlanner(
+           self._map, 1.0
+       )  # Distance between waypoints
+</code></pre>
+</blockquote>
 <h2 id="graph-description"><a class="header" href="#graph-description">Graph Description</a></h2>
 <pre><code class="language-yaml">  - id: carla_gps_op
     operator:
@@ -976,7 +973,7 @@ dora stop --name oasis-agent-demo
         position: oasis_agent/position
 </code></pre>
 <h2 id="graph-viz"><a class="header" href="#graph-viz">Graph Viz</a></h2>
-<pre><code class="language-mermaid">        flowchart TB
+<pre class="mermaid">        flowchart TB
   oasis_agent
 subgraph fot_op
   fot_op/op[op]
@@ -988,13 +985,24 @@ end
   oasis_agent -- opendrive --&gt; carla_gps_op/op
   oasis_agent -- position --&gt; carla_gps_op/op
   carla_gps_op/op -- gps_waypoints --&gt; fot_op/op
-</code></pre>
+</pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="yolov5-operator"><a class="header" href="#yolov5-operator">Yolov5 operator</a></h1>
 <p><code>Yolov5</code> object detection operator generates bounding boxes on images where it detects object. </p>
+<p>More info here: <a href="https://github.com/ultralytics/yolov5">https://github.com/ultralytics/yolov5</a></p>
 <p><code>Yolov5</code> has not been finetuned on the simulation and is directly importing weight from Pytorch Hub.</p>
+<p>In case you want to run <code>yolov5</code> without internet you can clone <a href="https://github.com/ultralytics/yolov5">https://github.com/ultralytics/yolov5</a> and download the weights you want to use from <a href="https://github.com/ultralytics/yolov5/releases/tag/v7.0">the release page</a> and then specify within the yaml graph the two environments variables:</p>
+<ul>
+<li><code>YOLOV5_PATH: YOUR/PATH</code> </li>
+<li><code>YOLOV5_WEIGHT_PATH: YOUR/WEIGHT/PATH</code></li>
+</ul>
+<p>You can also choose to allocate the model in GPU using the environment variable:</p>
+<ul>
+<li><code>PYTORCH_DEVICE: cuda # or cpu</code></li>
+</ul>
+<p>The image size must be specified in order to work. By default it is 1920x1080xBGR.</p>
 <h2 id="inputs"><a class="header" href="#inputs">Inputs</a></h2>
 <ul>
-<li>jpeg encoded image as input.</li>
+<li>image as1920x1080xBGR array.</li>
 </ul>
 <h2 id="outputs"><a class="header" href="#outputs">Outputs</a></h2>
 <ul>
@@ -1008,9 +1016,13 @@ end
       inputs:
         image: oasis_agent/image
       python: ../../operators/yolov5_op.py
+    env:
+      PYTORCH_DEVICE: cuda
+      YOLOV5_PATH:       /home/dora/workspace/simulate/team_code/dependencies/yolov5 
+      YOLOV5_WEIGHT_PATH:  /home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt
 </code></pre>
 <h2 id="graph-viz-1"><a class="header" href="#graph-viz-1">Graph Viz</a></h2>
-<pre><code class="language-mermaid">        flowchart TB
+<pre class="mermaid">        flowchart TB
   oasis_agent
 subgraph yolov5
   yolov5/op[op]
@@ -1020,16 +1032,27 @@ subgraph obstacle_location_op
 end
   oasis_agent -- image --&gt; yolov5/op
   yolov5/op -- bbox as obstacles_bbox --&gt; obstacle_location_op/op
-</code></pre>
+</pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="obstacle-location-operator"><a class="header" href="#obstacle-location-operator">Obstacle location operator</a></h1>
-<p>The obstacle location operator match bounding box with depth frame to find the exact position of obstacles.</p>
+<p>The obstacle location operator match bounding box with depth frame to find an approximative position of obstacles.</p>
+<p>There is two logic within it:</p>
+<ul>
+<li>One is for the ground dot for lane detection.</li>
+<li>One is for bounding box obstacle localisation.</li>
+</ul>
+<p>Both logic are based on he computation of the projection in 2D space of the lidar 3D point and then reusing the index to get the 3D position.</p>
+<ul>
+<li>In the case of ground dot detection, the approximation is based on a knnr, as we might not have enough data on the floor.</li>
+<li>In the case of bounding box, we use first quantile closest point within the bounding box to estimate the distance. We use the first quantile closest point to remove the noise.</li>
+</ul>
+<p>The mecanism to project the lidar point cloud into a 2D is also used in the <code>plot.py</code> operator. You can use the input <code>lidar_pc</code> within it to help you debug.</p>
 <h2 id="inputs-1"><a class="header" href="#inputs-1">Inputs</a></h2>
 <ul>
-<li>Obstacles bounding box.</li>
+<li>2D Obstacles bounding box.</li>
 </ul>
 <h2 id="outputs-1"><a class="header" href="#outputs-1">Outputs</a></h2>
 <ul>
-<li>GPS location of obstacles.</li>
+<li>3D position of obstacles as dot.</li>
 </ul>
 <h2 id="graph-description-2"><a class="header" href="#graph-description-2">Graph Description</a></h2>
 <pre><code class="language-yaml">  - id: obstacle_location_op
@@ -1043,7 +1066,7 @@ end
       python: ../../operators/obstacle_location_op.py
 </code></pre>
 <h2 id="graph-viz-2"><a class="header" href="#graph-viz-2">Graph Viz</a></h2>
-<pre><code class="language-mermaid">        flowchart TB
+<pre class="mermaid">        flowchart TB
   oasis_agent
 subgraph yolov5
   yolov5/op[op]
@@ -1058,8 +1081,22 @@ end
   yolov5/op -- bbox as obstacles_bbox --&gt; obstacle_location_op/op
   oasis_agent -- position --&gt; obstacle_location_op/op
   obstacle_location_op/op -- obstacles --&gt; fot_op/op
-</code></pre>
+</pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fot-operator"><a class="header" href="#fot-operator">FOT operator</a></h1>
+<p>The Frenet Optimal Planner Operator is based on <a href="https://github.com/erdos-project/frenet_optimal_trajectory_planner/">https://github.com/erdos-project/frenet_optimal_trajectory_planner/</a> and wrap the different elements <code>obstacles</code>, <code>position</code>, <code>speed</code> ... into a frenet consumable format. </p>
+<p>FOT inputs are:</p>
+<pre><code class="language-python">initial_conditions = {
+    &quot;ps&quot;: 0,
+    &quot;target_speed&quot;: # The target speed
+    &quot;pos&quot;: # The x, y current position
+    &quot;vel&quot;: # The vx, vy current speed
+    &quot;wp&quot;: # [[x, y], ... n_waypoints ] desired waypoints
+    &quot;obs&quot;: # [[min_x, min_y, max_x, max_y], ... ] obstacles on the way
+}
+</code></pre>
+<p>There is also a set of hyperparameters that are described below.</p>
+<p>As our obstacles are defined as 3D dot we need to transform those dot into <code>[min_x, min_y, max_x, max_y]</code> format. We do that within the <code>get_obstacle_list</code> function. This approximation is very basic and probably need to be revisited.</p>
+<p>The output is either a successful trajectory that we can feed into PID. Or it is a failure in which case we send the current position as waypoint.</p>
 <h2 id="graph-description-3"><a class="header" href="#graph-description-3">Graph Description</a></h2>
 <pre><code class="language-yaml">  - id: fot_op
     operator:
@@ -1073,7 +1110,7 @@ end
         gps_waypoints: carla_gps_op/gps_waypoints
 </code></pre>
 <h2 id="graph-viz-3"><a class="header" href="#graph-viz-3">Graph Viz</a></h2>
-<pre><code class="language-mermaid">        flowchart TB
+<pre class="mermaid">        flowchart TB
   oasis_agent
 subgraph carla_gps_op
   carla_gps_op/op[op]
@@ -1092,33 +1129,8 @@ end
   oasis_agent -- position --&gt; fot_op/op
   oasis_agent -- speed --&gt; fot_op/op
   fot_op/op -- waypoints --&gt; pid_control_op/op
-</code></pre>
-<h2 id="hyper-parameters-to-consider"><a class="header" href="#hyper-parameters-to-consider">Hyper Parameters to consider</a></h2>
-<p>See: https://github.com/erdos-project/frenet_optimal_trajectory_planner</p>
-<pre><code class="language-python">        self.hyperparameters = {
-            &quot;max_speed&quot;: 25.0,
-            &quot;max_accel&quot;: 45.0,
-            &quot;max_curvature&quot;: 55.0,
-            &quot;max_road_width_l&quot;: 0.1,
-            &quot;max_road_width_r&quot;: 0.1,
-            &quot;d_road_w&quot;: 0.5,
-            &quot;dt&quot;: 0.5,
-            &quot;maxt&quot;: 5.0,
-            &quot;mint&quot;: 2.0,
-            &quot;d_t_s&quot;: 5,
-            &quot;n_s_sample&quot;: 2.0,
-            &quot;obstacle_clearance&quot;: 0.1,
-            &quot;kd&quot;: 1.0,
-            &quot;kv&quot;: 0.1,
-            &quot;ka&quot;: 0.1,
-            &quot;kj&quot;: 0.1,
-            &quot;kt&quot;: 0.1,
-            &quot;ko&quot;: 0.1,
-            &quot;klat&quot;: 1.0,
-            &quot;klon&quot;: 1.0,
-            &quot;num_threads&quot;: 0,  # set 0 to avoid using threaded algorithm
-        }
-</code></pre>
+</pre>
+<h2 id="hyperparameter-descriptions"><a class="header" href="#hyperparameter-descriptions">Hyperparameter descriptions</a></h2>
 <pre><code class="language-bash">        initial_conditions (dict): dict containing the following items
             ps (float): previous longitudinal position
             target_speed (float): target speed [m/s]
@@ -1166,14 +1178,15 @@ end
 </code></pre>
 <p>Ref: https://github.com/erdos-project/frenet_optimal_trajectory_planner/blob/master/FrenetOptimalTrajectory/fot_wrapper.py</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="pid-control-operator"><a class="header" href="#pid-control-operator">PID Control operator</a></h1>
-<p><code>pid</code> control operator computes the command that needs to be executed to follow the <code>hybrid_astar</code> waypoints.</p>
+<p><code>pid</code> control operator computes the command that needs to be executed to follow the given waypoints. 
+It reacts to the car current speed and position in a way that accelerates or brake according to previous inputs.</p>
 <h2 id="inputs-2"><a class="header" href="#inputs-2">Inputs</a></h2>
 <ul>
 <li>waypoints coordinates to follow.</li>
 </ul>
 <h2 id="outputs-2"><a class="header" href="#outputs-2">Outputs</a></h2>
 <ul>
-<li>Command control.</li>
+<li>throttle, steering (rad) and braking.</li>
 </ul>
 <h2 id="graph-description-4"><a class="header" href="#graph-description-4">Graph Description</a></h2>
 <pre><code class="language-yaml">  - id: pid_control_op
@@ -1187,7 +1200,7 @@ end
         waypoints: fot_op/waypoints
 </code></pre>
 <h2 id="graph-viz-4"><a class="header" href="#graph-viz-4">Graph Viz</a></h2>
-<pre><code class="language-mermaid">        flowchart TB
+<pre class="mermaid">        flowchart TB
   oasis_agent
 subgraph fot_op
   fot_op/op[op]
@@ -1199,7 +1212,7 @@ end
   oasis_agent -- speed --&gt; pid_control_op/op
   fot_op/op -- waypoints --&gt; pid_control_op/op
   pid_control_op/op -- control --&gt; oasis_agent
-</code></pre>
+</pre>
 <h2 id="hyperparameters-consider-changing"><a class="header" href="#hyperparameters-consider-changing">Hyperparameters consider changing</a></h2>
 <p>See: https://en.wikipedia.org/wiki/PID_controller</p>
 <pre><code>pid_p = 0.1
@@ -1207,69 +1220,11 @@ pid_d = 0.0
 pid_i = 0.05
 dt = 1.0 / 20   
 </code></pre>
+<p>Example reaction:</p>
 <p align="center">
 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c0/Change_with_Ki.png" width="800">
-</p><div style="break-before: page; page-break-before: always;"></div><h1 id="oasis-sensor"><a class="header" href="#oasis-sensor">Oasis Sensor</a></h1>
-<p>input of dora:</p>
-<pre><code class="language-python">sensors = [
-            {
-                &quot;type&quot;: &quot;sensor.camera.rgb&quot;,
-                &quot;id&quot;: &quot;camera.center&quot;,
-                &quot;x&quot;: 2.0,
-                &quot;y&quot;: 0.0,
-                &quot;z&quot;: 1.5,
-                &quot;roll&quot;: 0.0,
-                &quot;pitch&quot;: 0.0,
-                &quot;yaw&quot;: 0.0,
-                &quot;width&quot;: IMAGE_WIDTH,
-                &quot;height&quot;: IMAGE_HEIGHT,
-                &quot;fov&quot;: 90,
-            },
-            {
-                &quot;type&quot;: &quot;sensor.lidar.ray_cast&quot;,
-                &quot;id&quot;: &quot;LIDAR&quot;,
-                &quot;x&quot;: 2.0,
-                &quot;y&quot;: 0.0,
-                &quot;z&quot;: 1.5,
-                &quot;roll&quot;: 0.0,
-                &quot;pitch&quot;: 0.0,
-                &quot;yaw&quot;: 0.0,
-            },
-            {
-                &quot;type&quot;: &quot;sensor.other.gnss&quot;,
-                &quot;id&quot;: &quot;GPS&quot;,
-                &quot;x&quot;: 2,
-                &quot;y&quot;: 0,
-                &quot;z&quot;: 1.5,
-            },
-            {
-                &quot;type&quot;: &quot;sensor.other.imu&quot;,
-                &quot;id&quot;: &quot;IMU&quot;,
-                &quot;x&quot;: 2,
-                &quot;y&quot;: 0,
-                &quot;z&quot;: 1.5,
-                &quot;roll&quot;: 0.0,
-                &quot;pitch&quot;: 0.0,
-                &quot;yaw&quot;: 0.0,
-            },
-            {
-                &quot;type&quot;: &quot;sensor.opendrive_map&quot;,
-                &quot;id&quot;: &quot;高精地图传感器&quot;,
-                &quot;reading_frequency&quot;: 1,
-            },
-            {&quot;type&quot;: &quot;sensor.speedometer&quot;, &quot;id&quot;: &quot;速度传感器&quot;},
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="oasis-sensor-1"><a class="header" href="#oasis-sensor-1">Oasis Sensor</a></h1>
-<p>Output of dora:</p>
-<pre><code class="language-python">vec_control = VehicleControl(
-    steer,
-    throttle,
-    brake,
-    hand_brake=False,
-)
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
-<pre><code class="language-mermaid">        flowchart TB
+</p><div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
+<pre class="mermaid">        flowchart TB
   oasis_agent
 subgraph carla_gps_op
   carla_gps_op/op[op]
@@ -1307,7 +1262,7 @@ end
   oasis_agent -- position --&gt; pid_control_op/op
   oasis_agent -- speed --&gt; pid_control_op/op
   fot_op/op -- waypoints --&gt; pid_control_op/op
-</code></pre>
+</pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="data-format"><a class="header" href="#data-format">Data format</a></h1>
 <p>All messages should be byte messages.</p>
 <p>Best practice is to use C-order numpy arrays bytes.</p>
