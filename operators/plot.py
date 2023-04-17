@@ -3,6 +3,7 @@ from typing import Callable
 
 import cv2
 import numpy as np
+import pyarrow as pa
 from dora import DoraStatus
 from dora_utils import (
     LABELS,
@@ -13,6 +14,8 @@ from dora_utils import (
     location_to_camera_view,
 )
 from scipy.spatial.transform import Rotation as R
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 CAMERA_WIDTH = 1920
 CAMERA_HEIGHT = 1080
@@ -109,9 +112,9 @@ class Operator:
             self.control = np.frombuffer(dora_input["data"], np.float16)
 
         elif "obstacles_bbox" == dora_input["id"]:
-            self.obstacles_bbox = np.frombuffer(
-                dora_input["data"], np.int32
-            ).reshape((-1, 6))
+            self.obstacles_bbox = (
+                dora_input["value"].to_numpy().view(np.int32).reshape((-1, 6))
+            )
 
         elif "traffic_sign_bbox" == dora_input["id"]:
             self.traffic_sign_bbox = np.frombuffer(
@@ -177,10 +180,11 @@ class Operator:
                 self.point_cloud = point_cloud.T
 
         elif "image" == dora_input["id"]:
-            self.camera_frame = np.frombuffer(
-                dora_input["data"],
-                np.uint8,
-            ).reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
+            self.camera_frame = (
+                dora_input["value"]
+                .to_numpy()
+                .reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
+            )
 
         if "image" != dora_input["id"] or isinstance(self.camera_frame, list):
             return DoraStatus.CONTINUE
