@@ -72,6 +72,6 @@ class Operator:
             ]  # xyxy -> xxyy
             arrays[:, 4] *= 100
             arrays = arrays.astype(np.int32)
-            arrays = pa.array(arrays.view(np.uint8).flatten())
+            arrays = pa.array(arrays.ravel().view(np.uint8))
             send_output("bbox", arrays, dora_input["metadata"])
             return DoraStatus.CONTINUE

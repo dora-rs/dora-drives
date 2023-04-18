@@ -1,6 +1,7 @@
 from typing import Callable
 
 import numpy as np
+import pyarrow as pa
 from dora import DoraStatus
 from dora_utils import (
     get_extrinsic_matrix,
@@ -9,6 +10,8 @@ from dora_utils import (
     local_points_to_camera_view,
 )
 from sklearn.neighbors import KNeighborsRegressor
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 DEPTH_IMAGE_WIDTH = 1920
 DEPTH_IMAGE_HEIGHT = 1080
@@ -118,7 +121,7 @@ class Operator:
 
         elif "position" == dora_input["id"]:
             # Add sensor transform
-            self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.position = dora_input["value"].to_numpy().view(np.float32)
             self.extrinsic_matrix = get_extrinsic_matrix(
                 get_projection_matrix(self.position)
             )
@@ -148,7 +151,9 @@ class Operator:
                     :, :3
                 ]
                 processed_lanes.append(lane_location)
-            processed_lanes = np.array(processed_lanes, np.float32).tobytes()
+            processed_lanes = pa.array(
+                np.array(processed_lanes, np.float32).ravel().view(np.uint8)
+            )
 
             send_output("global_lanes", processed_lanes, dora_input["metadata"])
 
@@ -192,13 +197,17 @@ class Operator:
                 predictions = get_predictions(
                     self.obstacles_bbox, obstacles_with_location
                 )
-                predictions_bytes = np.array(predictions, np.float32).tobytes()
+                predictions_bytes = pa.array(
+                    np.array(predictions, np.float32).ravel().view(np.uint8)
+                )
 
                 send_output(
                     "obstacles", predictions_bytes, dora_input["metadata"]
                 )
             else:
                 send_output(
-                    "obstacles", np.array([]).tobytes(), dora_input["metadata"]
+                    "obstacles",
+                    pa.array(np.array([]).ravel().view(np.uint8)),
+                    dora_input["metadata"],
                 )
         return DoraStatus.CONTINUE

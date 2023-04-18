@@ -5,14 +5,9 @@ import cv2
 import numpy as np
 import pyarrow as pa
 from dora import DoraStatus
-from dora_utils import (
-    LABELS,
-    get_extrinsic_matrix,
-    get_intrinsic_matrix,
-    get_projection_matrix,
-    local_points_to_camera_view,
-    location_to_camera_view,
-)
+from dora_utils import (LABELS, get_extrinsic_matrix, get_intrinsic_matrix,
+                        get_projection_matrix, local_points_to_camera_view,
+                        location_to_camera_view)
 from scipy.spatial.transform import Rotation as R
 
 pa.array([])  # See: https://github.com/apache/arrow/issues/34994

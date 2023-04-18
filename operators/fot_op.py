@@ -1,6 +1,7 @@
 from typing import Callable
 
 import numpy as np
+import pyarrow as pa
 from dora import DoraStatus
 from dora_utils import LABELS
 from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
@@ -9,6 +10,8 @@ from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 # Planning general
 TARGET_SPEED = 10
@@ -288,17 +291,21 @@ class Operator:
 
             send_output(
                 "waypoints",
-                np.array([x, y, 0.0], np.float32).tobytes(),
+                pa.array(np.array([x, y, 0.0], np.float32).view(np.uint8)),
                 dora_input["metadata"],
             )
             return DoraStatus.CONTINUE
 
         self.waypoints = np.concatenate([result_x, result_y]).reshape((2, -1)).T
 
-        self.outputs = (
+        self.outputs = np.ascontiguousarray(
             np.concatenate([result_x, result_y, speeds])
             .reshape((3, -1))
             .T.astype(np.float32)
         )
-        send_output("waypoints", self.outputs.tobytes(), dora_input["metadata"])
+        send_output(
+            "waypoints",
+            pa.array(self.outputs.ravel().view(np.uint8)),
+            dora_input["metadata"],
+        )
         return DoraStatus.CONTINUE

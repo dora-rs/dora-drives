@@ -4,10 +4,13 @@ from collections import deque
 from typing import Callable
 
 import numpy as np
+import pyarrow as pa
 from dora import DoraStatus
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 MIN_PID_WAYPOINT_DISTANCE = 1
 pid_p = 0.4
@@ -164,7 +167,7 @@ class Operator:
         """
 
         if "position" == dora_input["id"]:
-            self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.position = dora_input["value"].to_numpy().view(np.float32)
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "speed":
@@ -172,7 +175,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif "waypoints" == dora_input["id"]:
-            waypoints = np.frombuffer(dora_input["data"], np.float32)
+            waypoints = dora_input["value"].to_numpy().view(np.float32)
             waypoints = waypoints.reshape((-1, 3))
 
             self.target_speeds = waypoints[:, 2]
@@ -185,7 +188,9 @@ class Operator:
         if len(self.waypoints) == 0:
             send_output(
                 "control",
-                np.array([0, 0, 1], np.float16).tobytes(),
+                pa.array(
+                    np.array([0, 0, 1], np.float16).view(np.uint8).ravel()
+                ),
                 self.metadata,
             )
             return DoraStatus.CONTINUE
@@ -225,7 +230,11 @@ class Operator:
 
         send_output(
             "control",
-            np.array([throttle, target_angle, brake], np.float16).tobytes(),
+            pa.array(
+                np.array([throttle, target_angle, brake], np.float16).view(
+                    np.uint8
+                )
+            ),
             self.metadata,
         )
         return DoraStatus.CONTINUE

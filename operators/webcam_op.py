@@ -41,7 +41,7 @@ class Operator:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
             send_output(
                 "image",
-                pa.array(frame.view(np.uint8).flatten()),
+                pa.array(frame.ravel().view(np.uint8)),
                 dora_input["metadata"],
             )
         else:

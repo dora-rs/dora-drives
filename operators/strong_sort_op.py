@@ -2,9 +2,12 @@ from typing import Callable
 
 import cv2
 import numpy as np
+import pyarrow as pa
 import torch
 from dora import DoraStatus
 from strong_sort import StrongSORT
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
@@ -66,7 +69,7 @@ class Operator:
                 # self.model.increment_ages()
                 send_output(
                     "obstacles_id",
-                    np.array([]).tobytes(),
+                    pa.array(np.array([]).view(np.uint8).ravel()),
                     dora_input["metadata"],
                 )
                 return DoraStatus.CONTINUE
@@ -86,7 +89,7 @@ class Operator:
 
                     send_output(
                         "obstacles_id",
-                        outputs.tobytes(),
+                        pa.array(outputs.ravel().view(np.uint8)),
                         dora_input["metadata"],
                     )
 
