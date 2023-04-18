@@ -5,9 +5,14 @@ import cv2
 import numpy as np
 import pyarrow as pa
 from dora import DoraStatus
-from dora_utils import (LABELS, get_extrinsic_matrix, get_intrinsic_matrix,
-                        get_projection_matrix, local_points_to_camera_view,
-                        location_to_camera_view)
+from dora_utils import (
+    LABELS,
+    get_extrinsic_matrix,
+    get_intrinsic_matrix,
+    get_projection_matrix,
+    local_points_to_camera_view,
+    location_to_camera_view,
+)
 from scipy.spatial.transform import Rotation as R
 
 pa.array([])  # See: https://github.com/apache/arrow/issues/34994
@@ -84,7 +89,7 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
         if "waypoints" == dora_input["id"]:
-            waypoints = np.frombuffer(dora_input["data"], np.float32)
+            waypoints = np.array(dora_input["value"]).view(np.float32)
             waypoints = waypoints.reshape((-1, 3))
             waypoints = waypoints[:, :2]
             # Adding z axis for plot
@@ -94,7 +99,7 @@ class Operator:
             self.waypoints = waypoints
 
         elif "gps_waypoints" == dora_input["id"]:
-            gps_waypoints = np.frombuffer(dora_input["data"], np.float32)
+            gps_waypoints = np.array(dora_input["value"]).view(np.float32)
             gps_waypoints = gps_waypoints.reshape((-1, 3))
             gps_waypoints = gps_waypoints[:, :2]
             # Adding z axis for plot
@@ -104,7 +109,7 @@ class Operator:
             self.gps_waypoints = gps_waypoints
 
         elif "control" == dora_input["id"]:
-            self.control = np.frombuffer(dora_input["data"], np.float16)
+            self.control = np.array(dora_input["value"]).view(np.float16)
 
         elif "obstacles_bbox" == dora_input["id"]:
             self.obstacles_bbox = (
@@ -112,36 +117,40 @@ class Operator:
             )
 
         elif "traffic_sign_bbox" == dora_input["id"]:
-            self.traffic_sign_bbox = np.frombuffer(
-                dora_input["data"], np.int32
-            ).reshape((-1, 6))
+            self.traffic_sign_bbox = (
+                np.array(dora_input["value"]).view(np.int32).reshape((-1, 6))
+            )
 
         elif "obstacles_id" == dora_input["id"]:
-            self.obstacles_id = np.frombuffer(
-                dora_input["data"], np.int32
-            ).reshape((-1, 7))
+            self.obstacles_id = (
+                np.array(dora_input["value"]).view(np.int32).reshape((-1, 7))
+            )
 
         elif "obstacles" == dora_input["id"]:
-            obstacles = np.frombuffer(dora_input["data"], np.float32).reshape(
-                (-1, 5)
-            )[:, :3]
+            obstacles = (
+                np.array(dora_input["value"])
+                .view(np.float32)
+                .reshape((-1, 5))[:, :3]
+            )
             self.obstacles = obstacles
 
         elif "lanes" == dora_input["id"]:
-            lanes = np.frombuffer(dora_input["data"], np.int32).reshape(
-                (-1, 30, 2)
+            lanes = (
+                np.array(dora_input["value"])
+                .view(np.int32)
+                .reshape((-1, 30, 2))
             )
             self.lanes = lanes
 
         elif "global_lanes" == dora_input["id"]:
-            global_lanes = np.frombuffer(
-                dora_input["data"], np.float32
-            ).reshape((-1, 3))
+            global_lanes = (
+                np.array(dora_input["value"]).view(np.float32).reshape((-1, 3))
+            )
             self.global_lanes = global_lanes
 
         elif "drivable_area" == dora_input["id"]:
-            drivable_area = np.frombuffer(dora_input["data"], np.int32).reshape(
-                (1, -1, 2)
+            drivable_area = (
+                np.array(dora_input["value"]).view(np.int32).reshape((1, -1, 2))
             )
             self.drivable_area = drivable_area
 
@@ -149,7 +158,7 @@ class Operator:
             # Add sensor transform
 
             self.last_position = self.position
-            self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.position = np.array(dora_input["value"]).view(np.float32)
             if len(self.last_position) == 0:
                 return DoraStatus.CONTINUE
 
@@ -158,7 +167,7 @@ class Operator:
             ) * 20
 
         elif "lidar_pc" == dora_input["id"]:
-            point_cloud = np.frombuffer(dora_input["data"], np.float32)
+            point_cloud = np.array(dora_input["value"]).view(np.float32)
             point_cloud = point_cloud.reshape((-1, 3))
             # To camera coordinate
             # The latest coordinate space is the unreal space.

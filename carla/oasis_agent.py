@@ -298,7 +298,7 @@ class DoraAgent(AutonomousAgent):
                 event = node.next()
                 if event["type"] == "INPUT":
                     input_id = event["id"]
-                    value = event["data"]
+                    value = event["value"]
 
                     if input_id == "tick" and iteration > 0 and iteration < 4:
                         print(
@@ -312,7 +312,7 @@ class DoraAgent(AutonomousAgent):
                     elif input_id == "control":
                         break
 
-            [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
+            [throttle, target_angle, brake] = np.array(value).view(np.float16)
 
             steer = radians_to_steer(target_angle, STEER_GAIN)
             vec_control = VehicleControl(

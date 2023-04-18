@@ -195,8 +195,8 @@ def main():
 for event in node:
     if event["type"] == "INPUT":
         if event["id"] == "control":
-            [throttle, target_angle, brake] = np.frombuffer(
-                event["data"], np.float16
+            [throttle, target_angle, brake] = np.array(event["value"]).view(
+                np.float16
             )
 
             steer = radians_to_steer(target_angle, STEER_GAIN)

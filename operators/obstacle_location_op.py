@@ -75,7 +75,7 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
         if "lidar_pc" == dora_input["id"]:
-            point_cloud = np.frombuffer(dora_input["data"], np.float32)
+            point_cloud = np.array(dora_input["value"]).view(np.float32)
             point_cloud = point_cloud.reshape((-1, 3))
 
             # From Velodyne axis to Camera axis
@@ -101,23 +101,13 @@ class Operator:
             # 3D array -> 2D array with index_x -> pixel x, index_y -> pixel_y, value -> z
             camera_point_cloud = local_points_to_camera_view(
                 point_cloud, INTRINSIC_MATRIX
-            )
+            ).T
             self.camera_ground_point_cloud = local_points_to_camera_view(
                 self.ground_point_cloud, INTRINSIC_MATRIX
-            )
+            ).T
 
-            if len(point_cloud) != 0:
-                self.last_point_cloud = self.point_cloud
-                self.last_camera_point_cloud = self.camera_point_cloud
-                self.camera_point_cloud = camera_point_cloud.T
-                self.point_cloud = point_cloud
-                if len(self.last_point_cloud) > 0:
-                    self.point_cloud = np.concatenate(
-                        [self.last_point_cloud, self.point_cloud]
-                    )
-                    self.camera_point_cloud = np.concatenate(
-                        [self.last_camera_point_cloud, self.camera_point_cloud]
-                    )
+            self.camera_point_cloud = camera_point_cloud
+            self.point_cloud = point_cloud
 
         elif "position" == dora_input["id"]:
             # Add sensor transform
@@ -127,8 +117,10 @@ class Operator:
             )
 
         elif "lanes" == dora_input["id"]:
-            lanes = np.frombuffer(dora_input["data"], np.int32).reshape(
-                (-1, 60, 2)
+            lanes = (
+                np.array(dora_input["value"])
+                .view(np.int32)
+                .reshape((-1, 60, 2))
             )
 
             knnr = KNeighborsRegressor(n_neighbors=4)
@@ -162,9 +154,9 @@ class Operator:
                 return DoraStatus.CONTINUE
 
             # bbox = np.array([[min_x, max_x, min_y, max_y, confidence, label], ... n_bbox ... ])
-            self.obstacles_bbox = np.frombuffer(
-                dora_input["data"], np.int32
-            ).reshape((-1, 6))
+            self.obstacles_bbox = (
+                np.array(dora_input["value"]).view(np.int32).reshape((-1, 6))
+            )
 
             obstacles_with_location = []
             for obstacle_bb in self.obstacles_bbox:

@@ -47,7 +47,7 @@ def compute_throttle_and_brake(pid, current_speed: float, target_speed: float):
         target_speed (:obj:`float`): The target speed to reach (in m/s).
 
     Returns:
-        Throttle and brake dora_input["data"]s.
+        Throttle and brake.
     """
     if current_speed < 0:
         print("Current speed is negative: {}".format(current_speed))
@@ -101,7 +101,7 @@ class PIDLongitudinalController(object):
             current_speed (:obj:`float`): Current speed in m/s.
 
         Returns:
-            Throttle and brake dora_input["data"]s.
+            Throttle, brake and steering.
         """
         # Transform to km/h
         error = (target_speed - current_speed) * 3.6
@@ -162,7 +162,7 @@ class Operator:
         """Handle input.
         Args:
             dora_input["id"](str): Id of the input declared in the yaml configuration
-            dora_input["data"] (bytes): Bytes message of the input
+            dora_input["value"] (arrow.array(UInt8)): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
@@ -171,7 +171,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "speed":
-            self.speed = np.frombuffer(dora_input["data"], np.float32)
+            self.speed = np.array(dora_input["value"]).view(np.float32)
             return DoraStatus.CONTINUE
 
         elif "waypoints" == dora_input["id"]:

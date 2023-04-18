@@ -54,16 +54,16 @@ class Operator:
     ) -> DoraStatus:
 
         if dora_input["id"] == "image":
-            frame = np.frombuffer(
-                dora_input["data"],
+            frame = np.array(
+                dora_input["value"],
                 np.uint8,
             ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
             self.frame = frame[:, :, :3]
 
         elif dora_input["id"] == "obstacles_bbox" and len(self.frame) != 0:
-            obstacles = np.frombuffer(dora_input["data"], np.int32).reshape(
-                (-1, 6)
+            obstacles = (
+                np.array(dora_input["value"]).view(np.int32).reshape((-1, 6))
             )
             if obstacles.shape[0] == 0:
                 # self.model.increment_ages()

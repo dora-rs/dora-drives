@@ -55,7 +55,7 @@ class Operator:
         """Handle image
         Args:
             dora_input["id"](str): Id of the input declared in the yaml configuration
-            dora_input["data"] (bytes): Bytes message of the input
+            dora_input["value"] (arrow.array (UInt8)): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
         if dora_input["id"] == "image":
