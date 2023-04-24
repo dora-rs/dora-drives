@@ -7,12 +7,8 @@ import numpy as np
 import pyarrow as pa
 
 pa.array([])  # See: https://github.com/apache/arrow/issues/34994
-from _generate_world import (
-    add_camera,
-    add_lidar,
-    spawn_actors,
-    spawn_driving_vehicle,
-)
+from _generate_world import (add_camera, add_lidar, spawn_actors,
+                             spawn_driving_vehicle)
 from dora import Node
 from numpy import linalg as LA
 from opentelemetry import trace
@@ -20,12 +16,12 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import (
-    TraceContextTextMapPropagator,
-)
+from opentelemetry.trace.propagation.tracecontext import \
+    TraceContextTextMapPropagator
 from scipy.spatial.transform import Rotation as R
 
-from carla import Client, Location, Rotation, Transform, VehicleControl, command
+from carla import (Client, Location, Rotation, Transform, VehicleControl,
+                   command)
 
 
 def radians_to_steer(rad: float, steer_gain: float):
@@ -89,7 +85,7 @@ LABELS = "image"
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
 OBJECTIVE_WAYPOINTS = np.array([[234, 59, 39]], np.float32).ravel()
-STEER_GAIN = 0.7
+STEER_GAIN = 2
 
 lidar_pc = None
 depth_frame = None

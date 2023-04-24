@@ -7,7 +7,7 @@ from carla import Client, VehicleControl, command
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
-STEER_GAIN = 0.7
+STEER_GAIN = 2
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)
 
