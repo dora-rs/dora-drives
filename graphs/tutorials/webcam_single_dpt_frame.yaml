@@ -27,5 +27,4 @@ nodes:
     operator:
       python: ../../operators/plot.py
       inputs:
-#        depth_frame: single_dpt/depth_frame
         image: single_dpt/depth_frame
