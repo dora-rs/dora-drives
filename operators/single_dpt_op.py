@@ -14,6 +14,7 @@ DPT_PATH = os.environ.get("DPT_PATH")
 DPT_WEIGHT_PATH = os.environ.get("DPT_WEIGHT_PATH")
 MODEL_TYPE = os.environ.get("MODEL_TYPE")
 
+
 # example source: https://pytorch.org/hub/intelisl_midas_v2/
 class Operator:
     def __init__(self):
@@ -64,10 +65,13 @@ class Operator:
                 dora_input["data"],
                 np.uint8,
             ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-            
+
             with torch.no_grad():
+                print("starting frame: ", frame.shape)
+
                 image = frame[:, :, :3]
-                print("frame: ", frame.shape)
+                print("image: ", image.shape)
+
                 img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 print("img: ", img.shape)
                 input_batch = self.transform(img).to(DEVICE)
@@ -78,11 +82,33 @@ class Operator:
                     mode="bicubic",
                     align_corners=False,
                 ).squeeze()
-                
-                output = prediction.cpu().numpy()
-                print("output: ", output)
-                # plt.imshow(output)
+
+                depth_output = prediction.cpu().numpy()
+                print("depth_output: ", depth_output)
+
+                # use cv2 show
+                depth_min = depth_output.min()
+                depth_max = depth_output.max()
+                normalized_depth = 255 * (depth_output - depth_min) / (depth_max - depth_min)
+                normalized_depth *= 3
+                depth_frame = np.repeat(np.expand_dims(normalized_depth, 2), 3, axis=2) / 3
+                depth_frame = cv2.applyColorMap(np.uint8(depth_frame), cv2.COLORMAP_INFERNO)
+                original_image_bgr = np.flip(image, 2)
+                combine_image_depth_frame = np.concatenate((original_image_bgr, depth_frame), axis=1)
+                print("depth_img: ", combine_image_depth_frame)
+
+                height, width = combine_image_depth_frame.shape[:2]
+                # 缩小图像
+                size = (int(width * 0.3), int(height * 0.3))
+                depth_image = cv2.resize(combine_image_depth_frame, size, interpolation=cv2.INTER_AREA)
+                cv2.imshow('MiDaS Depth Estimation1', depth_image)
+                if cv2.waitKey(1) == 27:  # Escape key
+                    return DoraStatus.STOP
+
+                # use matplotlib.pyplot
+                # plt.imshow(depth_output)
                 # plt.show()
-                send_output("depth_frame", output.tobytes(), dora_input["metadata"])
-            print("frame exist")
+
+                send_output("depth_frame", depth_frame.tobytes(), dora_input["metadata"])
+            print("current frame processed")
         return DoraStatus.CONTINUE
