@@ -12,6 +12,7 @@
 
 - [Streaming a video](./webcam_plot.md)
 - [Yolov5](./yolov5.md)
+- [MiDaS](./webcam_midas_dpt.md)
 - [Full perception](./webcam_full_nodes.md)
 
 # Tutorials Carla
