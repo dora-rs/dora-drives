@@ -66,11 +66,7 @@ class Operator:
             ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
             with torch.no_grad():
-                print("starting frame: ", frame.shape)
-
                 image = frame[:, :, :3]
-                print("image: ", image.shape)
-
                 img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 print("img: ", img.shape)
                 input_batch = self.transform(img).to(DEVICE)
@@ -81,9 +77,7 @@ class Operator:
                     mode="bicubic",
                     align_corners=False,
                 ).squeeze()
-
                 depth_output = prediction.cpu().numpy()
-                print("depth_output: ", depth_output)
 
                 # use cv2 show
                 depth_min = depth_output.min()
