@@ -98,7 +98,7 @@ class Operator:
                 print("depth_img: ", combine_image_depth_frame)
 
                 height, width = combine_image_depth_frame.shape[:2]
-                # 缩小图像
+                # reduce image size
                 size = (int(width * 0.3), int(height * 0.3))
                 depth_image = cv2.resize(combine_image_depth_frame, size, interpolation=cv2.INTER_AREA)
                 cv2.imshow('MiDaS Depth Estimation1', depth_image)
