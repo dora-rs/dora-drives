@@ -23,9 +23,9 @@ nodes:
       # model_type = "DPT_Hybrid"   # MiDaS v3 - Hybrid    (medium accuracy, medium inference speed)
       # model_type = "MiDaS_small"  # MiDaS v2.1 - Small   (lowest accuracy, highest inference speed)
 
-#  - id: plot
-#    operator:
-#      python: ../../operators/plot.py
-#      inputs:
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
 #        depth_frame: single_dpt/depth_frame
-#        image: webcam/image
+        image: single_dpt/depth_frame

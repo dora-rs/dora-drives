@@ -93,22 +93,25 @@ class Operator:
                 normalized_depth *= 3
                 depth_frame = np.repeat(np.expand_dims(normalized_depth, 2), 3, axis=2) / 3
                 depth_frame = cv2.applyColorMap(np.uint8(depth_frame), cv2.COLORMAP_INFERNO)
-                original_image_bgr = np.flip(image, 2)
-                combine_image_depth_frame = np.concatenate((original_image_bgr, depth_frame), axis=1)
-                print("depth_img: ", combine_image_depth_frame)
-
-                height, width = combine_image_depth_frame.shape[:2]
+                h, w = depth_frame.shape[:2]
+                depth_frame_4 = np.dstack([depth_frame, np.ones((h, w), dtype="uint8") * 255])
+                print("depth_frame: ", depth_frame_4.shape)
+                # original_image_bgr = np.flip(image, 2)
+                # combine_image_depth_frame = np.concatenate((original_image_bgr, depth_frame), axis=1)
+                # print("depth_img: ", combine_image_depth_frame)
+                #
+                # height, width = combine_image_depth_frame.shape[:2]
                 # reduce image size
-                size = (int(width * 0.3), int(height * 0.3))
-                depth_image = cv2.resize(combine_image_depth_frame, size, interpolation=cv2.INTER_AREA)
-                cv2.imshow('MiDaS Depth Estimation1', depth_image)
-                if cv2.waitKey(1) == 27:  # Escape key
-                    return DoraStatus.STOP
+                # size = (int(width * 0.3), int(height * 0.3))
+                # depth_image = cv2.resize(combine_image_depth_frame, size, interpolation=cv2.INTER_AREA)
+                # cv2.imshow('MiDaS Depth Estimation1', depth_image)
+                # if cv2.waitKey(1) == 27:  # Escape key
+                #     return DoraStatus.STOP
 
                 # use matplotlib.pyplot
                 # plt.imshow(depth_output)
                 # plt.show()
 
-                send_output("depth_frame", depth_frame.tobytes(), dora_input["metadata"])
-            print("current frame processed")
+                send_output("depth_frame", depth_frame_4.tobytes(), dora_input["metadata"])
+            print("frame processed")
         return DoraStatus.CONTINUE
