@@ -41,7 +41,5 @@ tensorboard
 timm==0.6.12
 imutils==0.5.4
 einops==0.6.0
-torch>=1.13.0
-torchvision>=0.14.0
 nvidia-cuda-nvrtc-cu11>=11.7.99
 nvidia-cuda-runtime-cu11>=11.7.99
