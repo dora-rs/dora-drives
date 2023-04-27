@@ -28,7 +28,7 @@ dora start graphs/tutorials/webcam_single_dpt_frame.yaml --attach --hot-reload -
 
 Display as follows:
 <p align="center">
-    <img src="./midas_dpt.png.png" width="800">
+    <img src="./midas_dpt.png" width="800">
 </p>
 
 > I'm currently having issue running all nodes behind the GFW. You can look into it for inspiration.
