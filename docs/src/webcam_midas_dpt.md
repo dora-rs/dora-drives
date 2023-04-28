@@ -16,13 +16,23 @@ the graph will look as follows:
 ```
 
 ### MiDaS source code:
+You need to link the network to load the algorithm model.
 If you are in mainland China, you may need a network proxy to speed up the download.
+
+optional:
+    Of course, you can also download it in advance and place it under the specified directory. The operation steps are as follows:
 ```bash
 cd $DORA_DEP_HOME/dependencies/
 git clone git@github.com:isl-org/MiDaS.git
 cd MiDaS/weights
 wget https://github.com/isl-org/MiDaS/releases/download/v3_1/dpt_beit_large_512.pt
 cp dpt_beit_large_512.pt $HOME/.cache/torch/hub/checkpoints/
+```
+At the same time, open the following comments in the dataflow configuration file # graphs/tutorials/webcam_midas_frame.yaml
+```yaml
+      MIDAS_PATH: $DORA_DEP_HOME/dependencies/MiDaS/
+      MIDAS_WEIGHT_PATH: $DORA_DEP_HOME/dependencies/MiDaS/weights/dpt_beit_large_512.pt
+      MODEL_NAME: "DPT_BEiT_L_512"
 ```
 
 ### Custom configuration

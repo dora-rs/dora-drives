@@ -12,6 +12,8 @@ DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 MIDAS_PATH = os.environ.get("MIDAS_PATH")
 MIDAS_WEIGHT_PATH = os.environ.get("MIDAS_WEIGHT_PATH")
 MODEL_TYPE = os.environ.get("MODEL_TYPE")
+MODEL_NAME = os.environ.get("MODEL_NAME")
+
 
 # example source: https://pytorch.org/hub/intelisl_midas_v2/
 class Operator:
@@ -26,7 +28,7 @@ class Operator:
             # Without internet
             self.model = torch.hub.load(
                 repo_or_dir=MIDAS_PATH,
-                model="DPT_BEiT_L_512",
+                model=MODEL_NAME,
                 weights=MIDAS_WEIGHT_PATH,
                 source="local",
             )

@@ -18,6 +18,7 @@ nodes:
 #      MIDAS_PATH: $DORA_DEP_HOME/dependencies/MiDaS/
 #      MIDAS_WEIGHT_PATH: $DORA_DEP_HOME/dependencies/MiDaS/weights/dpt_beit_large_512.pt
       MODEL_TYPE: "DPT_Large"
+#      MODEL_NAME: "DPT_BEiT_L_512"
 
   - id: plot
     operator:
