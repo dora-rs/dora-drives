@@ -12,7 +12,6 @@
 
 - [Streaming a video](./webcam_plot.md)
 - [Yolov5](./yolov5.md)
-- [MiDaS](./webcam_midas_dpt.md)
 - [Full perception](./webcam_full_nodes.md)
 
 # Tutorials Carla
@@ -30,6 +29,7 @@
 - [GPS operator](./gps_operator.md)
 - [Yolov5 operator](./yolov5_operator.md)
 - [Obstacle location operator](./obstacle_location_operator.md)
+- [MiDaS operator](./webcam_midas_dpt.md)
 - [FOT operator](./fot_operator.md)
 - [PID Control operator](./pid_control_operator.md)
 

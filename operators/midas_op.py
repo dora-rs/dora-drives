@@ -24,6 +24,7 @@ class Operator:
                 "intel-isl/MiDaS",
                 MODEL_TYPE,
             )
+            midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
         else:
             # Without internet
             self.model = torch.hub.load(
@@ -32,7 +33,9 @@ class Operator:
                 weights=MIDAS_WEIGHT_PATH,
                 source="local",
             )
-        midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
+            midas_transforms = torch.hub.load(
+                repo_or_dir=MIDAS_PATH, model="transforms", source="local"
+            )
         if MODEL_TYPE == "DPT_Large" or MODEL_TYPE == "DPT_Hybrid":
             self.transform = midas_transforms.dpt_transform
         else:
