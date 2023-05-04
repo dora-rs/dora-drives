@@ -36,3 +36,8 @@ networkx==2.2
 ninja
 dora-rs==0.2.2
 tensorboard
+
+##### MiDaS ####
+timm==0.6.12
+imutils==0.5.4
+einops==0.6.0

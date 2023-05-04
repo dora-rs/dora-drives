@@ -1,0 +1,27 @@
+nodes:
+  - id: webcam
+    operator:
+      python: ../../operators/webcam_op.py
+      inputs:
+        tick: dora/timer/millis/100
+      outputs:
+        - image
+  - id: midas_op
+    operator:
+      outputs:
+        - depth_frame
+      inputs:
+        image: webcam/image
+      python: ../../operators/midas_op.py
+    env:
+      PYTORCH_DEVICE: "cuda"
+      MIDAS_PATH: $DORA_DEP_HOME/dependencies/MiDaS/
+      MIDAS_WEIGHT_PATH: $DORA_DEP_HOME/dependencies/MiDaS/weights/midas_v21_small_256.pt
+      MODEL_TYPE: "MiDaS_small"
+      MODEL_NAME: "MiDaS_small"
+
+  - id: plot
+    operator:
+      python: ../../operators/plot.py
+      inputs:
+        image: midas_op/depth_frame
