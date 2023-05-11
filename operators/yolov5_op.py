@@ -28,6 +28,13 @@ class Operator:
             )
         else:
             # Without internet
+            #
+            # To install:
+            # cd $DORA_HOME_DEP/dependecies # Optional
+            # git clone https://github.com/ultralytics/yolov5.git
+            # rm yolov5/.git -rf
+            # Add YOLOV5_PATH and YOLOV5_WEIGHT_PATH in your YAML graph
+
             self.model = torch.hub.load(
                 YOLOV5_PATH,
                 "custom",
