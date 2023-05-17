@@ -1,3 +1,66 @@
+""" 
+# FOT operator
+
+The Frenet Optimal Planner Operator is based on [https://github.com/erdos-project/frenet_optimal_trajectory_planner/](https://github.com/erdos-project/frenet_optimal_trajectory_planner/) and wrap the different elements `obstacles`, `position`, `speed` ... into a frenet consumable format. 
+
+
+FOT inputs are:
+```python
+initial_conditions = {
+    "ps": 0,
+    "target_speed": # The target speed
+    "pos": # The x, y current position
+    "vel": # The vx, vy current speed
+    "wp": # [[x, y], ... n_waypoints ] desired waypoints
+    "obs": # [[min_x, min_y, max_x, max_y], ... ] obstacles on the way
+}
+```
+There is also a set of hyperparameters that are described below.
+
+As our obstacles are defined as 3D dot we need to transform those dot into `[min_x, min_y, max_x, max_y]` format. We do that within the `get_obstacle_list` function. This approximation is very basic and probably need to be revisited.
+
+The output is either a successful trajectory that we can feed into PID. Or it is a failure in which case we send the current position as waypoint.
+
+## Graph Description
+
+```yaml
+  - id: fot_op
+    operator:
+      python: ../../operators/fot_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: oasis_agent/position
+        speed: oasis_agent/speed
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+```
+
+## Graph Viz
+
+```mermaid
+        flowchart TB
+  oasis_agent
+subgraph carla_gps_op
+  carla_gps_op/op[op]
+end
+subgraph fot_op
+  fot_op/op[op]
+end
+subgraph obstacle_location_op
+  obstacle_location_op/op[op]
+end
+subgraph pid_control_op
+  pid_control_op/op[op]
+end
+  carla_gps_op/op -- gps_waypoints --> fot_op/op
+  obstacle_location_op/op -- obstacles --> fot_op/op
+  oasis_agent -- position --> fot_op/op
+  oasis_agent -- speed --> fot_op/op
+  fot_op/op -- waypoints --> pid_control_op/op
+```
+"""
+
 from typing import Callable
 
 import numpy as np

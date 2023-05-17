@@ -1,3 +1,59 @@
+""" 
+# PID Control operator
+
+`pid` control operator computes the command that needs to be executed to follow the given waypoints. 
+It reacts to the car current speed and position in a way that accelerates or brake according to previous inputs.
+
+## Inputs
+
+- waypoints coordinates to follow.
+
+## Outputs
+
+- throttle, steering (rad) and braking.
+
+## Graph Description
+
+```yaml
+  - id: pid_control_op
+    operator:
+      python: ../../operators/pid_control_op.py
+      outputs:
+        - control
+      inputs:
+        position: oasis_agent/position
+        speed: oasis_agent/speed
+        waypoints: fot_op/waypoints
+```
+
+## Graph Viz
+
+```mermaid
+        flowchart TB
+  oasis_agent
+subgraph fot_op
+  fot_op/op[op]
+end
+subgraph pid_control_op
+  pid_control_op/op[op]
+end
+  oasis_agent -- position --> pid_control_op/op
+  oasis_agent -- speed --> pid_control_op/op
+  fot_op/op -- waypoints --> pid_control_op/op
+  pid_control_op/op -- control --> oasis_agent
+```
+
+## Hyperparameters consider changing
+
+See: https://en.wikipedia.org/wiki/PID_controller
+
+```
+pid_p = 0.1
+pid_d = 0.0
+pid_i = 0.05
+dt = 1.0 / 20   
+```
+"""
 import math
 import time
 from collections import deque
@@ -161,7 +217,7 @@ class Operator:
     ):
         """Handle input.
         Args:
-            dora_input["id"](str): Id of the input declared in the yaml configuration
+            dora_input["id"]  (str): Id of the input declared in the yaml configuration
             dora_input["value"] (arrow.array(UInt8)): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """

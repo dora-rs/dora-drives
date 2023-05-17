@@ -1,3 +1,8 @@
+""" 
+# Plot operator
+
+Plot operator takes outputs from the graph and plot it on the camera frame.
+"""
 import time
 from typing import Callable
 
@@ -51,7 +56,7 @@ lineType = 2
 
 class Operator:
     """
-    Compute a `control` based on the position and the waypoints of the car.
+    Plot inputs using cv2.imshow
     """
 
     def __init__(self):
