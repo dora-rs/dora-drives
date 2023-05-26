@@ -1,13 +1,72 @@
+""" 
+# PID Control operator
+
+`pid` control operator computes the command that needs to be executed to follow the given waypoints. 
+It reacts to the car current speed and position in a way that accelerates or brake according to previous inputs.
+
+## Inputs
+
+- waypoints coordinates to follow.
+
+## Outputs
+
+- throttle, steering (rad) and braking.
+
+## Graph Description
+
+```yaml
+  - id: pid_control_op
+    operator:
+      python: ../../operators/pid_control_op.py
+      outputs:
+        - control
+      inputs:
+        position: oasis_agent/position
+        speed: oasis_agent/speed
+        waypoints: fot_op/waypoints
+```
+
+## Graph Viz
+
+```mermaid
+        flowchart TB
+  oasis_agent
+subgraph fot_op
+  fot_op/op[op]
+end
+subgraph pid_control_op
+  pid_control_op/op[op]
+end
+  oasis_agent -- position --> pid_control_op/op
+  oasis_agent -- speed --> pid_control_op/op
+  fot_op/op -- waypoints --> pid_control_op/op
+  pid_control_op/op -- control --> oasis_agent
+```
+
+## Hyperparameters consider changing
+
+See: https://en.wikipedia.org/wiki/PID_controller
+
+```
+pid_p = 0.1
+pid_d = 0.0
+pid_i = 0.05
+dt = 1.0 / 20   
+```
+"""
 import math
 import time
 from collections import deque
 from typing import Callable
 
 import numpy as np
+import pyarrow as pa
 from dora import DoraStatus
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 MIN_PID_WAYPOINT_DISTANCE = 1
 pid_p = 0.4
@@ -44,7 +103,7 @@ def compute_throttle_and_brake(pid, current_speed: float, target_speed: float):
         target_speed (:obj:`float`): The target speed to reach (in m/s).
 
     Returns:
-        Throttle and brake dora_input["data"]s.
+        Throttle and brake.
     """
     if current_speed < 0:
         print("Current speed is negative: {}".format(current_speed))
@@ -98,7 +157,7 @@ class PIDLongitudinalController(object):
             current_speed (:obj:`float`): Current speed in m/s.
 
         Returns:
-            Throttle and brake dora_input["data"]s.
+            Throttle, brake and steering.
         """
         # Transform to km/h
         error = (target_speed - current_speed) * 3.6
@@ -158,21 +217,21 @@ class Operator:
     ):
         """Handle input.
         Args:
-            dora_input["id"](str): Id of the input declared in the yaml configuration
-            dora_input["data"] (bytes): Bytes message of the input
+            dora_input["id"]  (str): Id of the input declared in the yaml configuration
+            dora_input["value"] (arrow.array(UInt8)): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
         if "position" == dora_input["id"]:
-            self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.position = dora_input["value"].to_numpy().view(np.float32)
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "speed":
-            self.speed = np.frombuffer(dora_input["data"], np.float32)
+            self.speed = np.array(dora_input["value"]).view(np.float32)
             return DoraStatus.CONTINUE
 
         elif "waypoints" == dora_input["id"]:
-            waypoints = np.frombuffer(dora_input["data"], np.float32)
+            waypoints = dora_input["value"].to_numpy().view(np.float32)
             waypoints = waypoints.reshape((-1, 3))
 
             self.target_speeds = waypoints[:, 2]
@@ -185,7 +244,9 @@ class Operator:
         if len(self.waypoints) == 0:
             send_output(
                 "control",
-                np.array([0, 0, 1], np.float16).tobytes(),
+                pa.array(
+                    np.array([0, 0, 1], np.float16).view(np.uint8).ravel()
+                ),
                 self.metadata,
             )
             return DoraStatus.CONTINUE
@@ -225,7 +286,11 @@ class Operator:
 
         send_output(
             "control",
-            np.array([throttle, target_angle, brake], np.float16).tobytes(),
+            pa.array(
+                np.array([throttle, target_angle, brake], np.float16).view(
+                    np.uint8
+                )
+            ),
             self.metadata,
         )
         return DoraStatus.CONTINUE

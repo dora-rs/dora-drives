@@ -5,6 +5,10 @@ from dora import DoraStatus
 
 OUTPUT_WIDTH = 1920
 OUTPUT_HEIGHT = 1080
+import numpy as np
+import pyarrow as pa
+
+pa.array([])
 
 
 class Operator:
@@ -35,7 +39,11 @@ class Operator:
         if ret:
             frame = cv2.resize(frame, (OUTPUT_WIDTH, OUTPUT_HEIGHT))
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-            send_output("image", frame.tobytes(), dora_input["metadata"])
+            send_output(
+                "image",
+                pa.array(frame.ravel().view(np.uint8)),
+                dora_input["metadata"],
+            )
         else:
             print("could not get webcam.")
         return DoraStatus.CONTINUE

@@ -1,6 +1,66 @@
+""" 
+# Obstacle location operator
+
+The obstacle location operator match bounding box with depth frame to find an approximative position of obstacles.
+
+There is two logic within it:
+- One is for the ground dot for lane detection.
+- One is for bounding box obstacle localisation.
+
+Both logic are based on he computation of the projection in 2D space of the lidar 3D point and then reusing the index to get the 3D position.
+
+- In the case of ground dot detection, the approximation is based on a knnr, as we might not have enough data on the floor.
+- In the case of bounding box, we use first quantile closest point within the bounding box to estimate the distance. We use the first quantile closest point to remove the noise.
+
+The mecanism to project the lidar point cloud into a 2D is also used in the `plot.py` operator. You can use the input `lidar_pc` within it to help you debug.
+
+## Inputs
+
+- 2D Obstacles bounding box.
+
+## Outputs
+
+- 3D position of obstacles as dot.
+
+
+## Graph Description
+
+```yaml
+  - id: obstacle_location_op
+    operator: 
+      outputs:
+        - obstacles
+      inputs:
+        lidar_pc: oasis_agent/lidar_pc
+        obstacles_bbox: yolov5/bbox
+        position: oasis_agent/position
+      python: ../../operators/obstacle_location_op.py
+```
+
+## Graph Viz
+
+```mermaid
+        flowchart TB
+  oasis_agent
+subgraph yolov5
+  yolov5/op[op]
+end
+subgraph fot_op
+  fot_op/op[op]
+end
+subgraph obstacle_location_op
+  obstacle_location_op/op[op]
+end
+  oasis_agent -- lidar_pc --> obstacle_location_op/op
+  yolov5/op -- bbox as obstacles_bbox --> obstacle_location_op/op
+  oasis_agent -- position --> obstacle_location_op/op
+  obstacle_location_op/op -- obstacles --> fot_op/op
+```
+"""
 from typing import Callable
 
 import numpy as np
+import pyarrow as pa
 from dora import DoraStatus
 from dora_utils import (
     get_extrinsic_matrix,
@@ -9,6 +69,8 @@ from dora_utils import (
     local_points_to_camera_view,
 )
 from sklearn.neighbors import KNeighborsRegressor
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 DEPTH_IMAGE_WIDTH = 1920
 DEPTH_IMAGE_HEIGHT = 1080
@@ -72,7 +134,7 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
         if "lidar_pc" == dora_input["id"]:
-            point_cloud = np.frombuffer(dora_input["data"], np.float32)
+            point_cloud = np.array(dora_input["value"]).view(np.float32)
             point_cloud = point_cloud.reshape((-1, 3))
 
             # From Velodyne axis to Camera axis
@@ -98,34 +160,26 @@ class Operator:
             # 3D array -> 2D array with index_x -> pixel x, index_y -> pixel_y, value -> z
             camera_point_cloud = local_points_to_camera_view(
                 point_cloud, INTRINSIC_MATRIX
-            )
+            ).T
             self.camera_ground_point_cloud = local_points_to_camera_view(
                 self.ground_point_cloud, INTRINSIC_MATRIX
-            )
+            ).T
 
-            if len(point_cloud) != 0:
-                self.last_point_cloud = self.point_cloud
-                self.last_camera_point_cloud = self.camera_point_cloud
-                self.camera_point_cloud = camera_point_cloud.T
-                self.point_cloud = point_cloud
-                if len(self.last_point_cloud) > 0:
-                    self.point_cloud = np.concatenate(
-                        [self.last_point_cloud, self.point_cloud]
-                    )
-                    self.camera_point_cloud = np.concatenate(
-                        [self.last_camera_point_cloud, self.camera_point_cloud]
-                    )
+            self.camera_point_cloud = camera_point_cloud
+            self.point_cloud = point_cloud
 
         elif "position" == dora_input["id"]:
             # Add sensor transform
-            self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.position = dora_input["value"].to_numpy().view(np.float32)
             self.extrinsic_matrix = get_extrinsic_matrix(
                 get_projection_matrix(self.position)
             )
 
         elif "lanes" == dora_input["id"]:
-            lanes = np.frombuffer(dora_input["data"], np.int32).reshape(
-                (-1, 60, 2)
+            lanes = (
+                np.array(dora_input["value"])
+                .view(np.int32)
+                .reshape((-1, 60, 2))
             )
 
             knnr = KNeighborsRegressor(n_neighbors=4)
@@ -148,7 +202,9 @@ class Operator:
                     :, :3
                 ]
                 processed_lanes.append(lane_location)
-            processed_lanes = np.array(processed_lanes, np.float32).tobytes()
+            processed_lanes = pa.array(
+                np.array(processed_lanes, np.float32).ravel().view(np.uint8)
+            )
 
             send_output("global_lanes", processed_lanes, dora_input["metadata"])
 
@@ -157,9 +213,9 @@ class Operator:
                 return DoraStatus.CONTINUE
 
             # bbox = np.array([[min_x, max_x, min_y, max_y, confidence, label], ... n_bbox ... ])
-            self.obstacles_bbox = np.frombuffer(
-                dora_input["data"], np.int32
-            ).reshape((-1, 6))
+            self.obstacles_bbox = (
+                np.array(dora_input["value"]).view(np.int32).reshape((-1, 6))
+            )
 
             obstacles_with_location = []
             for obstacle_bb in self.obstacles_bbox:
@@ -192,13 +248,17 @@ class Operator:
                 predictions = get_predictions(
                     self.obstacles_bbox, obstacles_with_location
                 )
-                predictions_bytes = np.array(predictions, np.float32).tobytes()
+                predictions_bytes = pa.array(
+                    np.array(predictions, np.float32).ravel().view(np.uint8)
+                )
 
                 send_output(
                     "obstacles", predictions_bytes, dora_input["metadata"]
                 )
             else:
                 send_output(
-                    "obstacles", np.array([]).tobytes(), dora_input["metadata"]
+                    "obstacles",
+                    pa.array(np.array([]).ravel().view(np.uint8)),
+                    dora_input["metadata"],
                 )
         return DoraStatus.CONTINUE

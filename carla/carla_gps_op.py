@@ -1,11 +1,13 @@
 from typing import Callable
 
 import numpy as np
+import pyarrow as pa
 from _dora_utils import closest_vertex
 from _hd_map import HDMap
 from dora import DoraStatus
 from scipy.spatial.transform import Rotation as R
 
+pa.array([])
 from carla import Map
 
 # Planning general
@@ -49,7 +51,7 @@ class Operator:
     ):
 
         if "position" == dora_input["id"]:
-            self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.position = np.array(dora_input["value"]).view(np.float32)
             return DoraStatus.CONTINUE
 
         elif "opendrive" == dora_input["id"]:
@@ -59,9 +61,9 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif "objective_waypoints" == dora_input["id"]:
-            self.objective_waypoints = np.frombuffer(
-                dora_input["data"], np.float32
-            ).reshape((-1, 3))
+            self.objective_waypoints = (
+                np.array(dora_input["value"]).view(np.float32).reshape((-1, 3))
+            )
 
             if self.hd_map is None or len(self.position) == 0:
                 print("No map within the gps or position")
@@ -130,7 +132,7 @@ class Operator:
             if len(self.waypoints) == 0:
                 send_output(
                     "gps_waypoints",
-                    self.waypoints.tobytes(),
+                    pa.array(self.waypoints.view(np.uint8).ravel()),
                     dora_input["metadata"],
                 )  # World coordinate
                 return DoraStatus.CONTINUE
@@ -144,7 +146,11 @@ class Operator:
 
             send_output(
                 "gps_waypoints",
-                filter_consecutive_duplicate(self.waypoints_array).tobytes(),
+                pa.array(
+                    filter_consecutive_duplicate(self.waypoints_array)
+                    .view(np.uint8)
+                    .ravel()
+                ),
                 dora_input["metadata"],
             )  # World coordinate
 

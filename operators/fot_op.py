@@ -1,6 +1,70 @@
+""" 
+# FOT operator
+
+The Frenet Optimal Planner Operator is based on [https://github.com/erdos-project/frenet_optimal_trajectory_planner/](https://github.com/erdos-project/frenet_optimal_trajectory_planner/) and wrap the different elements `obstacles`, `position`, `speed` ... into a frenet consumable format. 
+
+
+FOT inputs are:
+```python
+initial_conditions = {
+    "ps": 0,
+    "target_speed": # The target speed
+    "pos": # The x, y current position
+    "vel": # The vx, vy current speed
+    "wp": # [[x, y], ... n_waypoints ] desired waypoints
+    "obs": # [[min_x, min_y, max_x, max_y], ... ] obstacles on the way
+}
+```
+There is also a set of hyperparameters that are described below.
+
+As our obstacles are defined as 3D dot we need to transform those dot into `[min_x, min_y, max_x, max_y]` format. We do that within the `get_obstacle_list` function. This approximation is very basic and probably need to be revisited.
+
+The output is either a successful trajectory that we can feed into PID. Or it is a failure in which case we send the current position as waypoint.
+
+## Graph Description
+
+```yaml
+  - id: fot_op
+    operator:
+      python: ../../operators/fot_op.py
+      outputs:
+        - waypoints
+      inputs:
+        position: oasis_agent/position
+        speed: oasis_agent/speed
+        obstacles: obstacle_location_op/obstacles
+        gps_waypoints: carla_gps_op/gps_waypoints
+```
+
+## Graph Viz
+
+```mermaid
+        flowchart TB
+  oasis_agent
+subgraph carla_gps_op
+  carla_gps_op/op[op]
+end
+subgraph fot_op
+  fot_op/op[op]
+end
+subgraph obstacle_location_op
+  obstacle_location_op/op[op]
+end
+subgraph pid_control_op
+  pid_control_op/op[op]
+end
+  carla_gps_op/op -- gps_waypoints --> fot_op/op
+  obstacle_location_op/op -- obstacles --> fot_op/op
+  oasis_agent -- position --> fot_op/op
+  oasis_agent -- speed --> fot_op/op
+  fot_op/op -- waypoints --> pid_control_op/op
+```
+"""
+
 from typing import Callable
 
 import numpy as np
+import pyarrow as pa
 from dora import DoraStatus
 from dora_utils import LABELS
 from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
@@ -9,6 +73,8 @@ from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 
 # Planning general
 TARGET_SPEED = 10
@@ -189,18 +255,18 @@ class Operator:
 
         if dora_input["id"] == "position":
             self.last_position = self.position
-            self.position = np.frombuffer(dora_input["data"], np.float32)
+            self.position = np.array(dora_input["value"]).view(np.float32)
             if len(self.last_position) == 0:
                 self.last_position = self.position
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "speed":
-            self.speed = np.frombuffer(dora_input["data"], np.float32)
+            self.speed = np.array(dora_input["value"]).view(np.float32)
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "obstacles":
-            obstacles = np.frombuffer(dora_input["data"], np.float32).reshape(
-                (-1, 5)
+            obstacles = (
+                np.array(dora_input["value"]).view(np.float32).reshape((-1, 5))
             )
             if len(self.last_obstacles) > 0:
                 self.obstacles = np.concatenate(
@@ -210,14 +276,16 @@ class Operator:
                 self.obstacles = obstacles
 
         elif dora_input["id"] == "global_lanes":
-            lanes = np.frombuffer(dora_input["data"], np.float32).reshape(
-                (-1, 60, 3)
+            lanes = (
+                np.array(dora_input["value"])
+                .view(np.float32)
+                .reshape((-1, 60, 3))
             )
             self.lanes = lanes
             return DoraStatus.CONTINUE
 
         elif "gps_waypoints" == dora_input["id"]:
-            waypoints = np.frombuffer(dora_input["data"], np.float32)
+            waypoints = np.array(dora_input["value"]).view(np.float32)
             waypoints = waypoints.reshape((-1, 3))[:, :2]
             self.gps_waypoints = waypoints
             return DoraStatus.CONTINUE
@@ -288,17 +356,21 @@ class Operator:
 
             send_output(
                 "waypoints",
-                np.array([x, y, 0.0], np.float32).tobytes(),
+                pa.array(np.array([x, y, 0.0], np.float32).view(np.uint8)),
                 dora_input["metadata"],
             )
             return DoraStatus.CONTINUE
 
         self.waypoints = np.concatenate([result_x, result_y]).reshape((2, -1)).T
 
-        self.outputs = (
+        self.outputs = np.ascontiguousarray(
             np.concatenate([result_x, result_y, speeds])
             .reshape((3, -1))
             .T.astype(np.float32)
         )
-        send_output("waypoints", self.outputs.tobytes(), dora_input["metadata"])
+        send_output(
+            "waypoints",
+            pa.array(self.outputs.ravel().view(np.uint8)),
+            dora_input["metadata"],
+        )
         return DoraStatus.CONTINUE

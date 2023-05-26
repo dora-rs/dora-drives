@@ -4,12 +4,11 @@ import logging
 import typing
 
 import numpy as np
-from _generate_world import (
-    add_camera,
-    add_lidar,
-    spawn_actors,
-    spawn_driving_vehicle,
-)
+import pyarrow as pa
+
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
+from _generate_world import (add_camera, add_lidar, spawn_actors,
+                             spawn_driving_vehicle)
 from dora import Node
 from numpy import linalg as LA
 from opentelemetry import trace
@@ -17,12 +16,12 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import (
-    TraceContextTextMapPropagator,
-)
+from opentelemetry.trace.propagation.tracecontext import \
+    TraceContextTextMapPropagator
 from scipy.spatial.transform import Rotation as R
 
-from carla import Client, Location, Rotation, Transform, VehicleControl, command
+from carla import (Client, Location, Rotation, Transform, VehicleControl,
+                   command)
 
 
 def radians_to_steer(rad: float, steer_gain: float):
@@ -85,8 +84,8 @@ CARLA_SIMULATOR_PORT = "2000"
 LABELS = "image"
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-OBJECTIVE_WAYPOINTS = np.array([[234, 59, 39]], np.float32)
-STEER_GAIN = 0.7
+OBJECTIVE_WAYPOINTS = np.array([[234, 59, 39]], np.float32).ravel()
+STEER_GAIN = 2
 
 lidar_pc = None
 depth_frame = None
@@ -106,7 +105,9 @@ def on_lidar_msg(frame):
     point_cloud = np.reshape(frame, (-1, 4))
     point_cloud = point_cloud[:, :3]
 
-    lidar_pc = point_cloud.tobytes()
+    lidar_pc = pa.array(
+        np.ascontiguousarray(point_cloud).ravel().view(np.uint8)
+    )
 
 
 def on_camera_msg(frame):
@@ -114,7 +115,7 @@ def on_camera_msg(frame):
     # frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
 
     global camera_frame
-    camera_frame = np.frombuffer(frame.raw_data, np.uint8).tobytes()
+    camera_frame = pa.array(np.frombuffer(frame.raw_data, np.uint8))
 
 
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
@@ -165,15 +166,21 @@ def main():
     output = {}
     propagator.inject(output)
     metadata = {"open_telemetry_context": serialize_context(output)}
-    node.send_output("position", position.tobytes(), metadata)
+    node.send_output("position", pa.array(position.view(np.uint8)), metadata)
     node.send_output(
         "speed",
-        np.array([LA.norm(position[:2] - last_position[:2])]).tobytes(),
+        pa.array(
+            np.array(
+                [LA.norm(position[:2] - last_position[:2])], np.float32
+            ).view(np.uint8)
+        ),
         metadata,
     )
     node.send_output("image", camera_frame, metadata)
     node.send_output(
-        "objective_waypoints", OBJECTIVE_WAYPOINTS.tobytes(), metadata
+        "objective_waypoints",
+        pa.array(OBJECTIVE_WAYPOINTS.view(np.uint8)),
+        metadata,
     )
     # node.send_output("depth_frame", depth_frame, metadata)
     # node.send_output("segmented_frame", segmented_frame, metadata)
@@ -184,8 +191,8 @@ def main():
 for event in node:
     if event["type"] == "INPUT":
         if event["id"] == "control":
-            [throttle, target_angle, brake] = np.frombuffer(
-                event["data"], np.float16
+            [throttle, target_angle, brake] = np.array(event["value"]).view(
+                np.float16
             )
 
             steer = radians_to_steer(target_angle, STEER_GAIN)

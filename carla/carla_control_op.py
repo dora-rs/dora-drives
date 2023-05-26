@@ -7,7 +7,7 @@ from carla import Client, VehicleControl, command
 
 CARLA_SIMULATOR_HOST = "localhost"
 CARLA_SIMULATOR_PORT = "2000"
-STEER_GAIN = 0.7
+STEER_GAIN = 2
 client = Client(CARLA_SIMULATOR_HOST, int(CARLA_SIMULATOR_PORT))
 client.set_timeout(30.0)
 
@@ -51,7 +51,7 @@ class Operator:
         """Handle input.
         Args:
             dora_input["id"](str): Id of the input declared in the yaml configuration
-            dora_input["data"] (bytes): Bytes message of the input
+            dora_input["value"] (arrow.array(UInt8)): Bytes message of the input
             send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
         """
 
@@ -65,8 +65,8 @@ class Operator:
         if "control" != dora_input["id"]:
             return DoraStatus.CONTINUE
 
-        [throttle, target_angle, brake] = np.frombuffer(
-            dora_input["data"], np.float16
+        [throttle, target_angle, brake] = np.array(dora_input["value"]).view(
+            np.float16
         )
 
         steer = radians_to_steer(target_angle, STEER_GAIN)

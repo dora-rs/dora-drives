@@ -3,16 +3,18 @@ import os.path
 import xml.etree.ElementTree as ET
 
 import numpy as np
+import pyarrow as pa
 from autoagents.autonomous_agent import AutonomousAgent
 from dora import Node
 from dora_tracing import propagator, serialize_context, tracer
 from scipy.spatial.transform import Rotation as R
 
+pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 from carla import VehicleControl
 
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
-STEER_GAIN = 1
+STEER_GAIN = 2
 AVERAGE_WINDOW = 10
 
 node = Node()
@@ -197,9 +199,11 @@ class DoraAgent(AutonomousAgent):
             if "速度传感器" in input_data.keys():
                 node.send_output(
                     "speed",
-                    np.array(
-                        input_data["速度传感器"][1]["speed"], np.float32
-                    ).tobytes(),
+                    pa.array(
+                        np.array(
+                            input_data["速度传感器"][1]["speed"], np.float32
+                        ).view(np.uint8)
+                    ),
                     metadata,
                 )
 
@@ -253,14 +257,14 @@ class DoraAgent(AutonomousAgent):
             frame_raw_data = input_data["camera.center"][1]
             ## frame = np.frombuffer(frame_raw_data, np.uint8)
             ## frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-            camera_frame = frame_raw_data.tobytes()
+            camera_frame = pa.array(frame_raw_data.view(np.uint8).ravel())
 
             ### LIDAR preprocessing
             frame_raw_data = input_data["LIDAR"][1]
             frame = np.frombuffer(frame_raw_data, np.float32)
             point_cloud = np.reshape(frame, (-1, 4))
             point_cloud = point_cloud[:, :3]
-            lidar_pc = point_cloud.tobytes()
+            lidar_pc = pa.array(point_cloud.view(np.uint8).ravel())
 
             ### Waypoints preprocessing
             waypoints_xyz = np.array(
@@ -275,11 +279,17 @@ class DoraAgent(AutonomousAgent):
             )
 
             ## Sending data into the dataflow
-            node.send_output("position", position.tobytes(), metadata)
+            node.send_output(
+                "position",
+                pa.array(position.view(np.uint8).ravel()),
+                metadata,
+            )
             node.send_output("image", camera_frame, metadata)
             node.send_output("lidar_pc", lidar_pc, metadata)
             node.send_output(
-                "objective_waypoints", waypoints_xyz.tobytes(), metadata
+                "objective_waypoints",
+                pa.array(waypoints_xyz.view(np.uint8).ravel()),
+                metadata,
             )
 
             # Receiving back control information
@@ -288,7 +298,7 @@ class DoraAgent(AutonomousAgent):
                 event = node.next()
                 if event["type"] == "INPUT":
                     input_id = event["id"]
-                    value = event["data"]
+                    value = event["value"]
 
                     if input_id == "tick" and iteration > 0 and iteration < 4:
                         print(
@@ -302,7 +312,7 @@ class DoraAgent(AutonomousAgent):
                     elif input_id == "control":
                         break
 
-            [throttle, target_angle, brake] = np.frombuffer(value, np.float16)
+            [throttle, target_angle, brake] = np.array(value).view(np.float16)
 
             steer = radians_to_steer(target_angle, STEER_GAIN)
             vec_control = VehicleControl(

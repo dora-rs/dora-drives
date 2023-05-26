@@ -21,4 +21,3 @@ nodes:
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
-        tick: dora/timer/millis/100
