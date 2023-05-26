@@ -155,103 +155,157 @@
 <p>Let's add a <code>yolov5</code> object detection operator that has already been written for us in <code>./operators/yolov5_op.py</code>. This will help us detect object as bounding boxes within the webcam stream.</p>
 <pre><code class="language-python"># operators/yolov5_op.py
 
-import os
-from typing import Callable
+&quot;&quot;&quot; 
+# Yolov5 operator
 
-import numpy as np
+`Yolov5` object detection operator generates bounding boxes on images where it detects object. 
+
+More info here: [https://github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5)
+
+`Yolov5` has not been finetuned on the simulation and is directly importing weight from Pytorch Hub.
+
+In case you want to run `yolov5` without internet you can clone [https://github.com/ultralytics/yolov5](https://github.com/ultralytics/yolov5) and download the weights you want to use from [the release page](https://github.com/ultralytics/yolov5/releases/tag/v7.0) and then specify within the yaml graph the two environments variables:
+- `YOLOV5_PATH: YOUR/PATH` 
+- `YOLOV5_WEIGHT_PATH: YOUR/WEIGHT/PATH`
+
+You can also choose to allocate the model in GPU using the environment variable:
+- `PYTORCH_DEVICE: cuda # or cpu`
+
+## Inputs
+
+- image as 1920x1080xBGR array.
+
+## Outputs
+
+- Bounding box coordinates as well as the confidence and class label as output.
+
+## Graph Description
+
+```yaml
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: webcam/image
+      python: ../../operators/yolov5_op.py
+</code></pre>
+<h2 id="graph-visualisation"><a class="header" href="#graph-visualisation">Graph Visualisation</a></h2>
+<pre class="mermaid">        flowchart TB
+  oasis_agent
+subgraph yolov5
+  yolov5/op[op]
+end
+subgraph obstacle_location_op
+  obstacle_location_op/op[op]
+end
+  oasis_agent -- image --&gt; yolov5/op
+  yolov5/op -- bbox as obstacles_bbox --&gt; obstacle_location_op/op
+</pre>
+<p>&quot;&quot;&quot;</p>
+<p>import os
+from typing import Callable</p>
+<p>import numpy as np
+import pyarrow as pa
 import torch
-from dora import DoraStatus
-
+from dora import DoraStatus</p>
+<p>pa.array([])  # See: https://github.com/apache/arrow/issues/34994
 IMAGE_WIDTH = 1920
 IMAGE_HEIGHT = 1080
 DEVICE = os.environ.get(&quot;PYTORCH_DEVICE&quot;) or &quot;cpu&quot;
 YOLOV5_PATH = os.environ.get(&quot;YOLOV5_PATH&quot;)
-YOLOV5_WEIGHT_PATH = os.environ.get(&quot;YOLOV5_WEIGHT_PATH&quot;)
+YOLOV5_WEIGHT_PATH = os.environ.get(&quot;YOLOV5_WEIGHT_PATH&quot;)</p>
+<p>class Operator:
+&quot;&quot;&quot;
+Send <code>bbox</code> found by YOLOv5 on given <code>image</code>
+&quot;&quot;&quot;</p>
+<pre><code>def __init__(self):
+    if YOLOV5_PATH is None:
+        # With internet
+        self.model = torch.hub.load(
+            &quot;ultralytics/yolov5&quot;,
+            &quot;yolov5n&quot;,
+        )
+    else:
+        # Without internet
+        #
+        # To install:
+        # cd $DORA_HOME_DEP/dependecies # Optional
+        # git clone https://github.com/ultralytics/yolov5.git
+        # rm yolov5/.git -rf
+        # Add YOLOV5_PATH and YOLOV5_WEIGHT_PATH in your YAML graph
 
+        self.model = torch.hub.load(
+            YOLOV5_PATH,
+            &quot;custom&quot;,
+            path=YOLOV5_WEIGHT_PATH,
+            source=&quot;local&quot;,
+        )
 
-class Operator:
+    self.model.to(torch.device(DEVICE))
+    self.model.eval()
+
+def on_event(
+    self,
+    dora_event: dict,
+    send_output: Callable[[str, bytes], None],
+) -&gt; DoraStatus:
+    if dora_event[&quot;type&quot;] == &quot;INPUT&quot;:
+        return self.on_input(dora_event, send_output)
+    return DoraStatus.CONTINUE
+
+def on_input(
+    self,
+    dora_input: dict,
+    send_output: Callable[[str, bytes], None],
+) -&gt; DoraStatus:
     &quot;&quot;&quot;
-    Send `bbox` found by YOLOv5 on given `image`
+    Handle image
+    Args:
+        dora_input[&quot;id&quot;] (str): Id of the input declared in the yaml configuration
+        dora_input[&quot;value&quot;] (arrow.array (UInt8)): Bytes message of the input
+        send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
     &quot;&quot;&quot;
+    if dora_input[&quot;id&quot;] == &quot;image&quot;:
+        frame = (
+            dora_input[&quot;value&quot;]
+            .to_numpy()
+            .reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+        )
+        frame = frame[:, :, :3]
 
-    def __init__(self):
-        if YOLOV5_PATH is None:
-            # With internet
-            self.model = torch.hub.load(
-                &quot;ultralytics/yolov5&quot;,
-                &quot;yolov5n&quot;,
-            )
-        else:
-            # Without internet
-            self.model = torch.hub.load(
-                YOLOV5_PATH,
-                &quot;custom&quot;,
-                path=YOLOV5_WEIGHT_PATH,
-                source=&quot;local&quot;,
-            )
-
-        self.model.to(torch.device(DEVICE))
-        self.model.eval()
-
-    def on_event(
-        self,
-        dora_event: dict,
-        send_output: Callable[[str, bytes], None],
-    ) -&gt; DoraStatus:
-        if dora_event[&quot;type&quot;] == &quot;INPUT&quot;:
-            return self.on_input(dora_event, send_output)
+        results = self.model(frame)  # includes NMS
+        arrays = np.array(results.xyxy[0].cpu())[
+            :, [0, 2, 1, 3, 4, 5]
+        ]  # xyxy -&gt; xxyy
+        arrays[:, 4] *= 100
+        arrays = arrays.astype(np.int32)
+        arrays = pa.array(arrays.ravel().view(np.uint8))
+        send_output(&quot;bbox&quot;, arrays, dora_input[&quot;metadata&quot;])
         return DoraStatus.CONTINUE
-
-    def on_input(
-        self,
-        dora_input: dict,
-        send_output: Callable[[str, bytes], None],
-    ) -&gt; DoraStatus:
-        &quot;&quot;&quot;Handle image
-        Args:
-            dora_input[&quot;id&quot;](str): Id of the input declared in the yaml configuration
-            dora_input[&quot;data&quot;] (bytes): Bytes message of the input
-            send_output (Callable[[str, bytes]]): Function enabling sending output back to dora.
-        &quot;&quot;&quot;
-        if dora_input[&quot;id&quot;] == &quot;image&quot;:
-            frame = np.frombuffer(
-                dora_input[&quot;data&quot;],
-                np.uint8,
-            ).reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-            frame = frame[:, :, :3]
-
-            results = self.model(frame)  # includes NMS
-            arrays = np.array(results.xyxy[0].cpu())[
-                :, [0, 2, 1, 3, 4, 5]
-            ]  # xyxy -&gt; xxyy
-            arrays[:, 4] *= 100
-            arrays = arrays.astype(np.int32)
-            arrays = arrays.tobytes()
-            send_output(&quot;bbox&quot;, arrays, dora_input[&quot;metadata&quot;])
-            return DoraStatus.CONTINUE
 </code></pre>
-<blockquote>
-<p>Operators are composed of:</p>
-<p><code>__init__</code> methods that help create the object.</p>
-<p><code>on_event</code> methods that is called when an event is received. 
-There is currently 4 event types:</p>
-<ul>
-<li><code>STOP</code>: meaning that the operator was signalled to stop.</li>
-<li><code>INPUT</code>: meannig that an input was received.
-<ul>
-<li>You can use <code>dora_event['id']</code>, to get the id. </li>
-<li>You can use <code>dora_event['data']</code>, to get the data. </li>
-<li>You can use <code>dora_event['meatadata']</code>, to get the metadata.</li>
-</ul>
-</li>
-<li><code>INPUT_CLOSED</code>: meannig that an input source was closed. This could be useful if the input is critical for the well behaviour of the operator.</li>
-<li><code>ERROR</code>: meaning that error message was received.</li>
-<li><code>UNKNOWN</code>: meaning that an unknown message was received.</li>
-</ul>
-<p>We have encapsulated <code>input</code> event in a <code>on_input</code> method but this is not required.</p>
-</blockquote>
-<p>To add an operator within the dataflow. You need to explicit what the input and output are. You can reference node by their ids:</p>
-<pre><code class="language-yaml"># graphs/tutorials/webcam_yolov5.yaml
+<pre><code>
+&gt; Operators are composed of:
+&gt;
+&gt; `__init__` methods that help create the object.
+&gt;
+&gt; `on_event` methods that is called when an event is received. 
+&gt; There is currently 4 event types:
+&gt; - `STOP`: meaning that the operator was signalled to stop.
+&gt; - `INPUT`: meannig that an input was received.
+&gt;   - You can use `dora_event['id']`, to get the id. 
+&gt;   - You can use `dora_event['data']`, to get the data. 
+&gt;   - You can use `dora_event['meatadata']`, to get the metadata.
+&gt; - `INPUT_CLOSED`: meannig that an input source was closed. This could be useful if the input is critical for the well behaviour of the operator.
+&gt; - `ERROR`: meaning that error message was received.
+&gt; - `UNKNOWN`: meaning that an unknown message was received.
+&gt;
+&gt; We have encapsulated `input` event in a `on_input` method but this is not required.
+
+To add an operator within the dataflow. You need to explicit what the input and output are. You can reference node by their ids:
+
+```yaml
+# graphs/tutorials/webcam_yolov5.yaml
 
 nodes:
   - id: webcam
@@ -276,7 +330,6 @@ nodes:
       inputs:
         image: webcam/image
         obstacles_bbox: yolov5/bbox
-        tick: dora/timer/millis/100
 </code></pre>
 <p>In this case, we have connected the <code>webcam/image</code> output to the <code>image</code> input of yolov5. <code>yolov5/bbox</code> is then connected to the <code>plot/obstacles_bbox</code>.</p>
 <p>Inputs are prefixed by the node name to be able to separate name conflicts.</p>
