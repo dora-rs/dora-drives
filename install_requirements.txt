@@ -35,7 +35,7 @@ pyquaternion
 ##### CARLA dependencies #####
 networkx==2.2
 ninja
-dora-rs==0.2.2
+dora-rs==0.2.3
 tensorboard
 
 ##### MiDaS ####
