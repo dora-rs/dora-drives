@@ -6,6 +6,8 @@ nodes:
         tick: dora/timer/millis/50
       outputs:
         - image
+    env:
+      DEVICE_INDEX: 0
 
   - id: plot
     operator:

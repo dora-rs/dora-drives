@@ -1,14 +1,15 @@
 from typing import Callable
-
-import cv2
 from dora import DoraStatus
-
-OUTPUT_WIDTH = 1920
-OUTPUT_HEIGHT = 1080
+import os
+import cv2
 import numpy as np
 import pyarrow as pa
 
 pa.array([])
+
+OUTPUT_WIDTH = 1920
+OUTPUT_HEIGHT = 1080
+DEVICE_INDEX = os.environ.get('DEVICE_INDEX', '0')
 
 
 class Operator:
@@ -17,7 +18,7 @@ class Operator:
     """
 
     def __init__(self):
-        self.video_capture = cv2.VideoCapture(0)
+        self.video_capture = cv2.VideoCapture(int(DEVICE_INDEX))
         self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, OUTPUT_WIDTH)
         self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, OUTPUT_HEIGHT)
 
