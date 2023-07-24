@@ -56,8 +56,6 @@ conda activate dora3.7
 
 cd $DORA_DEP_HOME/dependencies/
 
-pip install carla==0.9.13
-
 ###### Install Carla Leaderboard ######
 echo "[x] Installing Carla leaderboard..."
 cd $DORA_DEP_HOME/dependencies/
