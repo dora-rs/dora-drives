@@ -191,7 +191,7 @@ class Operator:
         elif "image" == dora_input["id"]:
             self.camera_frame = (
                 dora_input["value"]
-                .to_numpy()
+                .to_numpy().copy()
                 .reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
             )
 

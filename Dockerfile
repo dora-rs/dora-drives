@@ -117,8 +117,8 @@ RUN sudo chown -R dora:dora .
 # RUN conda activate dora3.7 && python3 -c "from strong_sort import StrongSORT; import torch; StrongSORT('osnet_x0_25_msmt17.pt', torch.device('cuda'), False)"
 # RUN conda activate dora3.7 && python3 -c "import yolov7_tt100k"
 
-RUN sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.3/dora-v0.2.3-x86_64-Linux.zip && sudo unzip dora-v0.2.3-x86_64-Linux.zip -d /bin 
-RUN conda activate dora3.7 && python3 -m pip install dora-rs==0.2.3 patchelf --upgrade
+RUN sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.4/dora-v0.2.4-x86_64-Linux.zip && sudo unzip dora-v0.2.4-x86_64-Linux.zip -d /bin 
+RUN conda activate dora3.7 && python3 -m pip install dora-rs==0.2.4 patchelf --upgrade
 
 WORKDIR /home/dora/workspace/dora-drives
 COPY . .

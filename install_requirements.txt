@@ -8,6 +8,7 @@ absl-py
 gdown
 pyarrow
 # Old dependencies to double check  
+ultralytics
 cvxpy
 erdos>=0.3.1
 lapsolver
@@ -35,7 +36,7 @@ pyquaternion
 ##### CARLA dependencies #####
 networkx==2.2
 ninja
-dora-rs==0.2.3
+dora-rs==0.2.4
 tensorboard
 
 ##### MiDaS ####
