@@ -12,17 +12,17 @@ nodes:
         - lidar_pc
         - opendrive
       source: shell
-      # args: >
-        # python3 $SIMULATE --output 
-        # --oasJson --criteriaConfig $CRITERIA
-        # --openscenario $XOSC
-        # --agent $TEAM_AGENT
-        # --agentConfig $TEAM_AGENT_CONF
-        # --destination $DESTINATION
+      args: >
+        python3 $SIMULATE --output 
+        --oasJson --criteriaConfig $CRITERIA
+        --openscenario $XOSC
+        --agent $TEAM_AGENT
+        --agentConfig $TEAM_AGENT_CONF
+        --destination $DESTINATION
       #
       # or for Carla Standalone:
       #
-      args: python3 ../../carla/carla_source_node.py
+      # args: python3 ../../carla/carla_source_node.py
 
   - id: carla_gps_op
     operator:
@@ -44,6 +44,8 @@ nodes:
     env:
       # CUDA_VISIBLE_DEVICES: ""
       PYTORCH_DEVICE: cuda
+      YOLOV5_PATH:       /home/dora/workspace/simulate/team_code/dependencies/yolov5 
+      YOLOV5_WEIGHT_PATH:  /home/dora/workspace/simulate/team_code/dependencies/yolov5/yolov5n.pt
 
   - id: obstacle_location_op
     operator: 
