@@ -3,7 +3,7 @@ nodes:
     custom:
       inputs:
         control: pid_control_op/control
-        tick: dora/timer/millis/400
+        tick: dora/timer/millis/100
       outputs:
         - position
         - speed

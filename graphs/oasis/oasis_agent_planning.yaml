@@ -2,7 +2,7 @@ nodes:
   - id: oasis_agent
     custom:
       inputs:
-        tick: dora/timer/millis/400
+        tick: dora/timer/millis/100
       outputs:
         - position
         - speed
