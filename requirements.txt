@@ -73,8 +73,10 @@ open3d
 pyflann==1.6.14
 pyflann_py3==0.1.0
 tensorboardX==2.5.1
-git+https://github.com/haixuanTao/IMFNet
+# git+https://github.com/haixuanTao/IMFNet
 
 # Traffic sign
 
-git+https://github.com/haixuanTao/yolov7.git
+# git+https://github.com/haixuanTao/yolov7.git
+
+git+https://github.com/haixuanTao/frenet_optimal_trajectory_planner.git

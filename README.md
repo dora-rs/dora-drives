@@ -19,11 +19,6 @@ We believe that programming autonomous driving vehicles is the perfect starting 
 git clone git@github.com:dora-rs/dora-drives.git
 cd dora-drives
 
-export DORA_DEP_HOME=<PATH TO A PARENT FOLDER> # Ex: $HOME/Documents
-export DORA_DEP_HOME=$HOME/Documents
-export PYLOT_HOME=$DORA_DEP_HOME
-export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies
-
 ## Installing dependencies
 conda create -n dora3.7 python=3.7 -y
 conda activate dora3.7
@@ -31,9 +26,6 @@ conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch -y
 pip install --upgrade pip
 pip install -r install_requirements.txt
 pip install -r requirements.txt
-
-chmod +x ./scripts/*
-./scripts/install.sh
 
 ## Installing dora if its not already installed
 sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.4/dora-v0.2.4-x86_64-Linux.zip && sudo unzip dora-v0.2.4-x86_64-Linux.zip -d /usr/local/bin 

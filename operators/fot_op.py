@@ -67,9 +67,7 @@ import numpy as np
 import pyarrow as pa
 from dora import DoraStatus
 from dora_utils import LABELS
-from frenet_optimal_trajectory_planner.FrenetOptimalTrajectory import (
-    fot_wrapper,
-)
+from frenetoptimaltrajectory import fot_wrapper
 from numpy import linalg as LA
 from scipy.spatial.transform import Rotation as R
 from sklearn.metrics import pairwise_distances
@@ -86,7 +84,6 @@ MAX_CURBATURE = np.pi / 6
 
 
 def get_lane_list(position, lanes, waypoints):
-
     lane_list = []
 
     lanes_xy = lanes[:, :, :2]
@@ -101,19 +98,14 @@ def get_lane_list(position, lanes, waypoints):
 
 
 def get_obstacle_list(position, obstacle_predictions, waypoints):
-
     [x_ego, y_ego, z, rx, ry, rz, rw] = position
-    [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
-        "xyz", degrees=False
-    )
+    [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler("xyz", degrees=False)
 
     if len(obstacle_predictions) == 0 or len(waypoints) == 0:
         return np.empty((0, 4))
     obstacle_list = []
 
-    distances = pairwise_distances(waypoints, obstacle_predictions[:, :2]).min(
-        0
-    )
+    distances = pairwise_distances(waypoints, obstacle_predictions[:, :2]).min(0)
     for distance, prediction in zip(distances, obstacle_predictions):
         # Use all prediction times as potential obstacles.
         [x, y, _, _confidence, _label] = prediction
@@ -252,7 +244,6 @@ class Operator:
         dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
-
         if dora_input["id"] == "position":
             self.last_position = self.position
             self.position = np.array(dora_input["value"]).view(np.float32)
@@ -265,22 +256,14 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "obstacles":
-            obstacles = (
-                np.array(dora_input["value"]).view(np.float32).reshape((-1, 5))
-            )
+            obstacles = np.array(dora_input["value"]).view(np.float32).reshape((-1, 5))
             if len(self.last_obstacles) > 0:
-                self.obstacles = np.concatenate(
-                    [self.last_obstacles, obstacles]
-                )
+                self.obstacles = np.concatenate([self.last_obstacles, obstacles])
             else:
                 self.obstacles = obstacles
 
         elif dora_input["id"] == "global_lanes":
-            lanes = (
-                np.array(dora_input["value"])
-                .view(np.float32)
-                .reshape((-1, 60, 3))
-            )
+            lanes = np.array(dora_input["value"]).view(np.float32).reshape((-1, 60, 3))
             self.lanes = lanes
             return DoraStatus.CONTINUE
 
@@ -303,9 +286,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         [x, y, z, rx, ry, rz, rw] = self.position
-        [_, _, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
-            "xyz", degrees=False
-        )
+        [_, _, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler("xyz", degrees=False)
 
         gps_obstacles = get_obstacle_list(
             self.position, self.obstacles, self.gps_waypoints
@@ -345,14 +326,10 @@ class Operator:
         if not success:
             initial_conditions["wp"] = initial_conditions["wp"][:5]
             print(f"fot failed. stopping with {initial_conditions}.")
-            target_distance = LA.norm(
-                self.gps_waypoints[-1] - self.position[:2]
-            )
+            target_distance = LA.norm(self.gps_waypoints[-1] - self.position[:2])
             print(f"Distance to target: {target_distance}")
             for obstacle in self.obstacles:
-                print(
-                    f"obstacles:{obstacle}, label: {LABELS[int(obstacle[-1])]}"
-                )
+                print(f"obstacles:{obstacle}, label: {LABELS[int(obstacle[-1])]}")
 
             send_output(
                 "waypoints",
