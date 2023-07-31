@@ -4,86 +4,71 @@
 
 ---
 
-`dora-drives` is a set of operators you can use with `dora` to create an autonomous driving vehicle.
+`dora-drives` is a step-by-step tutorial that allows beginners to write their own autonomous vehicle program from scratch using a simple starter kit.
 
-You can test the operators on real webcam or within [Carla](https://carla.org/).
+## Why dora-drives?
 
-This project is in early development, and many features have yet to be implemented with breaking changes. Please don't take for granted the current design.
+We believe that programming autonomous driving vehicles is the perfect starting point to learning robotic applications as:
+- Autonomous driving is foundational for many robotic applications.
+- Autonomous driving is simple to explain.
+- There are a lot of datasets, models and documentation available online.
+
+## Installation
+
+```bash
+git clone git@github.com:dora-rs/dora-drives.git
+cd dora-drives
+
+export DORA_DEP_HOME=<PATH TO A PARENT FOLDER> # Ex: $HOME/Documents
+export DORA_DEP_HOME=$HOME/Documents
+export PYLOT_HOME=$DORA_DEP_HOME
+export PYTHONPATH=$PYTHONPATH:$DORA_DEP_HOME/dependencies
+
+## Installing dependencies
+conda create -n dora3.7 python=3.7 -y
+conda activate dora3.7
+conda install pytorch=1.11.0 torchvision=0.12.0 cudatoolkit=11.3 -c pytorch -y
+pip install --upgrade pip
+pip install -r install_requirements.txt
+pip install -r requirements.txt
+
+chmod +x ./scripts/*
+./scripts/install.sh
+
+## Installing dora if its not already installed
+sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.4/dora-v0.2.4-x86_64-Linux.zip && sudo unzip dora-v0.2.4-x86_64-Linux.zip -d /usr/local/bin 
+```
+
+For more info, see: https://dora.carsmos.ai/docs/guides/dora-drives/installation
+
+## Getting started
+
+You can run a fully looped autonomous vehicle with just the following command:
+
+```bash
+docker pull carlasim/carla:0.9.13
+
+# Serve the carla simulator
+docker run --privileged --gpus all --net=host -e DISPLAY=$DISPLAY carlasim/carla:0.9.13 /bin/bash ./CarlaUE4.sh -carla-server -world-port=2000 -RenderOffScreen
+
+# Spawn dora daemon and coordinator
+dora up
+
+# Spawn dora dataflow
+dora start graphs/oasis/oasis_full.yaml --attach
+```
+
+To get a step-by-step tutorial, see: https://dora.carsmos.ai/docs/guides/dora-drives/carla
 
 ## Documentation
 
-The documentation can be found here: [dora-rs.github.io/dora-drives](https://dora-rs.github.io/dora-drives)
+The documentation can be found here: https://dora.carsmos.ai/docs/guides/dora-drives
 
-You will be able to get started using the [installation section](https://dora-rs.github.io/dora-drives/installation.html).
+## Discussion
 
-## Operators:
+Our main communication channel is our Github Project Discussion page: https://github.com/orgs/dora-rs/discussions
 
-### [Point cloud registration](https://paperswithcode.com/task/point-cloud-registration/latest)
-
-- [IMFNet](https://github.com/XiaoshuiHuang/IMFNet) 
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/imfnet-interpretable-multimodal-fusion-for/point-cloud-registration-on-3dmatch-benchmark)](https://paperswithcode.com/sota/point-cloud-registration-on-3dmatch-benchmark?p=imfnet-interpretable-multimodal-fusion-for)
-
-<img src=https://user-images.githubusercontent.com/22787340/192553644-1d8466be-c1e1-492d-9bc2-3546a1a3ea55.png width="300"><img src=https://user-images.githubusercontent.com/22787340/192553631-d6379df5-a1a8-49b9-a5c1-7bc7b9f1ed52.png width="300">
-
-
-
-### [Object dectection](https://paperswithcode.com/task/object-detection)
-
-- [yolov5](https://github.com/ultralytics/yolov5) 
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/path-aggregation-network-for-instance/object-detection-on-coco)](https://paperswithcode.com/sota/object-detection-on-coco?p=path-aggregation-network-for-instance)
-
-<img src=https://user-images.githubusercontent.com/22787340/187723794-3623bee2-91d6-436a-a5d7-d2e363483c76.gif width="600">
-
-- Perfect detection on Carla Simulator
-
-### [Traffic sign recognition](https://paperswithcode.com/task/traffic-sign-recognition)
-    
-- [Custom trained yolov7 on tt100k](https://github.com/haixuanTao/yolov7)
-
-### [Lane detection](https://paperswithcode.com/task/lane-detection)
-
-- [yolop](https://github.com/hustvl/YOLOP) 
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/lane-detection-on-bdd100k)](https://paperswithcode.com/sota/lane-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
-
-<img src=https://user-images.githubusercontent.com/22787340/187723841-7f3ba560-dbbe-4d43-886a-fb3b0be9247a.gif width="600">
-
-### [Drivable Area detection](https://paperswithcode.com/task/drivable-area-detection)
-
-- [yolop](https://github.com/hustvl/YOLOP) 
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/hybridnets-end-to-end-perception-network-1/drivable-area-detection-on-bdd100k)](https://paperswithcode.com/sota/drivable-area-detection-on-bdd100k?p=hybridnets-end-to-end-perception-network-1) 
-
-### [Multiple Object tracking(MOT)](https://paperswithcode.com/task/multi-object-tracking)
-#### [strong sort](https://github.com/haixuanTao/yolov5_strongsort_package) 
-
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/strongsort-make-deepsort-great-again/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=strongsort-make-deepsort-great-again) 
-
-<img src=https://user-images.githubusercontent.com/22787340/187723873-473cda4f-573d-4663-a5b9-a4df2611c482.gif width="600">
-
-### [Motion Planning](https://paperswithcode.com/task/motion-planning)
-
-- [Hybrid A-star](https://github.com/erdos-project/hybrid_astar_planner)
-
-<img src=https://user-images.githubusercontent.com/22787340/192555777-1d5e4c5f-d654-4ef3-a019-387e56e46970.gif width="600">
-
-### Path Tracking
-
-- Proportional Integral Derivative controller (PID)
-    
-## Future operators:
-
-- [Trajectory Prediction (pedestrian and vehicles)](https://paperswithcode.com/task/trajectory-prediction)
-
-- [Pedestrian detection](https://paperswithcode.com/task/pedestrian-detection)
-
-- [Semantic segmentation](https://paperswithcode.com/task/semantic-segmentation)
-
-- [Depth estimation](https://paperswithcode.com/task/depth-estimation)
-
-- [Multiple object tracking and segmentation(MOTS)](https://paperswithcode.com/task/multi-object-tracking)
+Feel free to reach out on any topic, issues or ideas.
 
 ## ⚖️ LICENSE 
 
