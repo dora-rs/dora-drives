@@ -45,7 +45,6 @@ def _get_latlon_ref(xodr):
 
 
 def from_gps_to_world_coordinate(lat, lon, lat_ref, lon_ref):
-
     EARTH_RADIUS_EQUA = 6378137.0  # pylint: disable=invalid-name
     scale = math.cos(lat_ref * math.pi / 180.0)
     mx_initial = scale * lon_ref * math.pi * EARTH_RADIUS_EQUA / 180.0
@@ -186,24 +185,17 @@ class DoraAgent(AutonomousAgent):
             metadata = {"open_telemetry_context": serialize_context(output)}
             ### Opendrive preprocessing
             if "高精地图传感器" in input_data.keys():
-
                 if self.opendrive_map is None:
                     opendrive_map = input_data["高精地图传感器"][1]["opendrive"]
                     self.save_input_data("高精地图传感器", input_data["高精地图传感器"])
 
                     self.opendrive_map = opendrive_map
                     self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
-                    node.send_output(
-                        "opendrive", opendrive_map.encode(), metadata
-                    )
+                    node.send_output("opendrive", opendrive_map.encode(), metadata)
             if "速度传感器" in input_data.keys():
                 node.send_output(
                     "speed",
-                    pa.array(
-                        np.array(
-                            input_data["速度传感器"][1]["speed"], np.float32
-                        ).view(np.uint8)
-                    ),
+                    pa.array(np.array(input_data["速度传感器"][1]["speed"], np.float32)),
                     metadata,
                 )
 
@@ -217,9 +209,7 @@ class DoraAgent(AutonomousAgent):
 
             ### Position preprocessing
             [lat, lon, z] = input_data["GPS"][1]
-            [x, y] = from_gps_to_world_coordinate(
-                lat, lon, self.lat_ref, self.lon_ref
-            )
+            [x, y] = from_gps_to_world_coordinate(lat, lon, self.lat_ref, self.lon_ref)
             yaw = input_data["IMU"][1][-1] - np.pi / 2
             roll = 0.0
             pitch = 0.0
@@ -257,14 +247,14 @@ class DoraAgent(AutonomousAgent):
             frame_raw_data = input_data["camera.center"][1]
             ## frame = np.frombuffer(frame_raw_data, np.uint8)
             ## frame = np.reshape(frame, (IMAGE_HEIGHT, IMAGE_WIDTH, 4))
-            camera_frame = pa.array(frame_raw_data.view(np.uint8).ravel())
+            camera_frame = pa.array(frame_raw_data.ravel())
 
             ### LIDAR preprocessing
             frame_raw_data = input_data["LIDAR"][1]
             frame = np.frombuffer(frame_raw_data, np.float32)
             point_cloud = np.reshape(frame, (-1, 4))
             point_cloud = point_cloud[:, :3]
-            lidar_pc = pa.array(point_cloud.view(np.uint8).ravel())
+            lidar_pc = pa.array(point_cloud.ravel())
 
             ### Waypoints preprocessing
             waypoints_xyz = np.array(
@@ -281,14 +271,14 @@ class DoraAgent(AutonomousAgent):
             ## Sending data into the dataflow
             node.send_output(
                 "position",
-                pa.array(position.view(np.uint8).ravel()),
+                pa.array(position.ravel()),
                 metadata,
             )
             node.send_output("image", camera_frame, metadata)
             node.send_output("lidar_pc", lidar_pc, metadata)
             node.send_output(
                 "objective_waypoints",
-                pa.array(waypoints_xyz.view(np.uint8).ravel()),
+                pa.array(waypoints_xyz.ravel()),
                 metadata,
             )
 
@@ -301,9 +291,7 @@ class DoraAgent(AutonomousAgent):
                     value = event["value"]
 
                     if input_id == "tick" and iteration > 0 and iteration < 4:
-                        print(
-                            f"Did not receive control after {iteration} ticks..."
-                        )
+                        print(f"Did not receive control after {iteration} ticks...")
                     elif input_id == "tick" and iteration == 4:
                         print(
                             f"Sending null control after waiting {iteration} ticks..."
@@ -312,7 +300,7 @@ class DoraAgent(AutonomousAgent):
                     elif input_id == "control":
                         break
 
-            [throttle, target_angle, brake] = np.array(value).view(np.float16)
+            [throttle, target_angle, brake] = np.array(value)
 
             steer = radians_to_steer(target_angle, STEER_GAIN)
             vec_control = VehicleControl(

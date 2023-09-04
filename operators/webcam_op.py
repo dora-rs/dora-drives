@@ -9,7 +9,7 @@ pa.array([])
 
 OUTPUT_WIDTH = 1920
 OUTPUT_HEIGHT = 1080
-DEVICE_INDEX = os.environ.get('DEVICE_INDEX', '0')
+DEVICE_INDEX = os.environ.get("DEVICE_INDEX", "0")
 
 
 class Operator:
@@ -42,7 +42,7 @@ class Operator:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
             send_output(
                 "image",
-                pa.array(frame.ravel().view(np.uint8)),
+                pa.array(frame.ravel()),
                 dora_input["metadata"],
             )
         else:

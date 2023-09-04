@@ -7,8 +7,7 @@ import numpy as np
 import pyarrow as pa
 
 pa.array([])  # See: https://github.com/apache/arrow/issues/34994
-from _generate_world import (add_camera, add_lidar, spawn_actors,
-                             spawn_driving_vehicle)
+from _generate_world import add_camera, add_lidar, spawn_actors, spawn_driving_vehicle
 from dora import Node
 from numpy import linalg as LA
 from opentelemetry import trace
@@ -16,12 +15,10 @@ from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import \
-    TraceContextTextMapPropagator
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 from scipy.spatial.transform import Rotation as R
 
-from carla import (Client, Location, Rotation, Transform, VehicleControl,
-                   command)
+from carla import Client, Location, Rotation, Transform, VehicleControl, command
 
 
 def radians_to_steer(rad: float, steer_gain: float):
@@ -66,9 +63,7 @@ CarrierT = typing.TypeVar("CarrierT")
 propagator = TraceContextTextMapPropagator()
 
 trace.set_tracer_provider(
-    TracerProvider(
-        resource=Resource.create({SERVICE_NAME: "carla_source_node"})
-    )
+    TracerProvider(resource=Resource.create({SERVICE_NAME: "carla_source_node"}))
 )
 tracer = trace.get_tracer(__name__)
 jaeger_exporter = JaegerExporter(
@@ -93,21 +88,16 @@ camera_frame = None
 segmented_frame = None
 last_position = np.array([0.0, 0.0])
 
-sensor_transform = Transform(
-    Location(3, 0, 1), Rotation(pitch=0, yaw=0, roll=0)
-)
+sensor_transform = Transform(Location(3, 0, 1), Rotation(pitch=0, yaw=0, roll=0))
 
 
 def on_lidar_msg(frame):
-
     global lidar_pc
     frame = np.frombuffer(frame.raw_data, np.float32)
     point_cloud = np.reshape(frame, (-1, 4))
     point_cloud = point_cloud[:, :3]
 
-    lidar_pc = pa.array(
-        np.ascontiguousarray(point_cloud).ravel().view(np.uint8)
-    )
+    lidar_pc = pa.array(np.ascontiguousarray(point_cloud).ravel())
 
 
 def on_camera_msg(frame):
@@ -166,20 +156,16 @@ def main():
     output = {}
     propagator.inject(output)
     metadata = {"open_telemetry_context": serialize_context(output)}
-    node.send_output("position", pa.array(position.view(np.uint8)), metadata)
+    node.send_output("position", pa.array(position), metadata)
     node.send_output(
         "speed",
-        pa.array(
-            np.array(
-                [LA.norm(position[:2] - last_position[:2])], np.float32
-            ).view(np.uint8)
-        ),
+        pa.array(np.array([LA.norm(position[:2] - last_position[:2])], np.float32)),
         metadata,
     )
     node.send_output("image", camera_frame, metadata)
     node.send_output(
         "objective_waypoints",
-        pa.array(OBJECTIVE_WAYPOINTS.view(np.uint8)),
+        pa.array(OBJECTIVE_WAYPOINTS),
         metadata,
     )
     # node.send_output("depth_frame", depth_frame, metadata)
@@ -191,9 +177,7 @@ def main():
 for event in node:
     if event["type"] == "INPUT":
         if event["id"] == "control":
-            [throttle, target_angle, brake] = np.array(event["value"]).view(
-                np.float16
-            )
+            [throttle, target_angle, brake] = np.array(event["value"])
 
             steer = radians_to_steer(target_angle, STEER_GAIN)
             vec_control = VehicleControl(
@@ -203,8 +187,6 @@ for event in node:
                 hand_brake=False,
             )
 
-            client.apply_batch(
-                [command.ApplyVehicleControl(vehicle_id, vec_control)]
-            )
+            client.apply_batch([command.ApplyVehicleControl(vehicle_id, vec_control)])
 
         main()

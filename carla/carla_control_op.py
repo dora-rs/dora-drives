@@ -65,9 +65,7 @@ class Operator:
         if "control" != dora_input["id"]:
             return DoraStatus.CONTINUE
 
-        [throttle, target_angle, brake] = np.array(dora_input["value"]).view(
-            np.float16
-        )
+        [throttle, target_angle, brake] = np.array(dora_input["value"])
 
         steer = radians_to_steer(target_angle, STEER_GAIN)
         vec_control = VehicleControl(
@@ -77,7 +75,5 @@ class Operator:
             hand_brake=False,
         )
 
-        client.apply_batch(
-            [command.ApplyVehicleControl(self.vehicle_id, vec_control)]
-        )
+        client.apply_batch([command.ApplyVehicleControl(self.vehicle_id, vec_control)])
         return DoraStatus.CONTINUE
