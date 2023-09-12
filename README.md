@@ -28,7 +28,7 @@ pip install -r install_requirements.txt
 pip install -r requirements.txt
 
 ## Installing dora if its not already installed
-sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.4/dora-v0.2.4-x86_64-Linux.zip && sudo unzip dora-v0.2.4-x86_64-Linux.zip -d /usr/local/bin 
+sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.5/dora-v0.2.5-x86_64-Linux.zip && sudo unzip dora-v0.2.5-x86_64-Linux.zip -d /usr/local/bin 
 ```
 
 For more info, see: https://dora.carsmos.ai/docs/guides/dora-drives/installation
