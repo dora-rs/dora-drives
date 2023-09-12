@@ -121,9 +121,7 @@ class Operator:
         """
         if dora_input["id"] == "image":
             frame = (
-                dora_input["value"]
-                .to_numpy()
-                .reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
+                dora_input["value"].to_numpy().reshape((IMAGE_HEIGHT, IMAGE_WIDTH, 4))
             )
             frame = frame[:, :, :3]
 
@@ -133,6 +131,6 @@ class Operator:
             ]  # xyxy -> xxyy
             arrays[:, 4] *= 100
             arrays = arrays.astype(np.int32)
-            arrays = pa.array(arrays.ravel().view(np.uint8))
+            arrays = pa.array(arrays.ravel())
             send_output("bbox", arrays, dora_input["metadata"])
             return DoraStatus.CONTINUE

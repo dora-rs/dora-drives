@@ -16,9 +16,7 @@ GOAL_LOCATION = [234, 59, 39]
 
 
 def filter_consecutive_duplicate(x):
-    return np.array(
-        [elem for i, elem in enumerate(x) if (elem - x[i - 1]).any()]
-    )
+    return np.array([elem for i, elem in enumerate(x) if (elem - x[i - 1]).any()])
 
 
 class Operator:
@@ -49,9 +47,8 @@ class Operator:
         dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ):
-
         if "position" == dora_input["id"]:
-            self.position = np.array(dora_input["value"]).view(np.float32)
+            self.position = np.array(dora_input["value"])
             return DoraStatus.CONTINUE
 
         elif "opendrive" == dora_input["id"]:
@@ -61,9 +58,7 @@ class Operator:
             return DoraStatus.CONTINUE
 
         elif "objective_waypoints" == dora_input["id"]:
-            self.objective_waypoints = (
-                np.array(dora_input["value"]).view(np.float32).reshape((-1, 3))
-            )
+            self.objective_waypoints = np.array(dora_input["value"]).reshape((-1, 3))
 
             if self.hd_map is None or len(self.position) == 0:
                 print("No map within the gps or position")
@@ -86,15 +81,12 @@ class Operator:
                     np.array([self.position[:2]]),
                 )
 
-                self.waypoints = self.waypoints[
-                    index : index + NUM_WAYPOINTS_AHEAD
-                ]
+                self.waypoints = self.waypoints[index : index + NUM_WAYPOINTS_AHEAD]
                 self.target_speeds = self.target_speeds[
                     index : index + NUM_WAYPOINTS_AHEAD
                 ]
 
             elif len(self.waypoints) == 0:
-
                 # Deconstructing the position
                 [x, y, z, rx, ry, rz, rw] = self.position
                 [pitch, roll, yaw] = R.from_quat([rx, ry, rz, rw]).as_euler(
@@ -114,9 +106,7 @@ class Operator:
                 ## Verify that computed waypoints are not inverted
                 target_vector = waypoints[0] - self.position[:2]
                 angle = np.arctan2(target_vector[1], target_vector[0])
-                diff_angle = np.arctan2(
-                    np.sin(angle - yaw), np.cos(angle - yaw)
-                )
+                diff_angle = np.arctan2(np.sin(angle - yaw), np.cos(angle - yaw))
                 # if np.abs(diff_angle) > np.pi / 2:
                 # print("Error in computation of waypoints.")
                 # print(
@@ -132,7 +122,7 @@ class Operator:
             if len(self.waypoints) == 0:
                 send_output(
                     "gps_waypoints",
-                    pa.array(self.waypoints.view(np.uint8).ravel()),
+                    pa.array(self.waypoints.ravel()),
                     dora_input["metadata"],
                 )  # World coordinate
                 return DoraStatus.CONTINUE
@@ -146,11 +136,7 @@ class Operator:
 
             send_output(
                 "gps_waypoints",
-                pa.array(
-                    filter_consecutive_duplicate(self.waypoints_array)
-                    .view(np.uint8)
-                    .ravel()
-                ),
+                pa.array(filter_consecutive_duplicate(self.waypoints_array).ravel()),
                 dora_input["metadata"],
             )  # World coordinate
 

@@ -246,29 +246,29 @@ class Operator:
     ):
         if dora_input["id"] == "position":
             self.last_position = self.position
-            self.position = np.array(dora_input["value"]).view(np.float32)
+            self.position = np.array(dora_input["value"])
             if len(self.last_position) == 0:
                 self.last_position = self.position
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "speed":
-            self.speed = np.array(dora_input["value"]).view(np.float32)
+            self.speed = np.array(dora_input["value"])
             return DoraStatus.CONTINUE
 
         elif dora_input["id"] == "obstacles":
-            obstacles = np.array(dora_input["value"]).view(np.float32).reshape((-1, 5))
+            obstacles = np.array(dora_input["value"]).reshape((-1, 5))
             if len(self.last_obstacles) > 0:
                 self.obstacles = np.concatenate([self.last_obstacles, obstacles])
             else:
                 self.obstacles = obstacles
 
         elif dora_input["id"] == "global_lanes":
-            lanes = np.array(dora_input["value"]).view(np.float32).reshape((-1, 60, 3))
+            lanes = np.array(dora_input["value"]).reshape((-1, 60, 3))
             self.lanes = lanes
             return DoraStatus.CONTINUE
 
         elif "gps_waypoints" == dora_input["id"]:
-            waypoints = np.array(dora_input["value"]).view(np.float32)
+            waypoints = np.array(dora_input["value"])
             waypoints = waypoints.reshape((-1, 3))[:, :2]
             self.gps_waypoints = waypoints
             return DoraStatus.CONTINUE
@@ -333,7 +333,7 @@ class Operator:
 
             send_output(
                 "waypoints",
-                pa.array(np.array([x, y, 0.0], np.float32).view(np.uint8)),
+                pa.array(np.array([x, y, 0.0], np.float32)),
                 dora_input["metadata"],
             )
             return DoraStatus.CONTINUE
@@ -347,7 +347,7 @@ class Operator:
         )
         send_output(
             "waypoints",
-            pa.array(self.outputs.ravel().view(np.uint8)),
+            pa.array(self.outputs.ravel()),
             dora_input["metadata"],
         )
         return DoraStatus.CONTINUE

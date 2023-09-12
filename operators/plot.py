@@ -94,17 +94,15 @@ class Operator:
         send_output: Callable[[str, bytes], None],
     ):
         if "waypoints" == dora_input["id"]:
-            waypoints = np.array(dora_input["value"]).view(np.float32)
+            waypoints = np.array(dora_input["value"])
             waypoints = waypoints.reshape((-1, 3))
             waypoints = waypoints[:, :2]
             # Adding z axis for plot
-            waypoints = np.hstack(
-                (waypoints, -0.5 + np.zeros((waypoints.shape[0], 1)))
-            )
+            waypoints = np.hstack((waypoints, -0.5 + np.zeros((waypoints.shape[0], 1))))
             self.waypoints = waypoints
 
         elif "gps_waypoints" == dora_input["id"]:
-            gps_waypoints = np.array(dora_input["value"]).view(np.float32)
+            gps_waypoints = np.array(dora_input["value"])
             gps_waypoints = gps_waypoints.reshape((-1, 3))
             gps_waypoints = gps_waypoints[:, :2]
             # Adding z axis for plot
@@ -114,65 +112,45 @@ class Operator:
             self.gps_waypoints = gps_waypoints
 
         elif "control" == dora_input["id"]:
-            self.control = np.array(dora_input["value"]).view(np.float16)
+            self.control = np.array(dora_input["value"])
 
         elif "obstacles_bbox" == dora_input["id"]:
-            self.obstacles_bbox = (
-                dora_input["value"].to_numpy().view(np.int32).reshape((-1, 6))
-            )
+            self.obstacles_bbox = dora_input["value"].to_numpy().reshape((-1, 6))
 
         elif "traffic_sign_bbox" == dora_input["id"]:
-            self.traffic_sign_bbox = (
-                np.array(dora_input["value"]).view(np.int32).reshape((-1, 6))
-            )
+            self.traffic_sign_bbox = np.array(dora_input["value"]).reshape((-1, 6))
 
         elif "obstacles_id" == dora_input["id"]:
-            self.obstacles_id = (
-                np.array(dora_input["value"]).view(np.int32).reshape((-1, 7))
-            )
+            self.obstacles_id = np.array(dora_input["value"]).reshape((-1, 7))
 
         elif "obstacles" == dora_input["id"]:
-            obstacles = (
-                np.array(dora_input["value"])
-                .view(np.float32)
-                .reshape((-1, 5))[:, :3]
-            )
+            obstacles = np.array(dora_input["value"]).reshape((-1, 5))[:, :3]
             self.obstacles = obstacles
 
         elif "lanes" == dora_input["id"]:
-            lanes = (
-                np.array(dora_input["value"])
-                .view(np.int32)
-                .reshape((-1, 30, 2))
-            )
+            lanes = np.array(dora_input["value"]).reshape((-1, 30, 2))
             self.lanes = lanes
 
         elif "global_lanes" == dora_input["id"]:
-            global_lanes = (
-                np.array(dora_input["value"]).view(np.float32).reshape((-1, 3))
-            )
+            global_lanes = np.array(dora_input["value"]).reshape((-1, 3))
             self.global_lanes = global_lanes
 
         elif "drivable_area" == dora_input["id"]:
-            drivable_area = (
-                np.array(dora_input["value"]).view(np.int32).reshape((1, -1, 2))
-            )
+            drivable_area = np.array(dora_input["value"]).reshape((1, -1, 2))
             self.drivable_area = drivable_area
 
         elif "position" == dora_input["id"]:
             # Add sensor transform
 
             self.last_position = self.position
-            self.position = np.array(dora_input["value"]).view(np.float32)
+            self.position = np.array(dora_input["value"])
             if len(self.last_position) == 0:
                 return DoraStatus.CONTINUE
 
-            self.current_speed = (
-                self.position[:2] - self.last_position[:2]
-            ) * 20
+            self.current_speed = (self.position[:2] - self.last_position[:2]) * 20
 
         elif "lidar_pc" == dora_input["id"]:
-            point_cloud = np.array(dora_input["value"]).view(np.float32)
+            point_cloud = np.array(dora_input["value"])
             point_cloud = point_cloud.reshape((-1, 3))
             # To camera coordinate
             # The latest coordinate space is the unreal space.
@@ -181,9 +159,7 @@ class Operator:
                 VELODYNE_MATRIX,
             )
             point_cloud = point_cloud[np.where(point_cloud[:, 2] > 0.1)]
-            point_cloud = local_points_to_camera_view(
-                point_cloud, INTRINSIC_MATRIX
-            )
+            point_cloud = local_points_to_camera_view(point_cloud, INTRINSIC_MATRIX)
 
             if len(point_cloud) != 0:
                 self.point_cloud = point_cloud.T
@@ -191,7 +167,8 @@ class Operator:
         elif "image" == dora_input["id"]:
             self.camera_frame = (
                 dora_input["value"]
-                .to_numpy().copy()
+                .to_numpy()
+                .copy()
                 .reshape((CAMERA_HEIGHT, CAMERA_WIDTH, 4))
             )
 
@@ -343,7 +320,6 @@ class Operator:
             end = (int(max_x), int(max_y))
             cv2.rectangle(resized_image, start, end, (0, 255, 0), 2)
             if VERBOSE:
-
                 cv2.putText(
                     resized_image,
                     LABELS[label] + f", {confidence}%",
