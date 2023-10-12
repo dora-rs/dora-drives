@@ -195,7 +195,9 @@ class DoraAgent(AutonomousAgent):
             if "速度传感器" in input_data.keys():
                 node.send_output(
                     "speed",
-                    pa.array(np.array(input_data["速度传感器"][1]["speed"], np.float32)),
+                    pa.array(
+                        np.array(input_data["速度传感器"][1]["speed"].ravel(), np.float32)
+                    ),
                     metadata,
                 )
 

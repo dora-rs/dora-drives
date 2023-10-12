@@ -188,5 +188,5 @@ for event in node:
             )
 
             client.apply_batch([command.ApplyVehicleControl(vehicle_id, vec_control)])
-
-        main()
+        else:
+            main()
