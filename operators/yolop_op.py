@@ -1,3 +1,40 @@
+""" 
+# yolop operator
+
+`yolop` recognizes lanes, and drivable area from a specific images.
+
+More info here: [https://github.com/hustvl/YOLOP](https://github.com/hustvl/YOLOP)
+
+You can also choose to allocate the model in GPU using the environment variable:
+- `PYTORCH_DEVICE: cuda # or cpu`
+
+## Inputs
+
+- image: HEIGHT x WIDTH x BGR array.
+
+## Outputs
+
+- drivable_area: drivable area as contour points
+- lanes: lanes as 60 points representing the lanes
+
+## Example plot ( lanes in red, drivable area in green)
+
+![Imgur](https://i.imgur.com/I531NIT.gif)
+
+## Graph Description
+
+```yaml
+  - id: yolop
+    operator: 
+      outputs:
+        - lanes
+        - drivable_area
+      inputs:
+        image: webcam/image
+      python: ../../operators/yolop_op.py
+```
+"""
+
 import os
 from typing import Callable
 
@@ -11,9 +48,7 @@ from dora import DoraStatus
 DEVICE = os.environ.get("PYTORCH_DEVICE") or "cpu"
 
 
-normalize = transforms.Normalize(
-    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-)
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 transform = transforms.Compose([transforms.ToTensor(), normalize])
 
@@ -38,9 +73,7 @@ def non_max_suppression(
          detections with shape: nx6 (x1, y1, x2, y2, conf, cls)
     """
 
-    output = [torch.zeros((0, 6), device=prediction.device)] * prediction.shape[
-        0
-    ]
+    output = [torch.zeros((0, 6), device=prediction.device)] * prediction.shape[0]
 
     for xi, x in enumerate(prediction):  # image index, image inference
         # Apply constraints
@@ -116,9 +149,7 @@ def fitlane(mask, sel_labels, labels, stats):
         # else:
         samples_y = np.linspace(y, y + h - 1, 60)
 
-        samples_x = [
-            np.where(labels[int(sample_y)] == t)[0] for sample_y in samples_y
-        ]
+        samples_x = [np.where(labels[int(sample_y)] == t)[0] for sample_y in samples_y]
 
         if if_y(samples_x):
             samples_x = [
@@ -144,8 +175,7 @@ def fitlane(mask, sel_labels, labels, stats):
             # else:
             #     samples_x = np.linspace(x, x_max+w-1, 60)
             samples_y = [
-                np.where(labels[:, int(sample_x)] == t)[0]
-                for sample_x in samples_x
+                np.where(labels[:, int(sample_x)] == t)[0] for sample_x in samples_x
             ]
             samples_y = [
                 int(np.mean(sample_y)) if len(sample_y) else -1
@@ -171,9 +201,7 @@ def fitlane(mask, sel_labels, labels, stats):
     return lanes
 
 
-def connect_lane(
-    image, shadow_height=0, kernel_size=7, func_type=cv2.MORPH_OPEN
-):
+def connect_lane(image, shadow_height=0, kernel_size=7, func_type=cv2.MORPH_OPEN):
     if len(image.shape) == 3:
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
@@ -285,7 +313,6 @@ class Operator:
         dora_input: dict,
         send_output: Callable[[str, bytes], None],
     ) -> DoraStatus:
-
         # inference
         frame = cv2.imdecode(
             np.frombuffer(
@@ -316,9 +343,7 @@ class Operator:
         # )
         # det = det_pred[0]
 
-        da_predict = da_seg_out[
-            :, :, pad_h : (h0 - pad_h), pad_w : (w0 - pad_w)
-        ]
+        da_predict = da_seg_out[:, :, pad_h : (h0 - pad_h), pad_w : (w0 - pad_w)]
         da_seg_mask = torch.nn.functional.interpolate(
             da_predict, scale_factor=1 / ratio, mode="bilinear"
         )
@@ -332,17 +357,11 @@ class Operator:
         if len(contours) != 0:
             contour = max(contours, key=cv2.contourArea)
             contour = contour.astype(np.int32)
-            send_output(
-                "drivable_area", contour.tobytes(), dora_input["metadata"]
-            )
+            send_output("drivable_area", contour.tobytes(), dora_input["metadata"])
         else:
-            send_output(
-                "drivable_area", np.array([]).tobytes(), dora_input["metadata"]
-            )
+            send_output("drivable_area", np.array([]).tobytes(), dora_input["metadata"])
 
-        ll_predict = ll_seg_out[
-            :, :, pad_h : (h0 - pad_h), pad_w : (w0 - pad_w)
-        ]
+        ll_predict = ll_seg_out[:, :, pad_h : (h0 - pad_h), pad_w : (w0 - pad_w)]
 
         ll_seg_mask = torch.nn.functional.interpolate(
             ll_predict, scale_factor=1 / ratio, mode="bilinear"

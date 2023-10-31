@@ -22,6 +22,9 @@ The mecanism to project the lidar point cloud into a 2D is also used in the `plo
 
 - 3D position of obstacles as dot.
 
+## Example plot (green dor in the middle of the bounding box)
+
+![Imgur](https://i.imgur.com/Aq33qy5.png)
 
 ## Graph Description
 

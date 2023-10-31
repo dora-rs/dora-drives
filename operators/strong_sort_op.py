@@ -1,6 +1,44 @@
+""" 
+# Strong Sort operator
+
+`Strong sort` uses deep learning to uniquely identify bounding boxes in order to track them trough an image stream. 
+
+## Inputs
+
+- image: HEIGHTxWIDTHxBGR array.
+- bbox: N_BBOX, X_MIN, X_MAX, Y_MIN, Y_MAX, CONDIDENCE, CLASS, array
+
+## Outputs
+
+- obstacles_id: x1, x2, y1, y2 track_id, class_id, conf
+
+## Example plot (Tracking correspond to the blue # id )
+
+![img](https://i.imgur.com/ozO1y7l.gif)
+
+## Graph Description
+
+```yaml
+  - id: yolov5
+    operator: 
+      outputs:
+        - obstacles_id
+      inputs:
+        image: webcam/image
+        bbox: yolov5/bbox
+      python: ../../operators/strong_sort_op.py
+```
+
+## Graph Visualisation
+
+```mermaid
+        flowchart TB
+  oasis_agent -- image --> strong_sort/op
+  yolov5/op -- bbox as obstacles_bbox --> strong_sort/op
+```
+"""
 from typing import Callable
 
-import cv2
 import numpy as np
 import pyarrow as pa
 import torch

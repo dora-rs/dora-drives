@@ -1,3 +1,31 @@
+""" 
+# Webcam operator
+
+## Inputs
+
+- tick: Dora tick.
+
+## Outputs
+
+- image: HEIGHTxWIDTHxBGR array.
+
+## Configuration
+
+Using cv2 package to get the webcam image. The webcam number can be configured using `CAMERA_INDEX`
+
+## Graph Description
+
+```yaml
+  - id: yolov5
+    operator: 
+      outputs:
+        - bbox
+      inputs:
+        image: webcam/image
+      python: ../../operators/webcam_op.py
+```
+"""
+
 from typing import Callable
 from dora import DoraStatus
 import os

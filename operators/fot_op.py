@@ -21,6 +21,18 @@ As our obstacles are defined as 3D dot we need to transform those dot into `[min
 
 The output is either a successful trajectory that we can feed into PID. Or it is a failure in which case we send the current position as waypoint.
 
+## Inputs
+
+- image: HEIGHT x WIDTH x BGR array.
+
+## Outputs
+
+- waypoints: x_points, y_points, speeds
+
+## Example Image
+
+![Imgur](https://i.imgur.com/9AGDlQY.gif)
+
 ## Graph Description
 
 ```yaml

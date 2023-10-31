@@ -18,6 +18,18 @@ wget https://github.com/isl-org/MiDaS/releases/download/v2_1/midas_v21_small_256
 cp midas_v21_small_256.pt $HOME/.cache/torch/hub/checkpoints/
 ```
 
+## Inputs
+
+- image: HEIGHT x WIDTH x BGR array.
+
+## Outputs
+
+- bbox: HEIGHT x WIDTH x Relative depth array.
+
+## Example output
+
+![Imgur](https://i.imgur.com/UrF9iPN.png)
+
 Add the following dataflow configuration 
 ```yaml
   - id: midas_op
@@ -130,8 +142,7 @@ class Operator:
                 )
                 normalized_depth *= 3
                 depth_frame = (
-                    np.repeat(np.expand_dims(normalized_depth, 2), 3, axis=2)
-                    / 3
+                    np.repeat(np.expand_dims(normalized_depth, 2), 3, axis=2) / 3
                 )
                 depth_frame = cv2.applyColorMap(
                     np.uint8(depth_frame), cv2.COLORMAP_INFERNO

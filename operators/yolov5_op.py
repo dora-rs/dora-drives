@@ -16,11 +16,15 @@ You can also choose to allocate the model in GPU using the environment variable:
 
 ## Inputs
 
-- image as 1920x1080xBGR array.
+- image: HEIGHT x WIDTH x BGR array.
 
 ## Outputs
 
-- Bounding box coordinates as well as the confidence and class label as output.
+- bbox: N_BBOX, X_MIN, X_MAX, Y_MIN, Y_MAX, CONDIDENCE, CLASS, array
+
+## Example Image
+
+![yolov5 example](https://i.imgur.com/hPrazyl.jpg)
 
 ## Graph Description
 
