@@ -191,7 +191,7 @@ class DoraAgent(AutonomousAgent):
 
                     self.opendrive_map = opendrive_map
                     self.lat_ref, self.lon_ref = _get_latlon_ref(opendrive_map)
-                    node.send_output("opendrive", opendrive_map.encode(), metadata)
+                    node.send_output("opendrive", pa.array([opendrive_map]), metadata)
             if "速度传感器" in input_data.keys():
                 node.send_output(
                     "speed",
