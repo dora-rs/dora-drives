@@ -131,7 +131,7 @@ camera = add_camera(world, sensor_transform, on_camera_msg, ego_vehicle)
 
 node = Node()
 
-node.send_output("opendrive", world.get_map().to_opendrive().encode())
+node.send_output("opendrive", pa.array([world.get_map().to_opendrive()]))
 
 
 def main():

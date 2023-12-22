@@ -53,7 +53,7 @@ class Operator:
 
         elif "opendrive" == dora_input["id"]:
             # Registering the map
-            opendrive = dora_input["data"].decode()
+            opendrive = dora_input["value"][0].as_py()
             self.hd_map = HDMap(Map("map", opendrive))
             return DoraStatus.CONTINUE
 
