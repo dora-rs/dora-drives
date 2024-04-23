@@ -21,7 +21,7 @@ pillow>=6.2.2
 pycocotools
 pytest
 scikit-image==0.18.3
-scipy==1.7.1
+scipy==1.11.1
 shapely==1.6.4
 # tensorflow-gpu>=2.7.1
 ##### Tracking dependencies #####
