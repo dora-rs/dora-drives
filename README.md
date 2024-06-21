@@ -31,7 +31,7 @@ pip install -r requirements.txt
 sudo wget https://github.com/dora-rs/dora/releases/download/v0.2.5/dora-v0.2.5-x86_64-Linux.zip && sudo unzip dora-v0.2.5-x86_64-Linux.zip -d /usr/local/bin 
 ```
 
-For more info, see: https://dora.carsmos.ai/docs/guides/dora-drives/installation
+For more info, see: https://dora-rs.ai/docs/guides/dora-drives/installation
 
 ## Getting started
 
@@ -50,11 +50,11 @@ dora up
 dora start graphs/oasis/oasis_full.yaml --attach
 ```
 
-To get a step-by-step tutorial, see: https://dora.carsmos.ai/docs/guides/dora-drives/carla
+To get a step-by-step tutorial, see: https://dora-rs.ai/docs/guides/dora-drives/carla
 
 ## Documentation
 
-The documentation can be found here: https://dora.carsmos.ai/docs/guides/dora-drives
+The documentation can be found here: https://dora-rs.ai/docs/guides/dora-drives
 
 ## Discussion
 
